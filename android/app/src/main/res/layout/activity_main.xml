@@ -1,0 +1,75 @@
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="fill_parent"
+    android:layout_height="fill_parent"
+    android:paddingLeft="16dp"
+    android:paddingRight="16dp"
+    android:background="#ffffff">
+
+    <TextView
+        android:id="@+id/name"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentTop="true"
+        android:layout_alignParentEnd="true"
+        android:layout_marginTop="144dp"
+        android:layout_marginEnd="69dp"
+        android:hint=""
+        android:text="MobileSR"
+        android:textColor="@color/colorButtonBackground"
+        android:textSize="50dp"
+        android:textStyle="bold"
+        android:typeface="sans" />
+
+    <LinearLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/name"
+        android:layout_alignParentStart="true"
+        android:layout_marginStart="131dp"
+        android:layout_marginTop="49dp"
+        android:orientation="vertical">
+
+        <android.support.v7.widget.AppCompatButton
+            android:id="@+id/buttonPickPhoto"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="pick photo"
+            android:textColor="@color/colorButtonText"
+            android:textStyle="bold"
+            android:typeface="sans"
+            app:backgroundTint="@color/colorButtonBackground" />
+
+        <android.support.v7.widget.AppCompatButton
+            android:id="@+id/buttonTakePhoto"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="take photo"
+            android:textColor="@color/colorButtonText"
+            android:textStyle="bold"
+            android:typeface="sans"
+            app:backgroundTint="@color/colorButtonBackground" />
+
+        <android.support.v7.widget.AppCompatButton
+            android:id="@+id/buttonSetttings"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="settings"
+            android:textColor="@color/colorButtonText"
+            android:textStyle="bold"
+            app:backgroundTint="@color/colorButtonBackground" />
+
+        <android.support.v7.widget.AppCompatButton
+            android:id="@+id/buttonTutorial"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="tutorial"
+            android:textColor="@color/colorButtonText"
+            android:textStyle="bold"
+            android:typeface="sans"
+            app:backgroundTint="@color/colorButtonBackground" />
+
+
+    </LinearLayout>
+
+</RelativeLayout>
