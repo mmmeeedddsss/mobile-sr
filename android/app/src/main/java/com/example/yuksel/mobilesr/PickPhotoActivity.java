@@ -4,11 +4,15 @@ import android.app.Activity;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
+import android.view.View;
+import android.widget.Button;
 import android.widget.ImageView;
 
 public class PickPhotoActivity extends Activity {
     private static final int PICK_IMAGE = 100;
     private ImageView imageView;
+    private Button pickButton;
+    private Button rotateButton;
 
     @Override
     public void onCreate(Bundle savedInstance) {
@@ -17,7 +21,22 @@ public class PickPhotoActivity extends Activity {
         setContentView(R.layout.pick_photo_activity);
 
         imageView = findViewById(R.id.pick_photo_image_view);
-        pickImage();
+
+        pickButton = findViewById(R.id.pick_photo_button);
+        pickButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                pickImage();
+            }
+        });
+
+        rotateButton = findViewById(R.id.rotate_image_button);
+        rotateButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                imageView.setRotation( (imageView.getRotation() + 90)%360 );
+            }
+        });
     }
 
     public void pickImage() {
