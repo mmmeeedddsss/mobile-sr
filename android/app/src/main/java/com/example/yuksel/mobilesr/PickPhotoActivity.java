@@ -1,16 +1,23 @@
 package com.example.yuksel.mobilesr;
 
-import android.app.Activity;
+import android.content.Context;
 import android.content.Intent;
+import android.graphics.Bitmap;
 import android.net.Uri;
 import android.os.Bundle;
+import android.provider.MediaStore;
+import android.support.v7.app.AppCompatActivity;
+import android.view.Display;
 import android.view.View;
+import android.view.WindowManager;
 import android.widget.Button;
 import android.widget.ImageView;
 
-public class PickPhotoActivity extends Activity {
+import java.io.IOException;
+
+public class PickPhotoActivity extends AppCompatActivity {
     private static final int PICK_IMAGE = 100;
-    private ImageView imageView;
+    private ZoomableImageView imageView;
     private Button pickButton;
     private Button rotateButton;
 
@@ -21,6 +28,7 @@ public class PickPhotoActivity extends Activity {
         setContentView(R.layout.pick_photo_activity);
 
         imageView = findViewById(R.id.pick_photo_image_view);
+
 
         pickButton = findViewById(R.id.pick_photo_button);
         pickButton.setOnClickListener(new View.OnClickListener() {
@@ -37,6 +45,7 @@ public class PickPhotoActivity extends Activity {
                 imageView.setRotation( (imageView.getRotation() + 90)%360 );
             }
         });
+
     }
 
     public void pickImage() {
@@ -50,7 +59,13 @@ public class PickPhotoActivity extends Activity {
         super.onActivityResult(requestCode, resultCode, data);
         if (resultCode == RESULT_OK && requestCode == PICK_IMAGE) {
             Uri imageUri = data.getData();
-            imageView.setImageURI(imageUri);
+            Bitmap bitmap = null;
+            try {
+                bitmap = MediaStore.Images.Media.getBitmap(this.getContentResolver(), imageUri);
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+            imageView.setImageBitmap(bitmap);
         }
     }
 }

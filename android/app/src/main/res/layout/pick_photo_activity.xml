@@ -5,9 +5,9 @@
     android:orientation="vertical">
 
 
-    <ImageView
+    <com.example.yuksel.mobilesr.ZoomableImageView
         android:id="@+id/pick_photo_image_view"
-        android:layout_width="match_parent"
+        android:layout_width="fill_parent"
         android:layout_height="fill_parent"
         android:layout_weight="1"/>
 <LinearLayout
