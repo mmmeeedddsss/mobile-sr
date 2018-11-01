@@ -97,7 +97,10 @@ public class ZoomableImageView extends AppCompatImageView {
     private Rect generateSourceRectange( int src_width, int src_height){
         float original_ratio = src_width/src_height;
 
-        Rect src_rect = new Rect(0, 0, (int)(src_width/zoom_factor), (int)(src_height/zoom_factor));
+        Rect src_rect = new Rect((int)(center_of_zoom_x*(zoom_factor-1)/zoom_factor),
+                (int)(center_of_zoom_y*(zoom_factor-1)/zoom_factor),
+                (int)(src_width/zoom_factor),
+                (int)(src_height/zoom_factor));
         // TODO calculate center for current src rect, then calculate
         return src_rect;
     }
