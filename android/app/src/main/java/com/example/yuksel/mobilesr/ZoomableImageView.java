@@ -16,8 +16,13 @@ public class ZoomableImageView extends AppCompatImageView {
     Bitmap bm;
     float start_x,start_y;
     float pinched_x, pinched_y;
+    float center_of_zoom_x, center_of_zoom_y;
     int viewHeight, viewWidth;
     int current_pointer_count;
+    float start_distance, current_distance;
+    float zoom_factor;
+
+    final float zoom_constant = 1;
 
     public ZoomableImageView(Context context) {
         super(context);
@@ -28,7 +33,15 @@ public class ZoomableImageView extends AppCompatImageView {
     }
 
     @Override
-    public void setImageBitmap(Bitmap bm) {
+    protected void onFinishInflate() { // Called after init of View
+        super.onFinishInflate();
+
+        zoom_factor = 1;
+        current_pointer_count = 0;
+    }
+
+    @Override
+    public void setImageBitmap(Bitmap bm) { // Overrided and get bitmap for custom drawing
         this.bm = bm;
         super.setImageBitmap(bm);
     }
@@ -45,15 +58,22 @@ public class ZoomableImageView extends AppCompatImageView {
                 if (current_pointer_count == 1) {
                     start_x = x;
                     start_y = y;
-                    Log.d("TAG", String.format("POINTER ONE X = %.5f, Y = %.5f", x, y));
+                    Log.d("TAG", String.format("1 finger started X = %.5f, Y = %.5f", x, y));
                 }
                 if (current_pointer_count == 2) {
                     // Starting distance between fingers
                     pinched_x = x;
                     pinched_y = y;
-                    Log.d("TAG", String.format("POINTER TWO X = %.5f, Y = %.5f", x, y));
+                    center_of_zoom_x = (start_x + pinched_x)/2;
+                    center_of_zoom_y = (start_y + pinched_y)/2;
+                    start_distance = getDistance(start_x,start_y,pinched_x,pinched_y);
+                    Log.d("TAG", String.format("2 finger started X = %.5f, Y = %.5f", x, y));
                 }
-
+                break;
+            case MotionEvent.ACTION_MOVE:
+                current_distance = getDistance(start_x, start_y, x, y);
+                zoom_factor = (current_distance - start_distance)*zoom_constant;
+                invalidate();
                 break;
             case MotionEvent.ACTION_POINTER_UP:
             case MotionEvent.ACTION_UP:
@@ -67,30 +87,22 @@ public class ZoomableImageView extends AppCompatImageView {
     public void draw(Canvas canvas) {
         super.draw(canvas);
         if( bm != null ) {
-            float center_x, center_y;
-            center_x = ( start_x + pinched_x )/2;
-            center_y = ( start_y + pinched_y )/2;
 
-            float scale_factor = (float) (sqrt( pow(start_x - pinched_x, 2) + pow(start_y - pinched_y, 2))/100);
-
-            Rect src_rect = generateSourceRectange( bm.getWidth(), bm.getHeight(),
-                    center_x, center_y, scale_factor );
-            Rect dest_rect = generateDestinationRectange( bm.getWidth(), bm.getHeight(),
-                    center_x, center_y, scale_factor, src_rect );
+            Rect src_rect = generateSourceRectange( bm.getWidth(), bm.getHeight() );
+            Rect dest_rect = generateDestinationRectange( bm.getWidth(), bm.getHeight(), src_rect );
             canvas.drawBitmap(bm, src_rect, dest_rect, null);
         }
     }
 
-    private Rect generateSourceRectange( int src_width, int src_height, float center_of_zoom_x,
-                                              float center_of_zoom_y, float scale_factor){
-        Rect src_rect = new Rect(0, 0, src_width, src_height);
+    private Rect generateSourceRectange( int src_width, int src_height){
         float original_ratio = src_width/src_height;
 
+        Rect src_rect = new Rect(0, 0, (int)(src_width/zoom_factor), (int)(src_height/zoom_factor));
+        // TODO calculate center for current src rect, then calculate
         return src_rect;
     }
 
-    private Rect generateDestinationRectange( int src_width, int src_height, float center_of_zoom_x,
-                                          float center_of_zoom_y, float scale_factor, Rect src_rect){
+    private Rect generateDestinationRectange( int src_width, int src_height, Rect src_rect){
         Rect dest_rect = new Rect(0,0, viewWidth, viewHeight);
         if( src_width < viewWidth ) {
             dest_rect.left += (viewWidth-src_width)/2;
@@ -103,9 +115,12 @@ public class ZoomableImageView extends AppCompatImageView {
         return dest_rect;
     }
 
+    private float getDistance(float x1, float y1, float x2, float y2){
+        return (float) (sqrt( pow(x1 - x2, 2) + pow(y1 - y2, 2)));
+    }
+
     @Override
     protected void onMeasure(final int widthMeasureSpec, final int heightMeasureSpec) {
-        current_pointer_count = 0;
         viewHeight= MeasureSpec.getSize(heightMeasureSpec);
         viewWidth= MeasureSpec.getSize(widthMeasureSpec);
         super.onMeasure(widthMeasureSpec, heightMeasureSpec);
