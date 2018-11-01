@@ -10,25 +10,33 @@
         android:layout_width="match_parent"
         android:layout_height="fill_parent"
         android:layout_weight="1"/>
-<LinearLayout
-    android:layout_width="match_parent"
-    android:layout_height="wrap_content">
 
-    <Button
-        android:id="@+id/pick_photo_button"
-        android:text="Pick a Photo"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_gravity="center_vertical|center_horizontal"/>
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
 
-    <Button
-        android:id="@+id/rotate_image_button"
-        android:text="Rotate Selected Photo"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_gravity="center_vertical|center_horizontal"/>
+        <Button
+            android:id="@+id/pick_photo_button"
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:layout_gravity="center_vertical|center_horizontal"
+            android:text="Pick a Photo" />
 
-</LinearLayout>
+        <Button
+            android:id="@+id/rotate_image_button"
+            android:layout_width="132dp"
+            android:layout_height="match_parent"
+            android:layout_gravity="center_vertical|center_horizontal"
+            android:text="Rotate Selected Photo" />
+
+        <Button
+            android:id="@+id/process_image_button"
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:text="Process Selected Photo" />
+
+    </LinearLayout>
 
 
 
