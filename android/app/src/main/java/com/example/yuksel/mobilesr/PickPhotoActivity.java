@@ -42,7 +42,7 @@ public class PickPhotoActivity extends AppCompatActivity {
         rotateButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                imageView.setRotation( (imageView.getRotation() + 90)%360 );
+                imageView.rotate();
             }
         });
 

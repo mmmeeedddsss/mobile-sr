@@ -3,6 +3,7 @@ package com.example.yuksel.mobilesr;
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
+import android.graphics.Matrix;
 import android.graphics.Paint;
 import android.graphics.Rect;
 import android.support.v7.widget.AppCompatImageView;
@@ -10,6 +11,7 @@ import android.util.AttributeSet;
 import android.util.Log;
 import android.view.MotionEvent;
 
+import static java.lang.Math.abs;
 import static java.lang.Math.pow;
 import static java.lang.Math.sqrt;
 
@@ -24,7 +26,8 @@ public class ZoomableImageView extends AppCompatImageView {
     float zoom_factor;
     Rect src_rect;
 
-    final float zoom_constant = 1F;
+    final float zoom_constant = 0.08F;
+    final float movement_constant = 4F;
 
     public ZoomableImageView(Context context) {
         super(context);
@@ -37,13 +40,12 @@ public class ZoomableImageView extends AppCompatImageView {
     @Override
     protected void onFinishInflate() { // Called after init of View
         super.onFinishInflate();
-
-        zoom_factor = 1;
-        current_pointer_count = 0;
     }
 
     @Override
     public void setImageBitmap(Bitmap bm) { // Overrided and get bitmap for custom drawing
+        zoom_factor = 1;
+        current_pointer_count = 0;
         this.bm = bm;
         //super.setImageBitmap(bm);
     }
@@ -62,14 +64,16 @@ public class ZoomableImageView extends AppCompatImageView {
                     start_y = y;
                     Log.d("TAG", String.format("1 finger started X = %.5f, Y = %.5f", x, y));
                 }
-                if (current_pointer_count == 2) {
+                else if (current_pointer_count == 2) {
                     // Starting distance between fingers
                     float x = e.getX(1);
                     float y = e.getY(1);
                     pinched_x = x;
                     pinched_y = y;
-                    center_of_zoom_x = (start_x + pinched_x)/2.0F/viewWidth*getWidth(src_rect);
-                    center_of_zoom_y = (start_y + pinched_y)/2.0F/viewHeight*getHeight(src_rect);
+                    center_of_zoom_x = (start_x + pinched_x)/2.0F;
+                    center_of_zoom_y = (start_y + pinched_y)/2.0F;
+                    center_of_zoom_x = center_of_zoom_x/viewWidth*getWidth(src_rect)+src_rect.left;
+                    center_of_zoom_y = center_of_zoom_y/viewHeight*getHeight(src_rect)+src_rect.top;
                     start_distance = getDistance(start_x,start_y,pinched_x,pinched_y);
                     Log.d("TAG", String.format("2 finger started X = %.5f, Y = %.5f", x, y));
                 }
@@ -79,11 +83,31 @@ public class ZoomableImageView extends AppCompatImageView {
                 current_pointer_count--;
                 return true;
             case MotionEvent.ACTION_MOVE:
-                if( current_pointer_count == 2 ) {
+                if( current_pointer_count == 1 ) {
+                    if( e.getHistorySize() > 0 ) {
+                        float px = e.getHistoricalX(0, e.getHistorySize() - 1);
+                        float py = e.getHistoricalY(0, e.getHistorySize() - 1);
+                        float x = e.getX(0);
+                        float y = e.getY(0);
+
+                        center_of_zoom_x -= (x - px)*movement_constant;
+                        center_of_zoom_y -= (y - py)*movement_constant;
+
+                        invalidate();
+                        return true;
+                    }
+                }
+                else if( current_pointer_count == 2 ) {
                     float x = e.getX(1);
                     float y = e.getY(1);
                     current_distance = getDistance(start_x, start_y, x, y);
-                    zoom_factor = (current_distance/start_distance) * zoom_constant;
+                    if( current_distance > start_distance )
+                        zoom_factor += zoom_constant;
+                    else
+                        zoom_factor -= zoom_constant;
+                    if(zoom_factor < 1)
+                        zoom_factor = 1;
+                    start_distance = current_distance;
                     invalidate();
                     return true;
                 }
@@ -107,10 +131,10 @@ public class ZoomableImageView extends AppCompatImageView {
     private Rect generateSourceRectange( int src_width, int src_height){
         float original_ratio = src_width/src_height;
 
-        Rect src_rect = new Rect((int)(center_of_zoom_x/zoom_factor/2),
-                (int)(center_of_zoom_y/zoom_factor/2),
-                (int)(src_width/zoom_factor - center_of_zoom_x/zoom_factor/2),
-                (int)(src_height/zoom_factor - center_of_zoom_y/zoom_factor/2));
+        Rect src_rect = new Rect((int)(center_of_zoom_x-bm.getWidth()/zoom_factor/2),
+                (int)(center_of_zoom_y-bm.getHeight()/zoom_factor/2),
+                (int)(center_of_zoom_x+bm.getWidth()/zoom_factor/2),
+                (int)(center_of_zoom_y+bm.getHeight()/zoom_factor/2));
         // TODO calculate center for current src rect, then calculate
         return normalize( src_rect );
     }
@@ -119,16 +143,20 @@ public class ZoomableImageView extends AppCompatImageView {
         Rect dest_rect = new Rect(0,0, viewWidth, viewHeight);
         int src_width = src_rect.right - src_rect.left;
         int src_height = src_rect.bottom - src_rect.top;
-/*
-        if( src_width < viewWidth ) {
-            dest_rect.left += (viewWidth-src_width)/2;
-            dest_rect.right -= (viewWidth-src_width)/2;
+        float original_ratio = src_width/src_height;
+
+        if( abs(original_ratio - viewWidth/viewHeight) < 0.01F )
+            return dest_rect;
+
+        if( viewWidth/viewHeight > original_ratio ) {
+            dest_rect.left += original_ratio*viewHeight/2;
+            dest_rect.right -= original_ratio*viewHeight/2;
         }
-        if( src_height < viewHeight ) {
-            dest_rect.top += (viewHeight-src_height)/2;
-            dest_rect.bottom -= (viewHeight-src_height)/2;
+        else{
+            dest_rect.top += viewWidth/original_ratio/2;
+            dest_rect.bottom -= viewWidth/original_ratio/2;
         }
-        */
+
         return dest_rect;
     }
 
@@ -159,5 +187,16 @@ public class ZoomableImageView extends AppCompatImageView {
         src_rect.right = src_rect.right>bm.getWidth()? bm.getWidth(): src_rect.right;
         src_rect.bottom = src_rect.bottom>bm.getHeight()?bm.getHeight():src_rect.bottom;
         return src_rect;
+    }
+
+    public void rotate() {
+        Matrix matrix = new Matrix();
+
+        matrix.postRotate(90);
+
+        Bitmap scaledBitmap = Bitmap.createScaledBitmap(bm, bm.getWidth(), bm.getHeight(),true);
+        bm = Bitmap.createBitmap(scaledBitmap, 0, 0, scaledBitmap.getWidth(), scaledBitmap.getHeight(), matrix, true);
+        scaledBitmap.recycle();
+        invalidate();
     }
 }
