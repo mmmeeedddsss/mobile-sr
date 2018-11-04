@@ -1,17 +1,13 @@
-package com.example.yuksel.mobilesr;
+package com.senior_project.group_1.mobilesr;
 
-import android.content.Context;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.net.Uri;
 import android.os.Bundle;
 import android.provider.MediaStore;
 import android.support.v7.app.AppCompatActivity;
-import android.view.Display;
 import android.view.View;
-import android.view.WindowManager;
 import android.widget.Button;
-import android.widget.ImageView;
 
 import java.io.IOException;
 

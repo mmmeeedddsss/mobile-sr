@@ -1,4 +1,4 @@
-package com.example.yuksel.mobilesr;
+package com.senior_project.group_1.mobilesr;
 
 import android.content.Intent;
 import android.support.v7.app.AppCompatActivity;

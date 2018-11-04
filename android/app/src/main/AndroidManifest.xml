@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    package="com.example.yuksel.mobilesr">
+    package="com.senior_project.group_1.mobilesr">
 
     <application
         android:allowBackup="true"
@@ -9,17 +9,17 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
-        <activity android:name=".MainActivity">
+        <activity android:name="com.senior_project.group_1.mobilesr.MainActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity android:name=".PickPhotoActivity"></activity>
-        <activity android:name=".TakePhotoActivity"></activity>
-        <activity android:name=".TutorialActivity"></activity>
-        <activity android:name=".SettingsActivity"></activity>
+        <activity android:name="com.senior_project.group_1.mobilesr.PickPhotoActivity"></activity>
+        <activity android:name="com.senior_project.group_1.mobilesr.TakePhotoActivity"></activity>
+        <activity android:name="com.senior_project.group_1.mobilesr.TutorialActivity"></activity>
+        <activity android:name="com.senior_project.group_1.mobilesr.SettingsActivity"></activity>
     </application>
 
 </manifest>
