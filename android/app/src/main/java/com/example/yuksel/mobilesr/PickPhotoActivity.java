@@ -11,6 +11,7 @@ import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.ImageView;
+import android.widget.Toast;
 
 public class PickPhotoActivity extends Activity {
     private static final int PICK_IMAGE = 100;
@@ -64,7 +65,10 @@ public class PickPhotoActivity extends Activity {
 
     public void processImage() {
         if(bitmap != null) {
+            long startTime = System.currentTimeMillis();
             bitmap = bitmapProcessor.processBitmap(bitmap);
+            long estimatedTime = System.currentTimeMillis() - startTime;
+            Toast.makeText(this,"Elapsed Time: "+estimatedTime, Toast.LENGTH_LONG ).show();
             imageView.setImageBitmap(bitmap);
         }
     }
