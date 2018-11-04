@@ -93,6 +93,17 @@ public class ZoomableImageView extends AppCompatImageView {
                         center_of_zoom_x -= (x - px)*movement_constant;
                         center_of_zoom_y -= (y - py)*movement_constant;
 
+                        if( center_of_zoom_x < 3 ) // such a magic number
+                            center_of_zoom_x = 3;
+                        if( center_of_zoom_x > bm.getWidth() - 4 ) // such another magic number
+                            center_of_zoom_x = bm.getWidth() - 4;
+                        if( center_of_zoom_y < 5 ) // wow another magic number
+                            center_of_zoom_y = 5;
+                        if( center_of_zoom_y > bm.getHeight() - 6 ) // omg so much magic
+                            center_of_zoom_y = bm.getHeight() - 6;
+
+
+
                         invalidate();
                         return true;
                     }
