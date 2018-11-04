@@ -65,10 +65,10 @@ public class PickPhotoActivity extends Activity {
 
     public void processImage() {
         if(bitmap != null) {
-            long startTime = System.currentTimeMillis();
+            long startTime = System.nanoTime();
             bitmap = bitmapProcessor.processBitmap(bitmap);
-            long estimatedTime = System.currentTimeMillis() - startTime;
-            Toast.makeText(this,"Elapsed Time: "+estimatedTime, Toast.LENGTH_LONG ).show();
+            long estimatedTime = System.nanoTime() - startTime;
+            Toast.makeText(this,"Elapsed Time in ms: "+estimatedTime/1000000, Toast.LENGTH_LONG ).show();
             imageView.setImageBitmap(bitmap);
         }
     }
