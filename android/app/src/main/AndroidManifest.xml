@@ -19,7 +19,7 @@
         <activity android:name="com.senior_project.group_1.mobilesr.PickPhotoActivity"></activity>
         <activity android:name="com.senior_project.group_1.mobilesr.TakePhotoActivity"></activity>
         <activity android:name="com.senior_project.group_1.mobilesr.TutorialActivity"></activity>
-        <activity android:name="com.senior_project.group_1.mobilesr.SettingsActivity"></activity>
+        <activity android:name="com.senior_project.group_1.mobilesr.MergedImageActivity"></activity>
     </application>
 
 </manifest>

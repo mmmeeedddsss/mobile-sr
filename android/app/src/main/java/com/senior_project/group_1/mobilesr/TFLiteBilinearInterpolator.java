@@ -1,4 +1,4 @@
-package com.example.yuksel.mobilesr;
+package com.senior_project.group_1.mobilesr;
 
 import android.app.Activity;
 import android.graphics.Bitmap;

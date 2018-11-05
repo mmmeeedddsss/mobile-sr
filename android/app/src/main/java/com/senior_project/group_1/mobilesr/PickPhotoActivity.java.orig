@@ -1,13 +1,12 @@
 package com.senior_project.group_1.mobilesr;
 
-import android.app.Activity;
 import android.content.Intent;
 import android.graphics.Bitmap;
+<<<<<<< HEAD:android/app/src/main/java/com/example/yuksel/mobilesr/PickPhotoActivity.java
 import android.graphics.drawable.BitmapDrawable;
 import android.net.Uri;
 import android.os.Bundle;
 import android.provider.MediaStore;
-import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
@@ -16,13 +15,26 @@ import android.widget.Toast;
 
 import java.util.ArrayList;
 import java.util.Collections;
+=======
+import android.net.Uri;
+import android.os.Bundle;
+import android.provider.MediaStore;
+import android.support.v7.app.AppCompatActivity;
+import android.view.View;
+import android.widget.Button;
+>>>>>>> 6ff3bcdd0928df7af80df11529ccfaeaf5f54938:android/app/src/main/java/com/senior_project/group_1/mobilesr/PickPhotoActivity.java
+
 import java.io.IOException;
 
 public class PickPhotoActivity extends AppCompatActivity {
     private static final int PICK_IMAGE = 100;
+<<<<<<< HEAD:android/app/src/main/java/com/example/yuksel/mobilesr/PickPhotoActivity.java
 
     private Bitmap bitmap;
+    private ImageView imageView;
+=======
     private ZoomableImageView imageView;
+>>>>>>> 6ff3bcdd0928df7af80df11529ccfaeaf5f54938:android/app/src/main/java/com/senior_project/group_1/mobilesr/PickPhotoActivity.java
     private Button pickButton;
     private Button rotateButton;
     private Button processButton;
@@ -38,6 +50,7 @@ public class PickPhotoActivity extends AppCompatActivity {
         setContentView(R.layout.pick_photo_activity);
 
         imageView = findViewById(R.id.pick_photo_image_view);
+
 
         pickButton = findViewById(R.id.pick_photo_button);
         pickButton.setOnClickListener(new View.OnClickListener() {
@@ -55,6 +68,7 @@ public class PickPhotoActivity extends AppCompatActivity {
             }
         });
 
+<<<<<<< HEAD:android/app/src/main/java/com/example/yuksel/mobilesr/PickPhotoActivity.java
         processButton = findViewById(R.id.process_image_button);
         processButton.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -67,12 +81,14 @@ public class PickPhotoActivity extends AppCompatActivity {
         splitButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Bitmap[] bitmapArray = splitImage(bitmap, 25);
+                Bitmap[] bitmapArray = splitImage(imageView, 25);
                 Intent splitImageIntent = new Intent(PickPhotoActivity.this, MergedImageActivity.class);
                 startActivity(splitImageIntent);
             }
         });
 
+=======
+>>>>>>> 6ff3bcdd0928df7af80df11529ccfaeaf5f54938:android/app/src/main/java/com/senior_project/group_1/mobilesr/PickPhotoActivity.java
     }
 
     public void pickImage() {
@@ -84,7 +100,6 @@ public class PickPhotoActivity extends AppCompatActivity {
     public void processImage() {
         if(bitmap != null) {
             long startTime = System.nanoTime();
-            Log.i("processImage", String.format("Bitmap size: %d %d", bitmap.getHeight(), bitmap.getWidth()));
             bitmap = bitmapProcessor.processBitmap(bitmap);
             long estimatedTime = System.nanoTime() - startTime;
             Toast.makeText(this,"Elapsed Time in ms: "+estimatedTime/1000000, Toast.LENGTH_LONG ).show();
@@ -97,6 +112,7 @@ public class PickPhotoActivity extends AppCompatActivity {
         super.onActivityResult(requestCode, resultCode, data);
         if (resultCode == RESULT_OK && requestCode == PICK_IMAGE) {
             Uri imageUri = data.getData();
+<<<<<<< HEAD:android/app/src/main/java/com/example/yuksel/mobilesr/PickPhotoActivity.java
             try {
                 bitmap = MediaStore.Images.Media.getBitmap(this.getContentResolver(), imageUri);
             }
@@ -119,7 +135,7 @@ public class PickPhotoActivity extends AppCompatActivity {
      * @param chunkNumbers The target number of small image chunks to be formed from the   source image
      */
     // TODO: Parameters will change : width, height will be added.
-    private Bitmap[] splitImage(final Bitmap scaledBitmap, int chunkNumbers) {
+    private Bitmap[] splitImage(ImageView image, int chunkNumbers) {
         // Number of rows and columns of the grid to be displayed.
         int rows, cols;
 
@@ -130,10 +146,8 @@ public class PickPhotoActivity extends AppCompatActivity {
         chunkImages = new ArrayList<>(chunkNumbers);
 
         // Get the scaled bitmap of the image
-        /*
         Bitmap bitmap = ((BitmapDrawable) image.getDrawable()).getBitmap();
         Bitmap scaledBitmap = Bitmap.createScaledBitmap(bitmap, bitmap.getWidth(), bitmap.getHeight(), true);
-        */
 
         rows = cols = (int) Math.sqrt(chunkNumbers);
         chunkHeight = bitmap.getHeight() / rows;
@@ -148,6 +162,15 @@ public class PickPhotoActivity extends AppCompatActivity {
                 coordinateX += chunkWidth;
             }
             coordinateY += chunkHeight;
+=======
+            Bitmap bitmap = null;
+            try {
+                bitmap = MediaStore.Images.Media.getBitmap(this.getContentResolver(), imageUri);
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+            imageView.setImageBitmap(bitmap);
+>>>>>>> 6ff3bcdd0928df7af80df11529ccfaeaf5f54938:android/app/src/main/java/com/senior_project/group_1/mobilesr/PickPhotoActivity.java
         }
         Bitmap[] bitmapArray = new Bitmap[chunkImages.size()];
         chunkImages.toArray(bitmapArray);
