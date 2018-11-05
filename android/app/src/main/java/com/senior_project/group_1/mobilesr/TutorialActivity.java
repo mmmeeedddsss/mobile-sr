@@ -1,9 +1,9 @@
-package com.example.yuksel.mobilesr;
+package com.senior_project.group_1.mobilesr;
 
-import android.app.Activity;
 import android.os.Bundle;
+import android.support.v7.app.AppCompatActivity;
 
-public class TutorialActivity extends Activity {
+public class TutorialActivity extends AppCompatActivity {
     @Override
     public void onCreate(Bundle savedInstance) {
         super.onCreate(savedInstance);

@@ -1,4 +1,4 @@
-package com.example.yuksel.mobilesr;
+package com.senior_project.group_1.mobilesr;
 
 import android.app.Activity;
 import android.content.Intent;
@@ -15,12 +15,13 @@ import android.widget.Toast;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.io.IOException;
 
-public class PickPhotoActivity extends Activity {
+public class PickPhotoActivity extends AppCompatActivity {
     private static final int PICK_IMAGE = 100;
 
     private Bitmap bitmap;
-    private ImageView imageView;
+    private ZoomableImageView imageView;
     private Button pickButton;
     private Button rotateButton;
     private Button processButton;
@@ -49,7 +50,7 @@ public class PickPhotoActivity extends Activity {
         rotateButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                imageView.setRotation( (imageView.getRotation() + 90)%360 );
+                imageView.rotate();
             }
         });
 

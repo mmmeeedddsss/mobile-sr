@@ -3,7 +3,7 @@ apply plugin: 'com.android.application'
 android {
     compileSdkVersion 28
     defaultConfig {
-        applicationId "com.example.yuksel.mobilesr"
+        applicationId "com.senior_project.group_1.mobilesr"
         minSdkVersion 27
         targetSdkVersion 28
         versionCode 1
