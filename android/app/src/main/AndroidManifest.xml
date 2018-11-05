@@ -20,6 +20,7 @@
         <activity android:name=".TakePhotoActivity"></activity>
         <activity android:name=".TutorialActivity"></activity>
         <activity android:name=".SettingsActivity"></activity>
+        <activity android:name=".MergedImageActivity"></activity>
     </application>
 
 </manifest>
