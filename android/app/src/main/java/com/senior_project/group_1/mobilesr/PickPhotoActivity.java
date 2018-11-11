@@ -1,9 +1,7 @@
 package com.senior_project.group_1.mobilesr;
 
-import android.app.Activity;
 import android.content.Intent;
 import android.graphics.Bitmap;
-import android.graphics.drawable.BitmapDrawable;
 import android.net.Uri;
 import android.os.Bundle;
 import android.provider.MediaStore;
@@ -11,17 +9,14 @@ import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
-import android.widget.ImageView;
 import android.widget.Toast;
 
 import java.util.ArrayList;
 import java.util.Collections;
-import java.io.IOException;
 
 public class PickPhotoActivity extends AppCompatActivity {
     private static final int PICK_IMAGE = 100;
 
-    private Bitmap bitmap;
     private ZoomableImageView imageView;
     private Button pickButton;
     private Button rotateButton;
@@ -67,29 +62,36 @@ public class PickPhotoActivity extends AppCompatActivity {
         splitButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Bitmap[] bitmapArray = splitImage(bitmap, 25);
-                Intent splitImageIntent = new Intent(PickPhotoActivity.this, MergedImageActivity.class);
-                startActivity(splitImageIntent);
+                splitImageHandler();
             }
         });
 
     }
 
-    public void pickImage() {
+    private void pickImage() {
         Intent gallery_intent = new Intent(Intent.ACTION_PICK,
                 android.provider.MediaStore.Images.Media.INTERNAL_CONTENT_URI);
         startActivityForResult(gallery_intent, PICK_IMAGE);
     }
 
-    public void processImage() {
-        if(bitmap != null) {
+    private void processImage() {
+        if(imageView.getCurrentBitmap() != null) {
             long startTime = System.nanoTime();
-            Log.i("processImage", String.format("Bitmap size: %d %d", bitmap.getHeight(), bitmap.getWidth()));
-            bitmap = bitmapProcessor.processBitmap(bitmap);
+            Log.i("processImage", String.format("Bitmap size: %d %d",
+                    imageView.getCurrentBitmap().getHeight(),
+                    imageView.getCurrentBitmap().getWidth()));
+
+            Bitmap bitmap = bitmapProcessor.processBitmap(imageView.getCurrentBitmap());
             long estimatedTime = System.nanoTime() - startTime;
             Toast.makeText(this,"Elapsed Time in ms: "+estimatedTime/1000000, Toast.LENGTH_LONG ).show();
             imageView.setImageBitmap(bitmap);
         }
+    }
+
+    private void splitImageHandler(){
+        Bitmap[] bitmapArray = splitImage(imageView.getCurrentBitmap(), 25);
+        Intent splitImageIntent = new Intent(PickPhotoActivity.this, MergedImageActivity.class);
+        startActivity(splitImageIntent);
     }
 
     @Override
@@ -98,12 +100,12 @@ public class PickPhotoActivity extends AppCompatActivity {
         if (resultCode == RESULT_OK && requestCode == PICK_IMAGE) {
             Uri imageUri = data.getData();
             try {
-                bitmap = MediaStore.Images.Media.getBitmap(this.getContentResolver(), imageUri);
+                imageView.setImageBitmap(MediaStore.Images.Media.getBitmap(this.getContentResolver(), imageUri));
             }
             catch (Exception ex) {
                 Log.e("PickPhotoActivity.onActivityResult", "Error while loading image bitmap from URI", ex);
             }
-            imageView.setImageBitmap(bitmap);
+
         }
     }
 
@@ -136,8 +138,8 @@ public class PickPhotoActivity extends AppCompatActivity {
         */
 
         rows = cols = (int) Math.sqrt(chunkNumbers);
-        chunkHeight = bitmap.getHeight() / rows;
-        chunkWidth = bitmap.getWidth() / cols;
+        chunkHeight = imageView.getCurrentBitmap().getHeight() / rows;
+        chunkWidth = imageView.getCurrentBitmap().getWidth() / cols;
 
         //coordinateX and coordinateY are the pixel positions of the image chunks
         int coordinateY = 0;

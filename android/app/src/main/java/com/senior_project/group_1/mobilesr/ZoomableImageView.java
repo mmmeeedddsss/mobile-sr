@@ -249,4 +249,8 @@ public class ZoomableImageView extends AppCompatImageView {
         scaledBitmap.recycle();
         invalidate(); // trigger drawing
     }
+
+    public Bitmap getCurrentBitmap() {
+        return null;
+    }
 }
