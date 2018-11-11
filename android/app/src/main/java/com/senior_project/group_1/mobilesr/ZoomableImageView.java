@@ -28,8 +28,8 @@ public class ZoomableImageView extends AppCompatImageView {
     // then, will be scaled to fit in the dest_rect( which is not globally defined )
     // for ideal operation, src_rect's edge ratio should be same with the dest_rect
 
-    final float zoom_constant = 0.08F; // Constant numbers to adjust the sensitivity of user gestures
-    final float movement_constant = 4F;
+    final float zoom_constant = 0.06F; // Constant numbers to adjust the sensitivity of user gestures
+    final float movement_constant = 12F;
 
     // Constructors
     public ZoomableImageView(Context context) {
@@ -38,11 +38,6 @@ public class ZoomableImageView extends AppCompatImageView {
 
     public ZoomableImageView(Context context, AttributeSet attrs) {
         super(context, attrs);
-    }
-
-    @Override
-    protected void onFinishInflate() { // Called after init of View
-        super.onFinishInflate();
     }
 
     // Overrided to get the original bitmap
@@ -54,7 +49,13 @@ public class ZoomableImageView extends AppCompatImageView {
 
         this.bm = bm;
 
-        // do not neet to call super.setImageBitmap
+        center_of_zoom_x = bm.getWidth()/2;
+        center_of_zoom_y = bm.getHeight()/2;
+
+        generateSourceRectange(bm.getWidth(), bm.getHeight());
+        fit_in_original_bm(src_rect);
+
+        // do not need to call super.setImageBitmap
     }
 
     @Override
@@ -106,20 +107,10 @@ public class ZoomableImageView extends AppCompatImageView {
                         float y = e.getY(0);
 
                         // Matematically, user is changing the center of the zoom by this opeartion
-                        center_of_zoom_x -= (x - px)*movement_constant;
-                        center_of_zoom_y -= (y - py)*movement_constant;
+                        center_of_zoom_x -= (x - px)*movement_constant/zoom_factor;
+                        center_of_zoom_y -= (y - py)*movement_constant/zoom_factor;
 
-                        // TODO correctly implement
-                        // This is temprorraly code to prevent user to change center of zoom locations
-                        // to outside of the image
-                        if( center_of_zoom_x < 3 ) // such a magic number
-                            center_of_zoom_x = 3;
-                        if( center_of_zoom_x > bm.getWidth() - 4 ) // such another magic number
-                            center_of_zoom_x = bm.getWidth() - 4;
-                        if( center_of_zoom_y < 5 ) // wow another magic number
-                            center_of_zoom_y = 5;
-                        if( center_of_zoom_y > bm.getHeight() - 6 ) // omg so much magic
-                            center_of_zoom_y = bm.getHeight() - 6;
+                        align_center_of_zoom(); // prevent if center of zoom is outside of the bm,
 
                         invalidate(); // this triggers draw method of view
                         return true;
@@ -133,9 +124,9 @@ public class ZoomableImageView extends AppCompatImageView {
                     // Differantially:
                     // If distance has increased, increase zoom_factor
                     if( current_distance > start_distance )
-                        zoom_factor += zoom_constant;
+                        zoom_factor += zoom_constant*zoom_factor;
                     else if(current_distance < start_distance)// If distance has decrased, increase zoom_factor
-                        zoom_factor -= zoom_constant;
+                        zoom_factor -= zoom_constant*zoom_factor;
                     if(zoom_factor < 1) // Dont allow to zoom out
                         zoom_factor = 1;
                     start_distance = current_distance;
@@ -144,6 +135,19 @@ public class ZoomableImageView extends AppCompatImageView {
                 }
         }
         return super.onTouchEvent(e);
+    }
+
+    private void align_center_of_zoom() {
+        // Code to prevent user to change center of zoom locations
+        // to outside of the image
+        if( center_of_zoom_x < 1 )
+            center_of_zoom_x = 1;
+        if( center_of_zoom_x > bm.getWidth() - 1 )
+            center_of_zoom_x = bm.getWidth() - 1;
+        if( center_of_zoom_y < 1 )
+            center_of_zoom_y = 1;
+        if( center_of_zoom_y > bm.getHeight() - 1 )
+            center_of_zoom_y = bm.getHeight() - 1;
     }
 
     @Override
@@ -173,13 +177,13 @@ public class ZoomableImageView extends AppCompatImageView {
     private Rect generateSourceRectange( int src_width, int src_height){
         float original_ratio = src_width/src_height;
 
-        //TODO there are cases where I might not user bm w/h ratio, add this
+        //TODO there are cases where I might not use bm w/h ratio, add this
         // Calculating the src rect
         Rect src_rect = new Rect((int)(center_of_zoom_x-bm.getWidth()/zoom_factor/2),
                 (int)(center_of_zoom_y-bm.getHeight()/zoom_factor/2),
                 (int)(center_of_zoom_x+bm.getWidth()/zoom_factor/2),
                 (int)(center_of_zoom_y+bm.getHeight()/zoom_factor/2));
-        return normalize( src_rect );
+        return fit_in_original_bm( src_rect );
     }
 
     private Rect generateDestinationRectange(Rect src_rect){
@@ -228,13 +232,26 @@ public class ZoomableImageView extends AppCompatImageView {
         return r.bottom - r.top;
     }
 
-    // TODO think about naming
-    // A method that crops the src rect to be sure that it is a sub-rectangle of bm
-    private Rect normalize(Rect src_rect) {
-        src_rect.left = src_rect.left<0?0:src_rect.left;
-        src_rect.top = src_rect.top<0?0:src_rect.top;
-        src_rect.right = src_rect.right>bm.getWidth()? bm.getWidth(): src_rect.right;
-        src_rect.bottom = src_rect.bottom>bm.getHeight()?bm.getHeight():src_rect.bottom;
+    // A method that shifts the src rect to be sure that it is a sub-rectangle of bm
+    private Rect fit_in_original_bm(Rect src_rect) {
+
+        if( src_rect.left < 0 ){
+            src_rect.right += -src_rect.left;
+            src_rect.left = 0;
+        }
+        if( src_rect.right >= bm.getWidth() ){
+            src_rect.left -= src_rect.right - bm.getWidth() + 1;
+            src_rect.right = bm.getWidth() - 1;
+        }
+        if( src_rect.top < 0 ){
+            src_rect.bottom += -src_rect.top;
+            src_rect.top = 0;
+        }
+        if( src_rect.bottom >= bm.getHeight() ){
+            src_rect.top -= src_rect.bottom - bm.getHeight() + 1;
+            src_rect.bottom = bm.getHeight() - 1;
+        }
+
         return src_rect;
     }
 
@@ -250,7 +267,13 @@ public class ZoomableImageView extends AppCompatImageView {
         invalidate(); // trigger drawing
     }
 
+    /**
+     * CALL RECYCLE AFTER YOUR JOB IS DONE WITH THE RETURNED BITMAP
+     */
     public Bitmap getCurrentBitmap() {
+        if( bm != null ) {
+            return Bitmap.createBitmap(bm,src_rect.left, src_rect.top, getWidth(src_rect), getHeight(src_rect));
+        }
         return null;
     }
 }

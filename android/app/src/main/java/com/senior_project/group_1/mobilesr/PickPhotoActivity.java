@@ -101,6 +101,7 @@ public class PickPhotoActivity extends AppCompatActivity {
             Uri imageUri = data.getData();
             try {
                 imageView.setImageBitmap(MediaStore.Images.Media.getBitmap(this.getContentResolver(), imageUri));
+                imageView.rotate();// I dont know why this rotation is required
             }
             catch (Exception ex) {
                 Log.e("PickPhotoActivity.onActivityResult", "Error while loading image bitmap from URI", ex);
