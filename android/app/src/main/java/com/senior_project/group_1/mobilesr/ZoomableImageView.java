@@ -280,31 +280,14 @@ public class ZoomableImageView extends AppCompatImageView {
             src_rect.bottom = bm.getHeight() - 1;
         }
 
-       /* if( src_rect.left < 0 ){
-            src_rect.left = 0;
-        }
-        if( src_rect.right >= bm.getWidth() ){
-            src_rect.right = bm.getWidth() - 1;
-        }
-        if( src_rect.top < 0 ){
-            src_rect.top = 0;
-        }
-        if( src_rect.bottom >= bm.getHeight() ){
-            src_rect.bottom = bm.getHeight() - 1;
-        }*/
-
         return src_rect;
     }
 
     // Method for rotating the selected image
     public void rotate() {
         Matrix matrix = new Matrix();
-        matrix.postRotate(90); // Creating a rotation matrix
-
-        // TODO possibly a memory leak, check if it is possible to do this in O(1) extra memory
-        Bitmap scaledBitmap = Bitmap.createScaledBitmap(bm, bm.getWidth(), bm.getHeight(),true);
-        bm = Bitmap.createBitmap(scaledBitmap, 0, 0, scaledBitmap.getWidth(), scaledBitmap.getHeight(), matrix, true);
-        scaledBitmap.recycle();
+        matrix.postRotate(-90); // Creating a rotation matrix
+        bm = Bitmap.createBitmap(bm, 0, 0, bm.getWidth(), bm.getHeight(), matrix, true);
         invalidate(); // trigger drawing
     }
 
