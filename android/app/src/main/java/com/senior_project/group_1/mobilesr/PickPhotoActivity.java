@@ -67,7 +67,7 @@ public class PickPhotoActivity extends AppCompatActivity {
         splitButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Bitmap[] bitmapArray = splitImage(bitmap, 25);
+                Bitmap[] bitmapArray = divideImage(bitmap, 25, 35);
                 Intent splitImageIntent = new Intent(PickPhotoActivity.this, MergedImageActivity.class);
                 startActivity(splitImageIntent);
             }
@@ -113,32 +113,10 @@ public class PickPhotoActivity extends AppCompatActivity {
         bitmapProcessor.close();
     }
 
-    /**
-     * Splits the source image and show them all into a grid in a new activity
-     *  @param image The source image to split
-     * @param chunkNumbers The target number of small image chunks to be formed from the   source image
-     */
-    // TODO: Parameters will change : width, height will be added.
-    private Bitmap[] splitImage(final Bitmap scaledBitmap, int chunkNumbers) {
-        // Number of rows and columns of the grid to be displayed.
-        int rows, cols;
-
-        // Height and width of small image chunks
-        int chunkHeight, chunkWidth;
-
-        // To store all the chunks in a list as bitmap format
-        chunkImages = new ArrayList<>(chunkNumbers);
-
-        // Get the scaled bitmap of the image
-        /*
-        Bitmap bitmap = ((BitmapDrawable) image.getDrawable()).getBitmap();
-        Bitmap scaledBitmap = Bitmap.createScaledBitmap(bitmap, bitmap.getWidth(), bitmap.getHeight(), true);
-        */
-
-        rows = cols = (int) Math.sqrt(chunkNumbers);
-        chunkHeight = bitmap.getHeight() / rows;
-        chunkWidth = bitmap.getWidth() / cols;
-
+    private Bitmap[] divideImage(final Bitmap scaledBitmap, int chunkHeight, int chunkWidth) {
+        int rows = scaledBitmap.getHeight() / chunkHeight;
+        int cols = scaledBitmap.getWidth() / chunkWidth;
+        chunkImages = new ArrayList<>(rows*cols);
         //coordinateX and coordinateY are the pixel positions of the image chunks
         int coordinateY = 0;
         for(int x=0; x<rows; x++){
@@ -151,8 +129,8 @@ public class PickPhotoActivity extends AppCompatActivity {
         }
         Bitmap[] bitmapArray = new Bitmap[chunkImages.size()];
         chunkImages.toArray(bitmapArray);
-        Collections.shuffle(chunkImages);
         return bitmapArray;
+
     }
 
 
