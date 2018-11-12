@@ -22,6 +22,7 @@ public class ZoomableImageView extends AppCompatImageView {
     float start_x,start_y; // first finger, first touch
     float pinched_x, pinched_y; // second finger, first touch
     float center_of_zoom_x, center_of_zoom_y; // center of zooming, in source rectange of drawing
+    float center_of_zoom_x_tba, center_of_zoom_y_tba; // center of zooming, to be achieved for smooth transformations
     int viewHeight, viewWidth; // original width and height of view in screen, in pixels
     int current_pointer_count; // number of touching fingers
     float start_distance, current_distance; // distances between the two fingers
@@ -29,6 +30,7 @@ public class ZoomableImageView extends AppCompatImageView {
     Rect src_rect; // a subset of pixel coordinates that will be cropped from original bitmap,
     // then, will be scaled to fit in the dest_rect( which is not globally defined )
     // for ideal operation, src_rect's edge ratio should be same with the dest_rect
+    Paint clearing_paint; // Paint for clearing canvas on draw method
 
     final float zoom_constant = 0.05F; // Constant numbers to adjust the sensitivity of user gestures
     final float movement_constant = 14F;
@@ -40,6 +42,13 @@ public class ZoomableImageView extends AppCompatImageView {
 
     public ZoomableImageView(Context context, AttributeSet attrs) {
         super(context, attrs);
+    }
+
+    @Override
+    protected void onFinishInflate() {
+        super.onFinishInflate();
+        clearing_paint = new Paint();
+        clearing_paint.setARGB(0,255,255,255);
     }
 
     // Overrided to get the original bitmap
@@ -79,16 +88,18 @@ public class ZoomableImageView extends AppCompatImageView {
                     float y = e.getY(1);
                     pinched_x = x;
                     pinched_y = y; // refer to comments on top, saving second finger's x and y
+                    // ----------------
                     // Calculation of center of the zoom in src
-                    center_of_zoom_x = (start_x + pinched_x)/2.0F;
-                    center_of_zoom_y = (start_y + pinched_y)/2.0F;
+                    center_of_zoom_x_tba = (start_x + pinched_x)/2.0F;
+                    center_of_zoom_y_tba = (start_y + pinched_y)/2.0F;
                     // Below, im converting the coordinates of the screen to the current subset of
                     // Original image bitmap, to find the actual location of the zoom center on
                     // original bitmap
-                    center_of_zoom_x = center_of_zoom_x/viewWidth*getWidth(src_rect)+src_rect.left;
-                    center_of_zoom_y = center_of_zoom_y/viewHeight*getHeight(src_rect)+src_rect.top;
+                    center_of_zoom_x_tba = center_of_zoom_x_tba/viewWidth*getWidth(src_rect)+src_rect.left;
+                    center_of_zoom_y_tba = center_of_zoom_y_tba/viewHeight*getHeight(src_rect)+src_rect.top;
                     // Current distance between fingers, note that change on this distance means
                     // User is trying to zoom in our out
+                    // -----------------
                     start_distance = getDistance(start_x,start_y,pinched_x,pinched_y);
                     Log.d("TAG", String.format("2 finger started X = %.5f, Y = %.5f", x, y));
                 }
@@ -111,6 +122,9 @@ public class ZoomableImageView extends AppCompatImageView {
                         center_of_zoom_x -= (x - px)*movement_constant/zoom_factor;
                         center_of_zoom_y -= (y - py)*movement_constant/zoom_factor;
 
+                        center_of_zoom_x_tba = center_of_zoom_x;
+                        center_of_zoom_y_tba = center_of_zoom_y;
+
                         align_center_of_zoom(); // prevent if center of zoom is outside of the bm,
 
                         invalidate(); // this triggers draw method of view
@@ -120,8 +134,8 @@ public class ZoomableImageView extends AppCompatImageView {
                 else if( current_pointer_count == 2 ) { // This is called in zoom-in or zoom-out oprations
                     float x = e.getX(1);
                     float y = e.getY(1);
-                    // TODO find a better calculation algorithm
                     current_distance = getDistance(start_x, start_y, x, y);
+
                     // Differantially:
                     // If distance has increased, increase zoom_factor
                     if( current_distance > start_distance )
@@ -151,13 +165,11 @@ public class ZoomableImageView extends AppCompatImageView {
             center_of_zoom_y = bm.getHeight() - getHeight(src_rect)/2;
     }
 
+
     @Override
     public void draw(Canvas canvas) {
-        super.draw(canvas); // TODO check if required to call super
-        Paint p = new Paint(); // TODO dont init every time
-        p.setARGB(0,255,255,255);
         if( bm != null ) {
-            canvas.drawRect( 0,0, viewWidth, viewHeight, p); // clear the canvas
+            canvas.drawRect( 0,0, viewWidth, viewHeight, clearing_paint); // clear the canvas
             src_rect = generateSourceRectange( bm.getWidth(), bm.getHeight() ); // calculate src and dsc rects
             Log.i("ImageView", "src_rect "+src_rect.toString());
             Rect dest_rect = generateDestinationRectange( src_rect );
@@ -178,16 +190,15 @@ public class ZoomableImageView extends AppCompatImageView {
     }
 
     private Rect generateSourceRectange( int src_width, int src_height){
-        float original_ratio = src_width/src_height;
-
-        //TODO there are cases where I might not use bm w/h ratio, add this
-        // Calculating the src rect
-        int based_height = bm.getHeight();
+        center_of_zoom_x += (center_of_zoom_x_tba - center_of_zoom_x)/10;
+        center_of_zoom_y += (center_of_zoom_y_tba - center_of_zoom_y)/10;
+        center_of_zoom_x_tba -= (center_of_zoom_x_tba - center_of_zoom_x)/10;
+        center_of_zoom_y_tba -= (center_of_zoom_y_tba - center_of_zoom_y)/10;
 
         Rect src_rect = new Rect((int)(center_of_zoom_x-bm.getWidth()/zoom_factor/2),
-                (int)(center_of_zoom_y-based_height/zoom_factor/2),
+                (int)(center_of_zoom_y-bm.getHeight()/zoom_factor/2),
                 (int)(center_of_zoom_x+bm.getWidth()/zoom_factor/2),
-                (int)(center_of_zoom_y+based_height/zoom_factor/2));
+                (int)(center_of_zoom_y+bm.getHeight()/zoom_factor/2));
         return fit_in_original_bm( src_rect );
     }
 
@@ -196,23 +207,23 @@ public class ZoomableImageView extends AppCompatImageView {
 
         float original_ratio = getWidth(src_rect)/(float)getHeight(src_rect); // w/h ratio of src
 
-        if( abs(original_ratio - viewWidth/(float)viewHeight) < 0.01F ) // if scaling is okay, return
+        if( abs(original_ratio - viewWidth/(float)viewHeight) < 0.00001F ) // if scaling is okay, return
             return dest_rect;
 
         // if I need to add padding to the dest rect, add
         if( viewWidth/viewHeight > original_ratio ) {
-            if( viewWidth/(float)viewHeight > bm.getWidth()/(float)getHeight(src_rect) ) {// what we can get at most
+            if( viewWidth/(float)viewHeight > bm.getWidth()/(float)getHeight(src_rect) ) {// what we can get at most still not enough
                 src_rect.left = 0;
-                src_rect.right = bm.getWidth();
+                src_rect.right = bm.getWidth(); // do that best scenario
                 original_ratio = getWidth(src_rect)/(float)getHeight(src_rect);
-                dest_rect.left += original_ratio*viewHeight/2;
+                dest_rect.left += original_ratio*viewHeight/2; // then add padding to the screen
                 dest_rect.right -= original_ratio*viewHeight/2;
 
             }
-            else{ // In this case, desired src H is
+            else{ // We can adjust the src as we want
                 int desired_width = (int)((viewWidth/(float)viewHeight)*getHeight(src_rect));
                 int previous_width = getWidth(src_rect);
-                src_rect.top -= (desired_width - previous_width)/2;
+                src_rect.top -= (desired_width - previous_width)/2; // then adjust it
                 src_rect.bottom += (desired_width - previous_width)/2;
             }
         }
