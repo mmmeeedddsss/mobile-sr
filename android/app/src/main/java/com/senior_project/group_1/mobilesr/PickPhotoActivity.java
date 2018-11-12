@@ -3,6 +3,7 @@ package com.senior_project.group_1.mobilesr;
 import android.app.Activity;
 import android.content.Intent;
 import android.graphics.Bitmap;
+import android.graphics.Canvas;
 import android.graphics.drawable.BitmapDrawable;
 import android.net.Uri;
 import android.os.Bundle;
@@ -67,7 +68,7 @@ public class PickPhotoActivity extends AppCompatActivity {
         splitButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Bitmap[] bitmapArray = divideImage(bitmap, 25, 35);
+                Bitmap[] bitmapArray = divideImage(bitmap, 100 , 90, 20);
                 Intent splitImageIntent = new Intent(PickPhotoActivity.this, MergedImageActivity.class);
                 startActivity(splitImageIntent);
             }
@@ -113,24 +114,42 @@ public class PickPhotoActivity extends AppCompatActivity {
         bitmapProcessor.close();
     }
 
-    private Bitmap[] divideImage(final Bitmap scaledBitmap, int chunkHeight, int chunkWidth) {
+    private Bitmap[] divideImage(final Bitmap scaledBitmap, int chunkHeight, int chunkWidth, int overlap) {
+        /*This method takes a bitmap, and arbitrary width and height values and an overlap value,
+        * and divides the image into grids of given height and width values, with a given overlap between chunks*/
         int rows = scaledBitmap.getHeight() / chunkHeight;
         int cols = scaledBitmap.getWidth() / chunkWidth;
-        chunkImages = new ArrayList<>(rows*cols);
+        chunkImages = new ArrayList<>();
         //coordinateX and coordinateY are the pixel positions of the image chunks
         int coordinateY = 0;
         for(int x=0; x<rows; x++){
             int coordinateX = 0;
             for(int y=0; y<cols; y++){
                 chunkImages.add(Bitmap.createBitmap(scaledBitmap, coordinateX, coordinateY, chunkWidth, chunkHeight));
-                coordinateX += chunkWidth;
+                coordinateX += chunkWidth - overlap;
             }
-            coordinateY += chunkHeight;
+            coordinateY += chunkHeight - overlap;
         }
         Bitmap[] bitmapArray = new Bitmap[chunkImages.size()];
         chunkImages.toArray(bitmapArray);
         return bitmapArray;
+    }
 
+    /*TODO: This method is not completed yet*/
+    public void reassembleImage(final Bitmap scaledBitmap,int chunkHeight, int chunkWidth) {
+        int rows = scaledBitmap.getHeight() / chunkHeight;
+        int cols = scaledBitmap.getWidth() / chunkWidth;
+
+        Bitmap bitmap = Bitmap.createBitmap(chunkWidth * cols, chunkHeight * rows,  Bitmap.Config.ARGB_4444);
+        Canvas canvas = new Canvas(bitmap);
+
+        int chunkNumbers = 0;
+        for(int i=0; i<rows; i++) {
+            for(int j=0; j<cols; j++) {
+                canvas.drawBitmap(chunkImages.get(chunkNumbers), chunkWidth * j, chunkHeight * i, null);
+                chunkNumbers++;
+            }
+        }
     }
 
 
