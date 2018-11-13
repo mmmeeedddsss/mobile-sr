@@ -2,39 +2,27 @@ package com.senior_project.group_1.mobilesr;
 
 import android.content.Intent;
 import android.graphics.Bitmap;
-<<<<<<< HEAD:android/app/src/main/java/com/example/yuksel/mobilesr/PickPhotoActivity.java
-import android.graphics.drawable.BitmapDrawable;
-import android.net.Uri;
-import android.os.Bundle;
-import android.provider.MediaStore;
-import android.util.Log;
-import android.view.View;
-import android.widget.Button;
-import android.widget.ImageView;
-import android.widget.Toast;
-
-import java.util.ArrayList;
-import java.util.Collections;
+<<<<<<< HEAD
 =======
+import android.graphics.Canvas;
+import android.graphics.drawable.BitmapDrawable;
+>>>>>>> divide-image-into-grids-vBeta
 import android.net.Uri;
 import android.os.Bundle;
 import android.provider.MediaStore;
 import android.support.v7.app.AppCompatActivity;
+import android.util.Log;
 import android.view.View;
 import android.widget.Button;
->>>>>>> 6ff3bcdd0928df7af80df11529ccfaeaf5f54938:android/app/src/main/java/com/senior_project/group_1/mobilesr/PickPhotoActivity.java
+import android.widget.Toast;
 
-import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Collections;
 
 public class PickPhotoActivity extends AppCompatActivity {
     private static final int PICK_IMAGE = 100;
-<<<<<<< HEAD:android/app/src/main/java/com/example/yuksel/mobilesr/PickPhotoActivity.java
 
-    private Bitmap bitmap;
-    private ImageView imageView;
-=======
     private ZoomableImageView imageView;
->>>>>>> 6ff3bcdd0928df7af80df11529ccfaeaf5f54938:android/app/src/main/java/com/senior_project/group_1/mobilesr/PickPhotoActivity.java
     private Button pickButton;
     private Button rotateButton;
     private Button processButton;
@@ -50,7 +38,6 @@ public class PickPhotoActivity extends AppCompatActivity {
         setContentView(R.layout.pick_photo_activity);
 
         imageView = findViewById(R.id.pick_photo_image_view);
-
 
         pickButton = findViewById(R.id.pick_photo_button);
         pickButton.setOnClickListener(new View.OnClickListener() {
@@ -68,7 +55,6 @@ public class PickPhotoActivity extends AppCompatActivity {
             }
         });
 
-<<<<<<< HEAD:android/app/src/main/java/com/example/yuksel/mobilesr/PickPhotoActivity.java
         processButton = findViewById(R.id.process_image_button);
         processButton.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -81,30 +67,42 @@ public class PickPhotoActivity extends AppCompatActivity {
         splitButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Bitmap[] bitmapArray = splitImage(imageView, 25);
+<<<<<<< HEAD
+                splitImageHandler();
+=======
+                Bitmap[] bitmapArray = divideImage(bitmap, 100 , 90, 20);
                 Intent splitImageIntent = new Intent(PickPhotoActivity.this, MergedImageActivity.class);
                 startActivity(splitImageIntent);
+>>>>>>> divide-image-into-grids-vBeta
             }
         });
 
-=======
->>>>>>> 6ff3bcdd0928df7af80df11529ccfaeaf5f54938:android/app/src/main/java/com/senior_project/group_1/mobilesr/PickPhotoActivity.java
     }
 
-    public void pickImage() {
+    private void pickImage() {
         Intent gallery_intent = new Intent(Intent.ACTION_PICK,
                 android.provider.MediaStore.Images.Media.INTERNAL_CONTENT_URI);
         startActivityForResult(gallery_intent, PICK_IMAGE);
     }
 
-    public void processImage() {
-        if(bitmap != null) {
+    private void processImage() {
+        if(imageView.getCurrentBitmap() != null) {
             long startTime = System.nanoTime();
-            bitmap = bitmapProcessor.processBitmap(bitmap);
+            Log.i("processImage", String.format("Bitmap size: %d %d",
+                    imageView.getCurrentBitmap().getHeight(),
+                    imageView.getCurrentBitmap().getWidth()));
+
+            Bitmap bitmap = bitmapProcessor.processBitmap(imageView.getCurrentBitmap());
             long estimatedTime = System.nanoTime() - startTime;
             Toast.makeText(this,"Elapsed Time in ms: "+estimatedTime/1000000, Toast.LENGTH_LONG ).show();
             imageView.setImageBitmap(bitmap);
         }
+    }
+
+    private void splitImageHandler(){
+        Bitmap[] bitmapArray = splitImage(imageView.getCurrentBitmap(), 25);
+        Intent splitImageIntent = new Intent(PickPhotoActivity.this, MergedImageActivity.class);
+        startActivity(splitImageIntent);
     }
 
     @Override
@@ -112,14 +110,14 @@ public class PickPhotoActivity extends AppCompatActivity {
         super.onActivityResult(requestCode, resultCode, data);
         if (resultCode == RESULT_OK && requestCode == PICK_IMAGE) {
             Uri imageUri = data.getData();
-<<<<<<< HEAD:android/app/src/main/java/com/example/yuksel/mobilesr/PickPhotoActivity.java
             try {
-                bitmap = MediaStore.Images.Media.getBitmap(this.getContentResolver(), imageUri);
+                imageView.setImageBitmap(MediaStore.Images.Media.getBitmap(this.getContentResolver(), imageUri));
+                imageView.rotate();// I dont know why this rotation is required
             }
             catch (Exception ex) {
                 Log.e("PickPhotoActivity.onActivityResult", "Error while loading image bitmap from URI", ex);
             }
-            imageView.setImageBitmap(bitmap);
+
         }
     }
 
@@ -129,13 +127,14 @@ public class PickPhotoActivity extends AppCompatActivity {
         bitmapProcessor.close();
     }
 
+
     /**
      * Splits the source image and show them all into a grid in a new activity
      *  @param image The source image to split
      * @param chunkNumbers The target number of small image chunks to be formed from the   source image
      */
     // TODO: Parameters will change : width, height will be added.
-    private Bitmap[] splitImage(ImageView image, int chunkNumbers) {
+    private Bitmap[] splitImage(final Bitmap scaledBitmap, int chunkNumbers) {
         // Number of rows and columns of the grid to be displayed.
         int rows, cols;
 
@@ -146,36 +145,51 @@ public class PickPhotoActivity extends AppCompatActivity {
         chunkImages = new ArrayList<>(chunkNumbers);
 
         // Get the scaled bitmap of the image
+        /*
         Bitmap bitmap = ((BitmapDrawable) image.getDrawable()).getBitmap();
         Bitmap scaledBitmap = Bitmap.createScaledBitmap(bitmap, bitmap.getWidth(), bitmap.getHeight(), true);
+        */
 
         rows = cols = (int) Math.sqrt(chunkNumbers);
-        chunkHeight = bitmap.getHeight() / rows;
-        chunkWidth = bitmap.getWidth() / cols;
+        chunkHeight = imageView.getCurrentBitmap().getHeight() / rows;
+        chunkWidth = imageView.getCurrentBitmap().getWidth() / cols;
 
+    private Bitmap[] divideImage(final Bitmap scaledBitmap, int chunkHeight, int chunkWidth, int overlap) {
+        /*This method takes a bitmap, and arbitrary width and height values and an overlap value,
+        * and divides the image into grids of given height and width values, with a given overlap between chunks*/
+        int rows = scaledBitmap.getHeight() / chunkHeight;
+        int cols = scaledBitmap.getWidth() / chunkWidth;
+        chunkImages = new ArrayList<>();
         //coordinateX and coordinateY are the pixel positions of the image chunks
         int coordinateY = 0;
         for(int x=0; x<rows; x++){
             int coordinateX = 0;
             for(int y=0; y<cols; y++){
                 chunkImages.add(Bitmap.createBitmap(scaledBitmap, coordinateX, coordinateY, chunkWidth, chunkHeight));
-                coordinateX += chunkWidth;
+                coordinateX += chunkWidth - overlap;
             }
-            coordinateY += chunkHeight;
-=======
-            Bitmap bitmap = null;
-            try {
-                bitmap = MediaStore.Images.Media.getBitmap(this.getContentResolver(), imageUri);
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-            imageView.setImageBitmap(bitmap);
->>>>>>> 6ff3bcdd0928df7af80df11529ccfaeaf5f54938:android/app/src/main/java/com/senior_project/group_1/mobilesr/PickPhotoActivity.java
+            coordinateY += chunkHeight - overlap;
         }
         Bitmap[] bitmapArray = new Bitmap[chunkImages.size()];
         chunkImages.toArray(bitmapArray);
-        Collections.shuffle(chunkImages);
         return bitmapArray;
+    }
+
+    /*TODO: This method is not completed yet*/
+    public void reassembleImage(final Bitmap scaledBitmap,int chunkHeight, int chunkWidth) {
+        int rows = scaledBitmap.getHeight() / chunkHeight;
+        int cols = scaledBitmap.getWidth() / chunkWidth;
+
+        Bitmap bitmap = Bitmap.createBitmap(chunkWidth * cols, chunkHeight * rows,  Bitmap.Config.ARGB_4444);
+        Canvas canvas = new Canvas(bitmap);
+
+        int chunkNumbers = 0;
+        for(int i=0; i<rows; i++) {
+            for(int j=0; j<cols; j++) {
+                canvas.drawBitmap(chunkImages.get(chunkNumbers), chunkWidth * j, chunkHeight * i, null);
+                chunkNumbers++;
+            }
+        }
     }
 
 
