@@ -132,7 +132,7 @@ public class PickPhotoActivity extends AppCompatActivity {
         }
         Bitmap[] bitmapArray = new Bitmap[chunkImages.size()];
         chunkImages.toArray(bitmapArray);
-        Collections.shuffle(chunkImages);
+        //Collections.shuffle(chunkImages);
         return bitmapArray;
     }
 
