@@ -57,27 +57,6 @@ def build_tfrecord(hr_glob, lr_glob, output_path):
             record_writer.write(serialized_sample)
 
 
-def build_image_decoder():
-    tf.reset_default_graph()
-    byte_input = tf.placeholder(tf.string)
-    img_output = tf.image.decode_png(byte_input, channels=3)
-    return byte_input, img_output
-
-
-def show_png(file_path, decoder_in, decoder_out):
-    import matplotlib.pyplot as plt
-    input_bytes = read_bytes(file_path)
-    with tf.Session() as sess:
-        feed_dict = {decoder_in: input_bytes}
-        output_image = sess.run(decoder_out, feed_dict=feed_dict)
-    plt.figure()
-    plt.imshow(output_image)
-    plt.show()
-
-
 if __name__ == '__main__':
     args = parse_arguments()
-    dec_in, dec_out = build_image_decoder()
-    # for image_path in args.image_paths:
-    #     show_png(image_path, dec_in, dec_out)
     build_tfrecord(args.hr_images_path, args.lr_images_path, args.outfile)
