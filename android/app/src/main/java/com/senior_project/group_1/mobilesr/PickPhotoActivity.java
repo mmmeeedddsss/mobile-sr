@@ -68,7 +68,7 @@ public class PickPhotoActivity extends AppCompatActivity {
         splitButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Bitmap[] bitmapArray = divideImage(bitmap, 100 , 90, 20);
+                Bitmap[] bitmapArray = divideImage(bitmap, 100 , 90, 20, 30);
                 Intent splitImageIntent = new Intent(PickPhotoActivity.this, MergedImageActivity.class);
                 startActivity(splitImageIntent);
             }
@@ -114,7 +114,7 @@ public class PickPhotoActivity extends AppCompatActivity {
         bitmapProcessor.close();
     }
 
-    private Bitmap[] divideImage(final Bitmap scaledBitmap, int chunkHeight, int chunkWidth, int overlap) {
+    private Bitmap[] divideImage(final Bitmap scaledBitmap, int chunkHeight, int chunkWidth, int overlapX, int overlapY) {
         /*This method takes a bitmap, and arbitrary width and height values and an overlap value,
         * and divides the image into grids of given height and width values, with a given overlap between chunks*/
         int rows = scaledBitmap.getHeight() / chunkHeight;
@@ -126,9 +126,9 @@ public class PickPhotoActivity extends AppCompatActivity {
             int coordinateX = 0;
             for(int y=0; y<cols; y++){
                 chunkImages.add(Bitmap.createBitmap(scaledBitmap, coordinateX, coordinateY, chunkWidth, chunkHeight));
-                coordinateX += chunkWidth - overlap;
+                coordinateX += chunkWidth - overlapX;
             }
-            coordinateY += chunkHeight - overlap;
+            coordinateY += chunkHeight - overlapY;
         }
         Bitmap[] bitmapArray = new Bitmap[chunkImages.size()];
         chunkImages.toArray(bitmapArray);
