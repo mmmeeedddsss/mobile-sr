@@ -28,12 +28,6 @@ def parse_arguments():
         help='the patch size to use when dividing the images, 256x256 by default',
         default='256x256')
     parser.add_argument(
-        '--downsampling-factor', '-d',
-        help='the factor by which input images are downsampled, used to determine patch size'
-             ' for the low-res images. 2 by default.',
-        type=int,
-        default=2)
-    parser.add_argument(
         '--njobs', '-n',
         help='the number of jobs to run in parallel. Defaults to 1.',
         type=int,
