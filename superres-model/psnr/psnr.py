@@ -26,3 +26,14 @@ def calc_psnr_file_path(org, imit):
   img2 = np.array(img2)
 
   return calc_psnr_numpy(img1, img2)
+
+# Main routine for running script
+# Cmd Line args are file paths
+# Print their PSNR to stdout
+if __name__ == '__main__':
+  import sys
+  if len(sys.argv) != 3:
+    print('Two image files needed. Use "python psnr.py <org_img> <other_img>"')
+    sys.exit(-1)
+  print(calc_psnr_file_path(sys.argv[1], sys.argv[2]))
+  
