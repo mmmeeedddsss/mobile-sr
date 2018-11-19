@@ -1,10 +1,8 @@
 package com.senior_project.group_1.mobilesr;
 
-import android.app.Activity;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
-import android.graphics.drawable.BitmapDrawable;
 import android.net.Uri;
 import android.os.Bundle;
 import android.provider.MediaStore;
@@ -12,14 +10,11 @@ import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
-import android.widget.ImageView;
 import android.widget.Toast;
 
 import java.util.ArrayList;
-import java.util.Collections;
-import java.io.IOException;
 
-public class PickPhotoActivity extends AppCompatActivity {
+public class PreprocessAndEnhanceActivity extends AppCompatActivity {
 
     private Bitmap bitmap;
     private ZoomableImageView imageView;
@@ -60,7 +55,7 @@ public class PickPhotoActivity extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 Bitmap[] bitmapArray = divideImage(bitmap, 100 , 90, 20, 30);
-                Intent splitImageIntent = new Intent(PickPhotoActivity.this, MergedImageActivity.class);
+                Intent splitImageIntent = new Intent(PreprocessAndEnhanceActivity.this, MergedImageActivity.class);
                 startActivity(splitImageIntent);
             }
         });
@@ -88,7 +83,7 @@ public class PickPhotoActivity extends AppCompatActivity {
             imageView.setImageBitmap(bitmap);
         }
         catch (Exception ex) {
-            Log.e("PickPhotoActivity.onActivityResult", "Error while loading image bitmap from URI", ex);
+            Log.e("PreprocessAndEnhanceActivity.onActivityResult", "Error while loading image bitmap from URI", ex);
         }
     }
 

@@ -15,7 +15,6 @@ import java.io.File;
 import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
-import java.util.Locale;
 
 public class MainActivity extends AppCompatActivity {
     static final int REQUEST_IMAGE_CAPTURE = 111;
@@ -119,7 +118,7 @@ public class MainActivity extends AppCompatActivity {
                 mImageUri = data.getData();
             }
             // Call opration activity
-            Intent pickPhotoIntent = new Intent(MainActivity.this, PickPhotoActivity.class);
+            Intent pickPhotoIntent = new Intent(MainActivity.this, PreprocessAndEnhanceActivity.class);
             pickPhotoIntent.putExtra("imageUri", mImageUri); // uri implements Parsable
             startActivity(pickPhotoIntent);
         }

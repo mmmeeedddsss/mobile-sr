@@ -12,7 +12,7 @@ public class MergedImageActivity extends Activity {
 
         //Getting the grid view and setting an adapter to it
         GridView grid = (GridView) findViewById(R.id.merge_image_view);
-        grid.setAdapter(new ImageAdapter(this, PickPhotoActivity.chunkImages));
-        grid.setNumColumns((int) Math.sqrt(PickPhotoActivity.chunkImages.size()));
+        grid.setAdapter(new ImageAdapter(this, PreprocessAndEnhanceActivity.chunkImages));
+        grid.setNumColumns((int) Math.sqrt(PreprocessAndEnhanceActivity.chunkImages.size()));
     }
 }
