@@ -19,6 +19,7 @@ import java.util.Locale;
 
 public class MainActivity extends AppCompatActivity {
     static final int REQUEST_IMAGE_CAPTURE = 111;
+    static final int REQUEST_IMAGE_SELECT = 112;
 
     Button pickPhotoButton, takePhotoButton, settingsButton, tutorialButton;
     private Uri mImageUri;
@@ -35,8 +36,7 @@ public class MainActivity extends AppCompatActivity {
         pickPhotoButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Intent pickPhotoIntent = new Intent(MainActivity.this, PickPhotoActivity.class);
-                startActivity(pickPhotoIntent);
+                pickImageFromGallery();
             }
         });
 
@@ -47,8 +47,7 @@ public class MainActivity extends AppCompatActivity {
         takePhotoButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Intent takePhotoIntent = new Intent(MainActivity.this, TakePhotoActivity.class);
-                startActivity(takePhotoIntent);
+                captureImage();
             }
         });
 
@@ -71,11 +70,17 @@ public class MainActivity extends AppCompatActivity {
         tutorialButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Intent settingsIntent = new Intent(MainActivity.this, TutorialActivity.class);
-                startActivity(settingsIntent);
+                Intent tutorialIntent = new Intent(MainActivity.this, TutorialActivity.class);
+                startActivity(tutorialIntent);
             }
         });
 
+    }
+
+    public void pickImageFromGallery() {
+        Intent gallery_intent = new Intent(Intent.ACTION_PICK,
+                android.provider.MediaStore.Images.Media.INTERNAL_CONTENT_URI);
+        startActivityForResult(gallery_intent, REQUEST_IMAGE_SELECT);
     }
 
     private void captureImage() {
@@ -103,13 +108,23 @@ public class MainActivity extends AppCompatActivity {
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-        if (requestCode == REQUEST_IMAGE_CAPTURE && resultCode == RESULT_OK) {
-            Toast.makeText(this.getApplicationContext(), "Uri : "+mImageUri, Toast.LENGTH_LONG).show();
+        if( resultCode == RESULT_OK ) {
+            if (requestCode == REQUEST_IMAGE_CAPTURE) {
+                Toast.makeText(this.getApplicationContext(), "Uri : " + mImageUri, Toast.LENGTH_LONG).show();
 
-            // Below, we are adding the captured image to gallery
-            Intent mediaScanIntent = new Intent(Intent.ACTION_MEDIA_SCANNER_SCAN_FILE);
-            mediaScanIntent.setData(mImageUri);
-            this.sendBroadcast(mediaScanIntent);
+                // Below, we are adding the captured image to gallery
+                Intent mediaScanIntent = new Intent(Intent.ACTION_MEDIA_SCANNER_SCAN_FILE);
+                mediaScanIntent.setData(mImageUri);
+                this.sendBroadcast(mediaScanIntent);
+            }
+            else if (requestCode == REQUEST_IMAGE_SELECT) {
+                mImageUri = data.getData();
+            }
+            // Call opration activity
+            Intent pickPhotoIntent = new Intent(MainActivity.this, PickPhotoActivity.class);
+            pickPhotoIntent.putExtra("imageUri", mImageUri); // uri implements Parsable
+            startActivity(pickPhotoIntent);
+            //this.finish(); TODO call finish?
         }
     }
 

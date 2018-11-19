@@ -20,16 +20,15 @@ import java.util.Collections;
 import java.io.IOException;
 
 public class PickPhotoActivity extends AppCompatActivity {
-    private static final int PICK_IMAGE = 100;
 
     private Bitmap bitmap;
     private ZoomableImageView imageView;
-    private Button pickButton;
     private Button rotateButton;
     private Button processButton;
     private Button splitButton;
     private BitmapProcessor bitmapProcessor;
     public static  ArrayList<Bitmap> chunkImages; // TODO: Only for debugging purpose (DELETE later.)
+    private Uri mImageUri;
 
     @Override
     public void onCreate(Bundle savedInstance) {
@@ -39,14 +38,6 @@ public class PickPhotoActivity extends AppCompatActivity {
         setContentView(R.layout.pick_photo_activity);
 
         imageView = findViewById(R.id.pick_photo_image_view);
-
-        pickButton = findViewById(R.id.pick_photo_button);
-        pickButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                pickImage();
-            }
-        });
 
         rotateButton = findViewById(R.id.rotate_image_button);
         rotateButton.setOnClickListener(new View.OnClickListener() {
@@ -74,12 +65,8 @@ public class PickPhotoActivity extends AppCompatActivity {
             }
         });
 
-    }
-
-    public void pickImage() {
-        Intent gallery_intent = new Intent(Intent.ACTION_PICK,
-                android.provider.MediaStore.Images.Media.INTERNAL_CONTENT_URI);
-        startActivityForResult(gallery_intent, PICK_IMAGE);
+        Intent intent = getIntent();
+        mImageUri = intent.getParcelableExtra("imageUri");
     }
 
     public void processImage() {
@@ -93,25 +80,14 @@ public class PickPhotoActivity extends AppCompatActivity {
         }
     }
 
-    @Override
-    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-        super.onActivityResult(requestCode, resultCode, data);
-        if (resultCode == RESULT_OK && requestCode == PICK_IMAGE) {
-            Uri imageUri = data.getData();
-            try {
-                bitmap = MediaStore.Images.Media.getBitmap(this.getContentResolver(), imageUri);
-            }
-            catch (Exception ex) {
-                Log.e("PickPhotoActivity.onActivityResult", "Error while loading image bitmap from URI", ex);
-            }
+    protected void setImage(int requestCode, int resultCode, Intent data) {
+        try {
+            bitmap = MediaStore.Images.Media.getBitmap(this.getContentResolver(), mImageUri);
             imageView.setImageBitmap(bitmap);
         }
-    }
-
-    @Override
-    protected void onDestroy() {
-        super.onDestroy();
-        bitmapProcessor.close();
+        catch (Exception ex) {
+            Log.e("PickPhotoActivity.onActivityResult", "Error while loading image bitmap from URI", ex);
+        }
     }
 
     private Bitmap[] divideImage(final Bitmap scaledBitmap, int chunkHeight, int chunkWidth, int overlapX, int overlapY) {
@@ -151,6 +127,12 @@ public class PickPhotoActivity extends AppCompatActivity {
                 chunkNumbers++;
             }
         }
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        bitmapProcessor.close();
     }
 
 
