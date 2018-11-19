@@ -65,8 +65,10 @@ public class PickPhotoActivity extends AppCompatActivity {
             }
         });
 
+        // Set content of Zoomable image view
         Intent intent = getIntent();
         mImageUri = intent.getParcelableExtra("imageUri");
+        setImage();
     }
 
     public void processImage() {
@@ -80,7 +82,7 @@ public class PickPhotoActivity extends AppCompatActivity {
         }
     }
 
-    protected void setImage(int requestCode, int resultCode, Intent data) {
+    protected void setImage() {
         try {
             bitmap = MediaStore.Images.Media.getBitmap(this.getContentResolver(), mImageUri);
             imageView.setImageBitmap(bitmap);

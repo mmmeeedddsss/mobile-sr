@@ -110,8 +110,6 @@ public class MainActivity extends AppCompatActivity {
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         if( resultCode == RESULT_OK ) {
             if (requestCode == REQUEST_IMAGE_CAPTURE) {
-                Toast.makeText(this.getApplicationContext(), "Uri : " + mImageUri, Toast.LENGTH_LONG).show();
-
                 // Below, we are adding the captured image to gallery
                 Intent mediaScanIntent = new Intent(Intent.ACTION_MEDIA_SCANNER_SCAN_FILE);
                 mediaScanIntent.setData(mImageUri);
@@ -124,7 +122,6 @@ public class MainActivity extends AppCompatActivity {
             Intent pickPhotoIntent = new Intent(MainActivity.this, PickPhotoActivity.class);
             pickPhotoIntent.putExtra("imageUri", mImageUri); // uri implements Parsable
             startActivity(pickPhotoIntent);
-            //this.finish(); TODO call finish?
         }
     }
 
@@ -133,11 +130,7 @@ public class MainActivity extends AppCompatActivity {
         String timeStamp = new SimpleDateFormat("yyyyMMdd_HHmmss").format(new Date());
         String imageFileName = "JPEG_" + timeStamp;
         File storageDir = getExternalFilesDir(Environment.DIRECTORY_PICTURES);
-        File image = File.createTempFile(
-                imageFileName,  /* prefix */
-                ".jpg",         /* suffix */
-                storageDir      /* directory */
-        );
+        File image = File.createTempFile(imageFileName,".jpg", storageDir );
 
         return image;
     }
