@@ -65,7 +65,7 @@ public class ZoomableImageView extends AppCompatImageView {
 
         generateSourceRectange(bm.getWidth(), bm.getHeight());
 
-        // do not need to call super.setImageBitmap
+        invalidate();
     }
 
     @Override
