@@ -23,6 +23,8 @@ public class PreprocessAndEnhanceActivity extends AppCompatActivity {
     private Button splitButton;
     private BitmapProcessor bitmapProcessor;
     public static  ArrayList<Bitmap> chunkImages; // TODO: Only for debugging purpose (DELETE later.)
+    public static Bitmap[] bitmapArray; // TODO: This will not be the public static in the next stages
+    public static int columns;
     private Uri mImageUri;
 
     @Override
@@ -87,25 +89,63 @@ public class PreprocessAndEnhanceActivity extends AppCompatActivity {
         }
     }
 
+
+    /**
+     * This method does the necessary checks for the image to be divided.
+     * Just for now, this method gives a RuntimeException for the edge cases.
+     * @param scaledBitmap : Bitmap to be divided
+     * @param chunkHeight : Divided chunk height value
+     * @param chunkWidth : Divided chunk width value
+     * @param overlapX : Overlap for the X-axis
+     * @param overlapY : Overlap for the Y-axis
+     * @throws RuntimeException
+     */
+    private void imageCheck(final Bitmap scaledBitmap, int chunkHeight, int chunkWidth, int overlapX, int overlapY) throws RuntimeException {
+
+        // Check that overlap values are not bigger than chunk height and width
+        if(overlapX > chunkWidth || overlapY > chunkHeight)
+            throw new RuntimeException();
+
+        // Check that image width and height is divisible by the chunk values and overlap
+        if(scaledBitmap.getHeight() % (chunkHeight - overlapY) != 0 || scaledBitmap.getWidth() % (chunkWidth - overlapX) != 0) {
+            Log.i("ImageCheck(): ", String.format("Bitmap size: %d %d", scaledBitmap.getHeight(), scaledBitmap.getWidth()));
+            throw new RuntimeException();
+
+        }
+        bitmapArray = divideImage(scaledBitmap, chunkHeight, chunkWidth, overlapX, overlapY);
+
+    }
+
     private Bitmap[] divideImage(final Bitmap scaledBitmap, int chunkHeight, int chunkWidth, int overlapX, int overlapY) {
         /*This method takes a bitmap, and arbitrary width and height values and an overlap value,
-        * and divides the image into grids of given height and width values, with a given overlap between chunks*/
-        int rows = scaledBitmap.getHeight() / chunkHeight;
-        int cols = scaledBitmap.getWidth() / chunkWidth;
+         * and divides the image into grids of given height and width values, with a given overlap between chunks*/
         chunkImages = new ArrayList<>();
+
+        columns = scaledBitmap.getWidth() / (chunkWidth-overlapX) + 1;
+
         //coordinateX and coordinateY are the pixel positions of the image chunks
-        int coordinateY = 0;
-        for(int x=0; x<rows; x++){
-            int coordinateX = 0;
-            for(int y=0; y<cols; y++){
-                chunkImages.add(Bitmap.createBitmap(scaledBitmap, coordinateX, coordinateY, chunkWidth, chunkHeight));
-                coordinateX += chunkWidth - overlapX;
+        for(int coordinateY=0; coordinateY<scaledBitmap.getHeight(); coordinateY += chunkHeight - overlapY){
+
+            for(int coordinateX=0; coordinateX<scaledBitmap.getWidth(); coordinateX += chunkWidth - overlapX){
+                // The rest of the bitmap's width and height is lower than the chunkwidth and chunkheight
+                if(scaledBitmap.getWidth()-coordinateX < chunkWidth && scaledBitmap.getHeight()-coordinateY < chunkHeight)
+                    chunkImages.add(Bitmap.createBitmap(scaledBitmap, coordinateX, coordinateY, scaledBitmap.getWidth()-coordinateX, scaledBitmap.getHeight()-coordinateY));
+
+                // The rest of the bitmap's width is lower than the chunkwidth
+                else if(scaledBitmap.getWidth()-coordinateX < chunkWidth)
+                    chunkImages.add(Bitmap.createBitmap(scaledBitmap, coordinateX, coordinateY, scaledBitmap.getWidth()-coordinateX, chunkHeight));
+
+                // The rest of the bitmap's height is lower than the chunkheight
+                else if(scaledBitmap.getHeight()-coordinateY < chunkHeight)
+                    chunkImages.add(Bitmap.createBitmap(scaledBitmap, coordinateX, coordinateY, chunkWidth, scaledBitmap.getHeight()-coordinateY));
+
+                else
+                    chunkImages.add(Bitmap.createBitmap(scaledBitmap, coordinateX, coordinateY, chunkWidth, chunkHeight));
             }
-            coordinateY += chunkHeight - overlapY;
         }
+
         Bitmap[] bitmapArray = new Bitmap[chunkImages.size()];
         chunkImages.toArray(bitmapArray);
-        //Collections.shuffle(chunkImages);
         return bitmapArray;
     }
 
