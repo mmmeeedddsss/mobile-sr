@@ -27,6 +27,17 @@ def calc_psnr_file_path(org, imit):
 
   return calc_psnr_numpy(img1, img2)
 
+# For batch processing, calculate PSNR for two lists of numpy arrays.
+# @params (original_images_list, imitation_images_list)
+# @ret list of psnr values corresponding to given args
+def calc_psnr_bat_np(org_list, imit_list):
+  psnr_list = []
+  for i in range(len(org_list)):
+    psnr = calc_psnr_numpy(org_list[i], imit_list[i])
+    psnr_list.append(psnr)
+
+  return psnr_list
+
 # Main routine for running script
 # Cmd Line args are file paths
 # Print their PSNR to stdout
