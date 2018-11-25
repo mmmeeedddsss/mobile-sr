@@ -10,7 +10,7 @@ import android.widget.BaseAdapter;
 import android.widget.GridView;
 import android.widget.ImageView;
 
-//The adapter class associated with the MergedImageActivity class
+//The adapter class associated with the DivideImageActivity class
 //The reason : to adapt the bitmaps to a grid view to see that bitmap conversion accomplished
 public class ImageAdapter extends BaseAdapter {
 
