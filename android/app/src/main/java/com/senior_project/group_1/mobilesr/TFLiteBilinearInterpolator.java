@@ -18,17 +18,17 @@ public class TFLiteBilinearInterpolator implements BitmapProcessor {
 
     private static final int SIZEOF_FLOAT = 4;
 
-    private int INPUT_IMAGE_WIDTH = 512;
-    private int INPUT_IMAGE_HEIGHT = 512;
+    private int INPUT_IMAGE_WIDTH = ApplicationConstants.IMAGE_CHUNK_SIZE_X;
+    private int INPUT_IMAGE_HEIGHT = ApplicationConstants.IMAGE_CHUNK_SIZE_Y;
 
     private static final int INPUT_TENSOR_BATCH = 1;
-    private int INPUT_TENSOR_WIDTH = 1024;
-    private int INPUT_TENSOR_HEIGHT = 1024;
+    private int INPUT_TENSOR_WIDTH = INPUT_IMAGE_WIDTH * 2;
+    private int INPUT_TENSOR_HEIGHT = INPUT_IMAGE_HEIGHT * 2;
     private static final int INPUT_TENSOR_CHANNELS = 3;
 
     private static final int OUTPUT_TENSOR_BATCH = 1;
-    private int OUTPUT_TENSOR_WIDTH = 1024;
-    private int OUTPUT_TENSOR_HEIGHT = 1024;
+    private int OUTPUT_TENSOR_WIDTH = INPUT_IMAGE_WIDTH * 2;
+    private int OUTPUT_TENSOR_HEIGHT = INPUT_IMAGE_WIDTH * 2;
     private static final int OUTPUT_TENSOR_CHANNELS = 3;
 
     // the tflite interpreter
