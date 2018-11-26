@@ -159,9 +159,9 @@ public class ImageProcessingHelper {
         columns =0;
         rows = 0;
         //coordinateX and coordinateY are the pixel positions of the image chunks
-        for (int coordinateY = 0; coordinateY < scaledBitmap.getHeight(); coordinateY += chunkHeight - overlapY) {
+        for (int coordinateY = 0; coordinateY < scaledBitmap.getHeight()-overlapY; coordinateY += chunkHeight - overlapY) {
 
-            for (int coordinateX = 0; coordinateX < scaledBitmap.getWidth(); coordinateX += chunkWidth - overlapX) {
+            for (int coordinateX = 0; coordinateX < scaledBitmap.getWidth()-overlapX; coordinateX += chunkWidth - overlapX) {
                 // The rest of the bitmap's width and height is lower than the chunkwidth and chunkheight
                 if (scaledBitmap.getWidth() - coordinateX < chunkWidth && scaledBitmap.getHeight() - coordinateY < chunkHeight)
                     chunkImages.add(Bitmap.createBitmap(scaledBitmap, coordinateX, coordinateY, scaledBitmap.getWidth() - coordinateX, scaledBitmap.getHeight() - coordinateY));
