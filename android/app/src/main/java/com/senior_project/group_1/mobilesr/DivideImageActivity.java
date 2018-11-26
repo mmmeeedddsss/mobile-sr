@@ -4,11 +4,9 @@ import android.app.Activity;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.GridView;
-import android.widget.ImageView;
 
 public class DivideImageActivity extends Activity {
     private Button mergeButton;
@@ -22,16 +20,15 @@ public class DivideImageActivity extends Activity {
         mergeButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                bitmap = PreprocessAndEnhanceActivity.reconstructImage(PreprocessAndEnhanceActivity.bitmap, 100, 90, 20, 30);
+                bitmap = ImageProcessingHelper.reconstructImage();
                 Intent mergeImageIntent = new Intent(DivideImageActivity.this, MergeImageActivity.class);
                 startActivity(mergeImageIntent);
             }
         });
 
-
         //Getting the grid view and setting an adapter to it
         GridView grid = findViewById(R.id.divided_image_grid_view);
-        grid.setAdapter(new ImageAdapter(this, PreprocessAndEnhanceActivity.chunkImages));
-        grid.setNumColumns(PreprocessAndEnhanceActivity.columns);
+        grid.setAdapter(new ImageAdapter(this, ImageProcessingHelper.chunkImages));
+        grid.setNumColumns(ImageProcessingHelper.columns);
     }
 }

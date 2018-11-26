@@ -171,9 +171,7 @@ public class ZoomableImageView extends AppCompatImageView {
         if( bm != null ) {
             canvas.drawRect( 0,0, viewWidth, viewHeight, clearing_paint); // clear the canvas
             src_rect = generateSourceRectange( bm.getWidth(), bm.getHeight() ); // calculate src and dsc rects
-            Log.i("ImageView", "src_rect "+src_rect.toString());
             Rect dest_rect = generateDestinationRectange( src_rect );
-            Log.i("ImageView", "src_rect "+src_rect.toString());
             canvas.drawBitmap(bm, src_rect, dest_rect, null); // draw image
             /*
             Here, we have actually 4 rectangles,
@@ -307,7 +305,28 @@ public class ZoomableImageView extends AppCompatImageView {
      */
     public Bitmap getCurrentBitmap() {
         if( bm != null ) {
-            return Bitmap.createBitmap(bm,src_rect.left, src_rect.top, getWidth(src_rect), getHeight(src_rect));
+            // Main challenge here is selecting a sub-bitmap that fits the model constraints
+
+            // TODO add padding instead of cropping the current selection
+            // -> Integer division causes cropping, maybe increasing those divisions
+            // with proper handling might be work( also handle setImage, crop the reconstructed one )
+            int chunkCountForX = getWidth(src_rect)/ApplicationConstants.IMAGE_CHUNK_SIZE_X;
+            int chunkCountForY = getHeight(src_rect)/ApplicationConstants.IMAGE_CHUNK_SIZE_Y;
+
+            Log.i("ZoomableImageView", chunkCountForX + " - " + chunkCountForY);
+
+            if( chunkCountForX > 0 && chunkCountForY > 0 ){
+                int subselectionMiddleX = getWidth(src_rect)/2 +src_rect.left;
+                int subselectionMiddleY = getHeight(src_rect)/2 +src_rect.top;
+                Rect subselectionRect = new Rect(
+                        (subselectionMiddleX-ApplicationConstants.IMAGE_CHUNK_SIZE_X/2*chunkCountForX),
+                        (subselectionMiddleY-ApplicationConstants.IMAGE_CHUNK_SIZE_Y/2*chunkCountForY),
+                        (subselectionMiddleX+ApplicationConstants.IMAGE_CHUNK_SIZE_X/2*chunkCountForX),
+                        (subselectionMiddleY+ApplicationConstants.IMAGE_CHUNK_SIZE_Y/2*chunkCountForY));
+                Log.i("ZoomableImageView","Image is created with sizes  "+getWidth(subselectionRect)+"x"+getHeight(subselectionRect) );
+                return Bitmap.createBitmap(bm, subselectionRect.left, subselectionRect.top,
+                        getWidth(subselectionRect), getHeight(subselectionRect));
+            }
         }
         return null;
     }
