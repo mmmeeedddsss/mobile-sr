@@ -110,6 +110,7 @@ public class ImageProcessingHelper {
         BitmapProcessor bitmapProcessor;
         bitmapProcessor = new TFLiteBilinearInterpolator(requestingActivity);
         for( int i=0; i<chunkImages.size(); i++ ){
+            Log.i("Divided Image Sizes","Image sizes for image "+i+"  "+chunkImages.get(i).getWidth()+"x"+chunkImages.get(i).getHeight());
             chunkImages.set(i, bitmapProcessor.processBitmap(chunkImages.get(i)));
             // TODO parallelism can be used in here
         }
