@@ -87,7 +87,10 @@ public class ImageProcessingHelper {
     public static Bitmap reconstructImage(int chunkHeight, int chunkWidth, int overlapX, int overlapY) {
         int originalHeight = (chunkHeight-overlapY*2)*rows;
         int originalWidth = (chunkWidth-overlapX*2)*columns;
-        Bitmap bitmap = Bitmap.createBitmap(originalHeight, originalWidth, Bitmap.Config.ARGB_4444);
+        Bitmap bitmap = Bitmap.createBitmap(
+                originalHeight*ApplicationConstants.MODEL_ZOOM_FACTOR,
+                originalWidth*ApplicationConstants.MODEL_ZOOM_FACTOR,
+                Bitmap.Config.ARGB_4444);
         Canvas canvas = new Canvas(bitmap); // this constructor causes canvas opeartions to write on provided bitmap
 
         ArrayList<Bitmap> result = arrangeChunks(overlapX, overlapY); // Prepare the chunks to reassemble the image.
@@ -183,6 +186,8 @@ public class ImageProcessingHelper {
             columns++;
         }
         rows=rows/columns;
+
+        Log.i("DivideImage","Image is divided to  "+rows+"x"+columns);
     }
 
 
