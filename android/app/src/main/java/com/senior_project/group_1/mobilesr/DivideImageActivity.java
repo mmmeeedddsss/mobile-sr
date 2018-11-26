@@ -20,7 +20,7 @@ public class DivideImageActivity extends Activity {
         mergeButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                bitmap = ImageProcessingHelper.reconstructImage(PreprocessAndEnhanceActivity.bitmap);
+                bitmap = ImageProcessingHelper.reconstructImage();
                 Intent mergeImageIntent = new Intent(DivideImageActivity.this, MergeImageActivity.class);
                 startActivity(mergeImageIntent);
             }

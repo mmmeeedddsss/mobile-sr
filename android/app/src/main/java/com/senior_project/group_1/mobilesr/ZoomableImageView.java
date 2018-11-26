@@ -307,7 +307,21 @@ public class ZoomableImageView extends AppCompatImageView {
      */
     public Bitmap getCurrentBitmap() {
         if( bm != null ) {
-            return Bitmap.createBitmap(bm,src_rect.left, src_rect.top, getWidth(src_rect), getHeight(src_rect));
+            // Main challenge here is selecting a sub-bitmap that fits the model constraints
+            //TODO TEST IMPLEMENTATION, done proper implementation
+            // Currently, only a single chunk is tried to fit into the current view of the ImageView
+            if( getWidth(src_rect) > ApplicationConstants.IMAGE_CHUNK_SIZE_X &&
+                getHeight(src_rect) > ApplicationConstants.IMAGE_CHUNK_SIZE_Y ){
+                int subselectionMiddleX = getWidth(src_rect)/2 +src_rect.left;
+                int subselectionMiddleY = getHeight(src_rect)/2 +src_rect.top;
+                Rect subselectionRect = new Rect(
+                        (subselectionMiddleX-ApplicationConstants.IMAGE_CHUNK_SIZE_X/2),
+                        (subselectionMiddleY-ApplicationConstants.IMAGE_CHUNK_SIZE_Y/2),
+                        (subselectionMiddleX+ApplicationConstants.IMAGE_CHUNK_SIZE_X/2),
+                        (subselectionMiddleY+ApplicationConstants.IMAGE_CHUNK_SIZE_Y/2));
+                return Bitmap.createBitmap(bm, subselectionRect.left, subselectionRect.top,
+                        getWidth(subselectionRect), getHeight(subselectionRect));
+            }
         }
         return null;
     }
