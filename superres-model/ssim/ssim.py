@@ -4,13 +4,26 @@ import numpy as np
 # Calculate SSIM of two images
 # @params (original_image, imitation_image)
 # @ret float
+#
+# Formula is:
+#
+#               (2*mu_x*mu_y + c1)(2*sigma_xy+c2)
+# SSIM = -------------------------------------------------
+#        (mu_x^2 + mu_y^2 + c1)(sigma_x^2 + sigma_y^2 + c2)
 def calc_ssim_numpy(org, imit):
-  MAXVAL = 255
-  err = imit - org
-  sqerr = err**2
-  dim = org.shape[0]*org.shape[1]*3
-  mse = np.sum(sqerr)/dim
-  ssim = 10 * math.log10(MAXVAL**2 / mse)
+  k_1 = 0.01
+  k_2 = 0.03
+  L = 255
+  c1 = (k_1*L)**2
+  c2 = (k_2*L)**2
+  mu_x = org.mean()
+  mu_y = org.mean()
+  sigma_x2 = org.var()
+  sigma_y2 = imit.var()
+  sigma_xy = np.cov(org.flatten(), imit.flatten())[0][1]
+  nom = (2*mu_x*mu_y+c1) * (2*sigma_xy + c2)
+  denom = (mu_x**2 + mu_y**2 + c1) * (sigma_x2 + sigma_y2 + c2)
+  ssim = nom / denom
   return ssim
 
 # Calculate SSIM of two images given their file paths
@@ -38,8 +51,8 @@ def calc_ssim_bat_np(org_list, imit_list):
 
   return ssim_list
 
-# Main routine for running script
-# Cmd Line args are file paths
+# Main routine for running script
+# Cmd Line args are file paths
 # Print their SSIM to stdout
 if __name__ == '__main__':
   import sys
