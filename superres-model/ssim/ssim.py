@@ -20,7 +20,7 @@ def calc_ssim_numpy(org, imit):
   mu_y = org.mean()
   sigma_x2 = org.var()
   sigma_y2 = imit.var()
-  sigma_xy = np.cov(org.flatten(), imit.flatten())[0][1]
+  sigma_xy = np.cov(org.flatten(), imit.flatten(), bias=True)[0][1]
   nom = (2*mu_x*mu_y+c1) * (2*sigma_xy + c2)
   denom = (mu_x**2 + mu_y**2 + c1) * (sigma_x2 + sigma_y2 + c2)
   ssim = nom / denom
