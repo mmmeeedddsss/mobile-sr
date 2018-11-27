@@ -1,5 +1,6 @@
 import math
 import numpy as np
+from skimage.measure import compare_ssim
 
 # Calculate SSIM of two images
 # @params (original_image, imitation_image)
@@ -11,20 +12,7 @@ import numpy as np
 # SSIM = -------------------------------------------------
 #        (mu_x^2 + mu_y^2 + c1)(sigma_x^2 + sigma_y^2 + c2)
 def calc_ssim_numpy(org, imit):
-  k_1 = 0.01
-  k_2 = 0.03
-  L = 255
-  c1 = (k_1*L)**2
-  c2 = (k_2*L)**2
-  mu_x = org.mean()
-  mu_y = org.mean()
-  sigma_x2 = org.var()
-  sigma_y2 = imit.var()
-  sigma_xy = np.cov(org.flatten(), imit.flatten(), bias=True)[0][1]
-  nom = (2*mu_x*mu_y+c1) * (2*sigma_xy + c2)
-  denom = (mu_x**2 + mu_y**2 + c1) * (sigma_x2 + sigma_y2 + c2)
-  ssim = nom / denom
-  return ssim
+  return compare_ssim(org, imit, full=True, multichannel=True)[0]
 
 # Calculate SSIM of two images given their file paths
 # Depends on calc_ssim_numpy
