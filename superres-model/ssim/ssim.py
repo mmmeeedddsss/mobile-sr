@@ -1,23 +1,23 @@
 import math
 import numpy as np
 
-# Calculate PSNR of two images
+# Calculate SSIM of two images
 # @params (original_image, imitation_image)
 # @ret float
-def calc_psnr_numpy(org, imit):
+def calc_ssim_numpy(org, imit):
   MAXVAL = 255
   err = imit - org
   sqerr = err**2
   dim = org.shape[0]*org.shape[1]*3
   mse = np.sum(sqerr)/dim
-  psnr = 10 * math.log10(MAXVAL**2 / mse)
-  return psnr
+  ssim = 10 * math.log10(MAXVAL**2 / mse)
+  return ssim
 
-# Calculate PSNR of two images given their file paths
-# Depends on calc_psnr_numpy
+# Calculate SSIM of two images given their file paths
+# Depends on calc_ssim_numpy
 # @params (original_image_path, imitation_image_path)
 # @ret float
-def calc_psnr_file_path(org, imit):
+def calc_ssim_file_path(org, imit):
   from PIL import Image
   img1  = Image.open(org)
   img2  = Image.open(imit)
@@ -25,26 +25,26 @@ def calc_psnr_file_path(org, imit):
   img1 = np.array(img1)
   img2 = np.array(img2)
 
-  return calc_psnr_numpy(img1, img2)
+  return calc_ssim_numpy(img1, img2)
 
-# For batch processing, calculate PSNR for two lists of numpy arrays.
+# For batch processing, calculate SSIM for two lists of numpy arrays.
 # @params (original_images_list, imitation_images_list)
-# @ret list of psnr values corresponding to given args
-def calc_psnr_bat_np(org_list, imit_list):
-  psnr_list = []
+# @ret list of ssim values corresponding to given args
+def calc_ssim_bat_np(org_list, imit_list):
+  ssim_list = []
   for i in range(len(org_list)):
-    psnr = calc_psnr_numpy(org_list[i], imit_list[i])
-    psnr_list.append(psnr)
+    ssim = calc_ssim_numpy(org_list[i], imit_list[i])
+    ssim_list.append(ssim)
 
-  return psnr_list
+  return ssim_list
 
 # Main routine for running script
 # Cmd Line args are file paths
-# Print their PSNR to stdout
+# Print their SSIM to stdout
 if __name__ == '__main__':
   import sys
   if len(sys.argv) != 3:
-    print('Two image files needed. Use "python psnr.py <org_img> <other_img>"')
+    print('Two image files needed. Use "python ssim.py <org_img> <other_img>"')
     sys.exit(-1)
-  print(calc_psnr_file_path(sys.argv[1], sys.argv[2]))
+  print(calc_ssim_file_path(sys.argv[1], sys.argv[2]))
 
