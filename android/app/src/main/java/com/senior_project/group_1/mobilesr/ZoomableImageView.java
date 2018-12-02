@@ -310,24 +310,39 @@ public class ZoomableImageView extends AppCompatImageView {
             // TODO add padding instead of cropping the current selection
             // -> Integer division causes cropping, maybe increasing those divisions
             // with proper handling might be work( also handle setImage, crop the reconstructed one )
-            int chunkCountForX = getWidth(src_rect)/ApplicationConstants.IMAGE_CHUNK_SIZE_X;
-            int chunkCountForY = getHeight(src_rect)/ApplicationConstants.IMAGE_CHUNK_SIZE_Y;
+            // Overlap*(n+1)+(chunk_size-2*overlap)*n = size_y
+            // overlap + (chunk_size-overlap)*n = size_y
+            // (size_y-overlap)/(chunk_size-overlap) = n
+            // + 1 is selecting a bigger area
+            int chunkCountForX = (getWidth(src_rect)-ApplicationConstants.IMAGE_OVERLAP_X)
+                    / (ApplicationConstants.IMAGE_CHUNK_SIZE_X-ApplicationConstants.IMAGE_OVERLAP_X) + 1;
+            int chunkCountForY = (getHeight(src_rect)-ApplicationConstants.IMAGE_OVERLAP_Y)
+                    / (ApplicationConstants.IMAGE_CHUNK_SIZE_Y-ApplicationConstants.IMAGE_OVERLAP_Y) + 1;
 
             Log.i("ZoomableImageView", chunkCountForX + " - " + chunkCountForY);
 
             if( chunkCountForX > 0 && chunkCountForY > 0 ){
                 int subselectionMiddleX = getWidth(src_rect)/2 +src_rect.left;
                 int subselectionMiddleY = getHeight(src_rect)/2 +src_rect.top;
+                int subselectionWidth = chunkCountForX*(ApplicationConstants.IMAGE_CHUNK_SIZE_X-ApplicationConstants.IMAGE_OVERLAP_X)
+                        + ApplicationConstants.IMAGE_OVERLAP_X;
+                int subselectionHeight = chunkCountForY*(ApplicationConstants.IMAGE_CHUNK_SIZE_Y-ApplicationConstants.IMAGE_OVERLAP_Y)
+                        + ApplicationConstants.IMAGE_OVERLAP_Y;
                 Rect subselectionRect = new Rect(
-                        (subselectionMiddleX-ApplicationConstants.IMAGE_CHUNK_SIZE_X/2*chunkCountForX),
-                        (subselectionMiddleY-ApplicationConstants.IMAGE_CHUNK_SIZE_Y/2*chunkCountForY),
-                        (subselectionMiddleX+ApplicationConstants.IMAGE_CHUNK_SIZE_X/2*chunkCountForX),
-                        (subselectionMiddleY+ApplicationConstants.IMAGE_CHUNK_SIZE_Y/2*chunkCountForY));
+                        (subselectionMiddleX-subselectionWidth/2),
+                        (subselectionMiddleY-subselectionHeight/2),
+                        (subselectionMiddleX+( subselectionWidth%2 == 0 ? subselectionWidth : subselectionWidth + 1)),
+                        (subselectionMiddleY+( subselectionHeight%2 == 0 ? subselectionHeight : subselectionHeight + 1)));
                 Log.i("ZoomableImageView","Image is created with sizes  "+getWidth(subselectionRect)+"x"+getHeight(subselectionRect) );
-                return Bitmap.createBitmap(bm, subselectionRect.left, subselectionRect.top,
-                        getWidth(subselectionRect), getHeight(subselectionRect));
+                return createSubBitmapWithPadding( subselectionRect );
             }
         }
         return null;
+    }
+
+    private Bitmap createSubBitmapWithPadding(Rect subselectionRect) {
+        // TODO not implemented !
+        return Bitmap.createBitmap(bm, subselectionRect.left, subselectionRect.top,
+                getWidth(subselectionRect), getHeight(subselectionRect));
     }
 }
