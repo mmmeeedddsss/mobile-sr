@@ -8,6 +8,8 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.GridView;
 
+import java.util.ArrayList;
+
 public class DivideImageActivity extends Activity {
     private Button mergeButton;
     public static Bitmap bitmap;
