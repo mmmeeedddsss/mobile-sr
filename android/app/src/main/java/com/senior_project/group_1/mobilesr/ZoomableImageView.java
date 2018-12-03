@@ -355,6 +355,7 @@ public class ZoomableImageView extends AppCompatImageView {
             return Bitmap.createBitmap(bm, subselectionRect.left, subselectionRect.top,
                     getWidth(subselectionRect), getHeight(subselectionRect));
         else {
+
             int originalWidth = bm.getWidth();
             int originalHeight = bm.getHeight();
             ByteArrayOutputStream stream = new ByteArrayOutputStream();
