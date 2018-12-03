@@ -10,6 +10,7 @@ import android.support.v7.widget.AppCompatImageView;
 import android.util.AttributeSet;
 import android.util.Log;
 import android.view.MotionEvent;
+import android.widget.Toast;
 
 import java.io.ByteArrayOutputStream;
 import java.nio.ByteBuffer;
@@ -61,7 +62,7 @@ public class ZoomableImageView extends AppCompatImageView {
         zoom_factor = 1;
         current_pointer_count = 0;
 
-        this.bm = bm;
+        this.bm = bm.copy(Bitmap.Config.ARGB_8888, true);;
 
         center_of_zoom_x = bm.getWidth()/2;
         center_of_zoom_y = bm.getHeight()/2;
@@ -331,12 +332,13 @@ public class ZoomableImageView extends AppCompatImageView {
                         + ApplicationConstants.IMAGE_OVERLAP_X;
                 int subselectionHeight = chunkCountForY*(ApplicationConstants.IMAGE_CHUNK_SIZE_Y-ApplicationConstants.IMAGE_OVERLAP_Y)
                         + ApplicationConstants.IMAGE_OVERLAP_Y;
+                Log.i("ZoomableImageView", String.format(" subselection w:%d h:%d ", subselectionWidth, subselectionHeight));
                 Rect subselectionRect = new Rect(
                         (subselectionMiddleX-subselectionWidth/2),
                         (subselectionMiddleY-subselectionHeight/2),
-                        (subselectionMiddleX+( subselectionWidth%2 == 0 ? subselectionWidth : subselectionWidth + 1)),
-                        (subselectionMiddleY+( subselectionHeight%2 == 0 ? subselectionHeight : subselectionHeight + 1)));
-                Log.i("ZoomableImageView","Image is created with sizes  "+getWidth(subselectionRect)+"x"+getHeight(subselectionRect) );
+                        (subselectionMiddleX+( subselectionWidth%2 == 0 ? subselectionWidth/2 : subselectionWidth/2 + 1)),
+                        (subselectionMiddleY+( subselectionHeight%2 == 0 ? subselectionHeight/2 : subselectionHeight/2 + 1)));
+                Log.i("ZoomableImageView","Selected a subrectangle with sizes: "+getWidth(subselectionRect)+"x"+getHeight(subselectionRect) );
                 return createSubBitmapWithPadding( subselectionRect );
             }
         }
@@ -356,17 +358,16 @@ public class ZoomableImageView extends AppCompatImageView {
                     getWidth(subselectionRect), getHeight(subselectionRect));
         else {
 
+            long startTime = System.nanoTime();
+
             int originalWidth = bm.getWidth();
             int originalHeight = bm.getHeight();
-            ByteArrayOutputStream stream = new ByteArrayOutputStream();
-            bm.compress(Bitmap.CompressFormat.PNG, 100, stream); // TODO its said that that op. so slow
-            byte[] byteArray = stream.toByteArray();
-            byte[] newByteArray = new byte[ getWidth(subselectionRect)*getHeight(subselectionRect) ];
+            int[] pixelArray = new int[ originalHeight*originalWidth ];
+            bm.getPixels(pixelArray, 0, bm.getWidth(), 0, 0, bm.getWidth(), bm.getHeight());
+            int[] newPixelArray = new int[ getWidth(subselectionRect)*getHeight(subselectionRect) ];
 
             // https://stackoverflow.com/questions/4989182/converting-java-bitmap-to-byte-array
 
-            int dx = - subselectionRect.left + originalBmRect.left;
-            int dy = - subselectionRect.top + originalBmRect.top;
             for( int y=0; y<getHeight(subselectionRect); y++ )
             {
                 for( int x=0; x<getWidth(subselectionRect); x++ )
@@ -374,21 +375,23 @@ public class ZoomableImageView extends AppCompatImageView {
                     int px = x + subselectionRect.left;
                     int py = y + subselectionRect.top;
                     if( originalBmRect.contains( px, py) )
-                        newByteArray[ x + y*getWidth(subselectionRect) ] = byteArray[ px + py*originalWidth ];
+                        newPixelArray[ x + y*getWidth(subselectionRect) ] = pixelArray[ px + py*originalWidth ];
                     else
                     {
-                        if( px <= originalBmRect.left ) px = px + dx;
-                        else if( px >= originalBmRect.right ) px = px - dx;
-                        if( py <= originalBmRect.top ) py = py + dy;
-                        else if( py >= originalBmRect.bottom  ) py = py - dy;
-                        newByteArray[ x + y*getWidth(subselectionRect) ] = byteArray[ px*py ];
+                        // Reflecting
+                        if( px < 0 ) px = -px;
+                        else if( px >= originalWidth ) px = px - 2*( px - originalWidth ) - 1; // minus 1 for bounds
+                        if( py < 0 ) py = -py;
+                        else if( py >= originalBmRect.bottom  ) py = py - 2*( py - originalHeight ) - 1; // minus 1 for bounds
+                        //Log.i("ZoomableImageView", "x,y -> "+x+":"+y+"  px,py -> "+px+","+py);
+                        newPixelArray[ x + y*getWidth(subselectionRect) ] = pixelArray[ px + py*originalWidth ];
                     }
                 }
             }
-            Bitmap.Config configBmp = Bitmap.Config.valueOf(bm.getConfig().name());
-            Bitmap new_bm = Bitmap.createBitmap(getWidth(subselectionRect), getHeight(subselectionRect), configBmp);
-            ByteBuffer buffer = ByteBuffer.wrap(newByteArray);
-            new_bm.copyPixelsFromBuffer(buffer);
+            Bitmap new_bm = Bitmap.createBitmap(newPixelArray, getWidth(subselectionRect), getHeight(subselectionRect), Bitmap.Config.ARGB_8888);
+
+            long estimatedTime = System.nanoTime() - startTime;
+            Toast.makeText(getContext(), "Elapsed Time in ms for reflection: " + estimatedTime / 1000000, Toast.LENGTH_LONG).show();
             return new_bm;
         }
     }
