@@ -88,7 +88,7 @@ public class ImageProcessingHelper {
     public static ArrayList<Bitmap> prepareChunks(int chunkHeight, int chunkWidth, int overlapX, int overlapY) {
         ArrayList<Bitmap> result = new ArrayList<>();
         for(int i=0; i<chunkImages.size(); i++) {
-            result.add(Bitmap.createBitmap(chunkImages.get(i), overlapX/ApplicationConstants.MODEL_ZOOM_FACTOR, overlapY/ApplicationConstants.MODEL_ZOOM_FACTOR, chunkWidth-overlapX, chunkHeight-overlapY));
+            result.add(Bitmap.createBitmap(chunkImages.get(i), overlapX*2, overlapY*2, (chunkWidth-overlapX*2)*2, (chunkHeight-overlapY*2)*2));
         }
         return result;
     }
@@ -102,11 +102,11 @@ public class ImageProcessingHelper {
      * @return bitmap.
      */
     public static Bitmap reconstructImage(int chunkHeight, int chunkWidth, int overlapX, int overlapY) {
-        int originalHeight = (chunkHeight-overlapY)*rows;
-        int originalWidth = (chunkWidth-overlapX)*columns;
+        int originalHeight = (chunkHeight-overlapX*2)*rows;
+        int originalWidth = (chunkWidth-overlapY*2)*columns;
         Bitmap bitmap = Bitmap.createBitmap(
-                originalHeight*ApplicationConstants.MODEL_ZOOM_FACTOR,
                 originalWidth*ApplicationConstants.MODEL_ZOOM_FACTOR,
+                originalHeight*ApplicationConstants.MODEL_ZOOM_FACTOR,
                 Bitmap.Config.ARGB_4444);
         Canvas canvas = new Canvas(bitmap); // this constructor causes canvas operations to write on provided bitmap
 
@@ -168,9 +168,9 @@ public class ImageProcessingHelper {
             columns =0;
             rows = 0;
             //coordinateX and coordinateY are the pixel positions of the image chunks
-            for (int coordinateY = 0; coordinateY < scaledBitmap.getHeight()-chunkHeight; coordinateY += chunkHeight - overlapY) {
+            for (int coordinateY = 0; coordinateY <= scaledBitmap.getHeight()-chunkHeight; coordinateY += chunkHeight - overlapY*2) {
 
-                for (int coordinateX = 0; coordinateX < scaledBitmap.getWidth()-chunkWidth; coordinateX += chunkWidth - overlapX) {
+                for (int coordinateX = 0; coordinateX <= scaledBitmap.getWidth()-chunkWidth; coordinateX += chunkWidth - overlapX*2) {
                     chunkImages.add(Bitmap.createBitmap(scaledBitmap, coordinateX, coordinateY, chunkWidth, chunkHeight));
                     rows++;
 
