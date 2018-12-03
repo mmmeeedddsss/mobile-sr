@@ -319,9 +319,6 @@ public class ZoomableImageView extends AppCompatImageView {
             // (size_y-overlap)/(chunk_size-overlap) = n
             // + 1 is selecting a bigger area
 
-            src_rect.left -= ApplicationConstants.IMAGE_OVERLAP_X;
-            src_rect.top -= ApplicationConstants.IMAGE_OVERLAP_Y;
-
 
             int chunkCountForX = (getWidth(src_rect)-ApplicationConstants.IMAGE_OVERLAP_X*2)
                     / (ApplicationConstants.IMAGE_CHUNK_SIZE_X-ApplicationConstants.IMAGE_OVERLAP_X*2) + 1;
