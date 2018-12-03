@@ -65,7 +65,7 @@ public class PreprocessAndEnhanceActivity extends AppCompatActivity {
     public void processImage() {
         if (bitmap != null) {
             long startTime = System.nanoTime();
-            Log.i("processImage", String.format("Bitmap size: %d %d", bitmap.getHeight(), bitmap.getWidth()));
+            Log.i("processImage", String.format("Bitmap size: %d %d", bitmap.getWidth(), bitmap.getHeight()));
 
             ImageProcessingHelper.divideImage(imageView.getCurrentBitmap());
             ImageProcessingHelper.processImages(this);

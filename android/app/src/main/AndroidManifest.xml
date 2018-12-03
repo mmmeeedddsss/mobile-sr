@@ -20,7 +20,6 @@
             </intent-filter>
         </activity>
         <activity android:name="com.senior_project.group_1.mobilesr.PreprocessAndEnhanceActivity"></activity>
-        <activity android:name="com.senior_project.group_1.mobilesr.TakePhotoActivity"></activity>
         <activity android:name="com.senior_project.group_1.mobilesr.TutorialActivity"></activity>
         <activity android:name="com.senior_project.group_1.mobilesr.DivideImageActivity"></activity>
         <activity android:name="com.senior_project.group_1.mobilesr.MergeImageActivity"></activity>

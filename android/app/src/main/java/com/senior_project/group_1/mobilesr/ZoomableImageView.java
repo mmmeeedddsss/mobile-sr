@@ -10,6 +10,10 @@ import android.support.v7.widget.AppCompatImageView;
 import android.util.AttributeSet;
 import android.util.Log;
 import android.view.MotionEvent;
+import android.widget.Toast;
+
+import java.io.ByteArrayOutputStream;
+import java.nio.ByteBuffer;
 
 import static java.lang.Math.abs;
 import static java.lang.Math.max;
@@ -58,7 +62,7 @@ public class ZoomableImageView extends AppCompatImageView {
         zoom_factor = 1;
         current_pointer_count = 0;
 
-        this.bm = bm;
+        this.bm = bm.copy(Bitmap.Config.ARGB_8888, true);;
 
         center_of_zoom_x = bm.getWidth()/2;
         center_of_zoom_y = bm.getHeight()/2;
@@ -310,24 +314,88 @@ public class ZoomableImageView extends AppCompatImageView {
             // TODO add padding instead of cropping the current selection
             // -> Integer division causes cropping, maybe increasing those divisions
             // with proper handling might be work( also handle setImage, crop the reconstructed one )
-            int chunkCountForX = getWidth(src_rect)/ApplicationConstants.IMAGE_CHUNK_SIZE_X;
-            int chunkCountForY = getHeight(src_rect)/ApplicationConstants.IMAGE_CHUNK_SIZE_Y;
+            // Overlap*(n+1)+(chunk_size-2*overlap)*n = size_y
+            // overlap + (chunk_size-overlap)*n = size_y
+            // (size_y-overlap)/(chunk_size-overlap) = n
+            // + 1 is selecting a bigger area
+
+            src_rect.left -= ApplicationConstants.IMAGE_OVERLAP_X;
+            src_rect.top -= ApplicationConstants.IMAGE_OVERLAP_Y;
+
+
+            int chunkCountForX = (getWidth(src_rect)-ApplicationConstants.IMAGE_OVERLAP_X*2)
+                    / (ApplicationConstants.IMAGE_CHUNK_SIZE_X-ApplicationConstants.IMAGE_OVERLAP_X*2) + 1;
+            int chunkCountForY = (getHeight(src_rect)-ApplicationConstants.IMAGE_OVERLAP_Y*2)
+                    / (ApplicationConstants.IMAGE_CHUNK_SIZE_Y-ApplicationConstants.IMAGE_OVERLAP_Y*2) + 1;
 
             Log.i("ZoomableImageView", chunkCountForX + " - " + chunkCountForY);
 
             if( chunkCountForX > 0 && chunkCountForY > 0 ){
-                int subselectionMiddleX = getWidth(src_rect)/2 +src_rect.left;
-                int subselectionMiddleY = getHeight(src_rect)/2 +src_rect.top;
+                int subselectionMiddleX = getWidth(src_rect)/2 + src_rect.left;
+                int subselectionMiddleY = getHeight(src_rect)/2 + src_rect.top;
+                int subselectionWidth = chunkCountForX*(ApplicationConstants.IMAGE_CHUNK_SIZE_X-ApplicationConstants.IMAGE_OVERLAP_X*2)
+                        + ApplicationConstants.IMAGE_OVERLAP_X*2;
+                int subselectionHeight = chunkCountForY*(ApplicationConstants.IMAGE_CHUNK_SIZE_Y-ApplicationConstants.IMAGE_OVERLAP_Y*2)
+                        + ApplicationConstants.IMAGE_OVERLAP_Y*2;
+                Log.i("ZoomableImageView", String.format(" subselection w:%d h:%d ", subselectionWidth, subselectionHeight));
                 Rect subselectionRect = new Rect(
-                        (subselectionMiddleX-ApplicationConstants.IMAGE_CHUNK_SIZE_X/2*chunkCountForX),
-                        (subselectionMiddleY-ApplicationConstants.IMAGE_CHUNK_SIZE_Y/2*chunkCountForY),
-                        (subselectionMiddleX+ApplicationConstants.IMAGE_CHUNK_SIZE_X/2*chunkCountForX),
-                        (subselectionMiddleY+ApplicationConstants.IMAGE_CHUNK_SIZE_Y/2*chunkCountForY));
-                Log.i("ZoomableImageView","Image is created with sizes  "+getWidth(subselectionRect)+"x"+getHeight(subselectionRect) );
-                return Bitmap.createBitmap(bm, subselectionRect.left, subselectionRect.top,
-                        getWidth(subselectionRect), getHeight(subselectionRect));
+                        (subselectionMiddleX-subselectionWidth/2),
+                        (subselectionMiddleY-subselectionHeight/2),
+                        (subselectionMiddleX+( subselectionWidth%2 == 0 ? subselectionWidth/2 : subselectionWidth/2 + 1)),
+                        (subselectionMiddleY+( subselectionHeight%2 == 0 ? subselectionHeight/2 : subselectionHeight/2 + 1)));
+                Log.i("ZoomableImageView","Selected a subrectangle with sizes: "+getWidth(subselectionRect)+"x"+getHeight(subselectionRect) );
+                return createSubBitmapWithPadding( subselectionRect );
             }
         }
         return null;
+    }
+
+    Rect getBitmapRect( Bitmap bm )
+    {
+        return new Rect(0,0,bm.getWidth(), bm.getHeight());
+    }
+
+    private Bitmap createSubBitmapWithPadding(Rect subselectionRect) {
+
+        Rect originalBmRect = getBitmapRect(bm);
+        if( originalBmRect.contains(subselectionRect) )
+            return Bitmap.createBitmap(bm, subselectionRect.left, subselectionRect.top,
+                    getWidth(subselectionRect), getHeight(subselectionRect));
+        else {
+
+            long startTime = System.nanoTime();
+
+            int originalWidth = bm.getWidth();
+            int originalHeight = bm.getHeight();
+            int[] pixelArray = new int[ originalHeight*originalWidth ];
+            bm.getPixels(pixelArray, 0, bm.getWidth(), 0, 0, bm.getWidth(), bm.getHeight());
+            int[] newPixelArray = new int[ getWidth(subselectionRect)*getHeight(subselectionRect) ];
+
+            for( int y=0; y<getHeight(subselectionRect); y++ )
+            {
+                for( int x=0; x<getWidth(subselectionRect); x++ )
+                {
+                    int px = x + subselectionRect.left;
+                    int py = y + subselectionRect.top;
+                    if( originalBmRect.contains( px, py) )
+                        newPixelArray[ x + y*getWidth(subselectionRect) ] = pixelArray[ px + py*originalWidth ];
+                    else
+                    {
+                        // Reflecting
+                        if( px < 0 ) px = -px;
+                        else if( px >= originalWidth ) px = px - 2*( px - originalWidth ) - 1; // minus 1 for bounds
+                        if( py < 0 ) py = -py;
+                        else if( py >= originalBmRect.bottom  ) py = py - 2*( py - originalHeight ) - 1; // minus 1 for bounds
+                        //Log.i("ZoomableImageView", "x,y -> "+x+":"+y+"  px,py -> "+px+","+py);
+                        newPixelArray[ x + y*getWidth(subselectionRect) ] = pixelArray[ px + py*originalWidth ];
+                    }
+                }
+            }
+            Bitmap new_bm = Bitmap.createBitmap(newPixelArray, getWidth(subselectionRect), getHeight(subselectionRect), Bitmap.Config.ARGB_8888);
+
+            long estimatedTime = System.nanoTime() - startTime;
+            Toast.makeText(getContext(), "Elapsed Time in ms for reflection: " + estimatedTime / 1000000, Toast.LENGTH_LONG).show();
+            return new_bm;
+        }
     }
 }
