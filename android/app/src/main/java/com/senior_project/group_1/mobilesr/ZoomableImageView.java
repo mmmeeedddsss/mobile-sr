@@ -12,6 +12,7 @@ import android.util.Log;
 import android.view.MotionEvent;
 
 import java.io.ByteArrayOutputStream;
+import java.nio.ByteBuffer;
 
 import static java.lang.Math.abs;
 import static java.lang.Math.max;
@@ -369,16 +370,25 @@ public class ZoomableImageView extends AppCompatImageView {
             {
                 for( int x=0; x<getWidth(subselectionRect); x++ )
                 {
-                    if( originalBmRect.contains( x + subselectionRect.left, y + subselectionRect.top) )
-                        newByteArray[ x + y*getWidth(subselectionRect) ] = byteArray[ (x-dx) + (y-dy)*originalWidth ];
+                    int px = x + subselectionRect.left;
+                    int py = y + subselectionRect.top;
+                    if( originalBmRect.contains( px, py) )
+                        newByteArray[ x + y*getWidth(subselectionRect) ] = byteArray[ px + py*originalWidth ];
                     else
                     {
-
-                        newByteArray[ x + y*getWidth(subselectionRect) ] =
+                        if( px <= originalBmRect.left ) px = px + dx;
+                        else if( px >= originalBmRect.right ) px = px - dx;
+                        if( py <= originalBmRect.top ) py = py + dy;
+                        else if( py >= originalBmRect.bottom  ) py = py - dy;
+                        newByteArray[ x + y*getWidth(subselectionRect) ] = byteArray[ px*py ];
                     }
                 }
             }
+            Bitmap.Config configBmp = Bitmap.Config.valueOf(bm.getConfig().name());
+            Bitmap new_bm = Bitmap.createBitmap(getWidth(subselectionRect), getHeight(subselectionRect), configBmp);
+            ByteBuffer buffer = ByteBuffer.wrap(newByteArray);
+            new_bm.copyPixelsFromBuffer(buffer);
+            return new_bm;
         }
-        return null;
     }
 }
