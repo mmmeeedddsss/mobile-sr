@@ -11,6 +11,8 @@ import android.util.AttributeSet;
 import android.util.Log;
 import android.view.MotionEvent;
 
+import java.io.ByteArrayOutputStream;
+
 import static java.lang.Math.abs;
 import static java.lang.Math.max;
 import static java.lang.Math.min;
@@ -340,9 +342,43 @@ public class ZoomableImageView extends AppCompatImageView {
         return null;
     }
 
+    Rect getBitmapRect( Bitmap bm )
+    {
+        return new Rect(0,0,bm.getWidth(), bm.getHeight());
+    }
+
     private Bitmap createSubBitmapWithPadding(Rect subselectionRect) {
-        // TODO not implemented !
-        return Bitmap.createBitmap(bm, subselectionRect.left, subselectionRect.top,
-                getWidth(subselectionRect), getHeight(subselectionRect));
+
+        Rect originalBmRect = getBitmapRect(bm);
+        if( originalBmRect.contains(subselectionRect) )
+            return Bitmap.createBitmap(bm, subselectionRect.left, subselectionRect.top,
+                    getWidth(subselectionRect), getHeight(subselectionRect));
+        else {
+            int originalWidth = bm.getWidth();
+            int originalHeight = bm.getHeight();
+            ByteArrayOutputStream stream = new ByteArrayOutputStream();
+            bm.compress(Bitmap.CompressFormat.PNG, 100, stream); // TODO its said that that op. so slow
+            byte[] byteArray = stream.toByteArray();
+            byte[] newByteArray = new byte[ getWidth(subselectionRect)*getHeight(subselectionRect) ];
+
+            // https://stackoverflow.com/questions/4989182/converting-java-bitmap-to-byte-array
+
+            int dx = - subselectionRect.left + originalBmRect.left;
+            int dy = - subselectionRect.top + originalBmRect.top;
+            for( int y=0; y<getHeight(subselectionRect); y++ )
+            {
+                for( int x=0; x<getWidth(subselectionRect); x++ )
+                {
+                    if( originalBmRect.contains( x + subselectionRect.left, y + subselectionRect.top) )
+                        newByteArray[ x + y*getWidth(subselectionRect) ] = byteArray[ (x-dx) + (y-dy)*originalWidth ];
+                    else
+                    {
+
+                        newByteArray[ x + y*getWidth(subselectionRect) ] =
+                    }
+                }
+            }
+        }
+        return null;
     }
 }
