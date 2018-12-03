@@ -157,7 +157,7 @@ public class ImageProcessingHelper {
             throw new RuntimeException();
 
         // Check that image width and height is divisible by the chunk values and overlap
-        if (scaledBitmap.getHeight() % (chunkHeight - overlapY) != 0 || scaledBitmap.getWidth() % (chunkWidth - overlapX) != 0) {
+        if ((scaledBitmap.getHeight()-overlapY*2) % (chunkHeight - overlapY*2) != 0 || (scaledBitmap.getWidth()-overlapX*2) % (chunkWidth - overlapX*2) != 0) {
             Log.i("ImageCheck(): ", String.format("Bitmap size: %d %d", scaledBitmap.getHeight(), scaledBitmap.getWidth()));
             throw new RuntimeException();
 
