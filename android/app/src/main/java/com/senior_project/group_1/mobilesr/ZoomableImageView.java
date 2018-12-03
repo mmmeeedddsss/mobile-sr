@@ -366,8 +366,6 @@ public class ZoomableImageView extends AppCompatImageView {
             bm.getPixels(pixelArray, 0, bm.getWidth(), 0, 0, bm.getWidth(), bm.getHeight());
             int[] newPixelArray = new int[ getWidth(subselectionRect)*getHeight(subselectionRect) ];
 
-            // https://stackoverflow.com/questions/4989182/converting-java-bitmap-to-byte-array
-
             for( int y=0; y<getHeight(subselectionRect); y++ )
             {
                 for( int x=0; x<getWidth(subselectionRect); x++ )
