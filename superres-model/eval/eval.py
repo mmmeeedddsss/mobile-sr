@@ -4,6 +4,7 @@ import numpy as np
 import sys
 import subprocess
 import psnr
+import ssim
 datasets = ['Set5', 'Set14', 'BSDS100']
 set5_range = (1, 6)
 set14_range = (1, 15)
@@ -77,9 +78,39 @@ def calc_psnr_values(path, set5_flag=True, set14_flag=True, bsd100_flag=True):
     result.append(bsd100_mean)
   return result
 
+def calc_ssim_values(path, set5_flag=True, set14_flag=True, bsd100_flag=True):
+  set5_path, set14_path, bsd100_path = dataset_paths(path)
+  result = []
+  if set5_flag:
+    set5_sum = []
+    for i in range(*set5_range):
+      set5_sum.append(\
+        ssim.calc_ssim_file_path(set5_path+'{}.png'.format(i),\
+                                 set5_path+'{}_LR_interp.png'.format(i)))
+    set5_mean = np.mean(set5_sum)
+    result.append(set5_mean)
+  if set14_flag:
+    set14_sum = []
+    for i in range(*set14_range):
+      set14_sum.append(\
+        ssim.calc_ssim_file_path(set14_path+'{}.png'.format(i),\
+                                 set14_path+'{}_LR_interp.png'.format(i)))
+    set14_mean = np.mean(set14_sum)
+    result.append(set14_mean)
+  if bsd100_flag:
+    bsd100_sum = []
+    for i in range(*bsd100_range):
+      bsd100_sum.append(\
+        ssim.calc_ssim_file_path(bsd100_path+'{}.png'.format(i),\
+                                 bsd100_path+'{}_LR_interp.png'.format(i)))
+    bsd100_mean = np.mean(bsd100_sum)
+    result.append(bsd100_mean)
+  return result
+
 if __name__ == '__main__':
   path = sys.argv[1]
   #create_low_res(path)
   #apply_SR(path)
-  print(calc_psnr_values(path))
+  #print(calc_psnr_values(path))
+  print(calc_ssim_values(path))
 
