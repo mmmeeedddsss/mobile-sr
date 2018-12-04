@@ -120,6 +120,9 @@ def parse_arguments():
     parser.add_argument(
         '-m', 
         help='if specified, calculate only METRIC values(psnr/ssim)')
+    parser.add_argument(
+        '-c',
+        help='compare with file')
     args = parser.parse_args()
     if not args.dataset_path:
         print('error: dataset path have to be specified')
@@ -147,6 +150,15 @@ if __name__ == '__main__':
         f.write(psnr_line + '\n')
       if not args.m == 'psnr':
         f.write(ssim_line + '\n')
+  elif args.c:
+    with open(args.c, 'r') as f:
+      content = f.readlines()
+      psnr = content[1].split()[1:]
+      ssim = content[2].split()[1:]
+      print('old:\t' + '\t'.join(psnr))
+      print(psnr_line)
+      print('old:\t' + '\t'.join(ssim))
+      print(ssim_line)
   else:
     print(header)
     if not args.m == 'ssim':
