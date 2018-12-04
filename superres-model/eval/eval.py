@@ -113,7 +113,10 @@ def parse_arguments():
     parser = ArgumentParser()
     parser.add_argument(
         'dataset_path',
-        help='path to datasets root',)
+        help='path to datasets root')
+    parser.add_argument(
+        '-o',
+        help='save the output to file')
     parser.add_argument(
         '-m', 
         help='if specified, calculate only METRIC values(psnr/ssim)')
@@ -127,12 +130,26 @@ if __name__ == '__main__':
   args = parse_arguments()
   #create_low_res(path)
   #apply_SR(path)
-  print('\t{}\t{}\t{}'.format('Set5', 'Set14', 'BSD100'))
+
+  header = '\t{}\t{}\t{}'.format('Set5', 'Set14', 'BSD100')
   if not args.m == 'ssim':
     psnr = calc_psnr_values(args.dataset_path)
-    print('PSNR:\t{:.2f}\t{:.2f}\t{:.2f}'.format(psnr[0], psnr[1], psnr[2]))
+    psnr_line = 'PSNR:\t{:.2f}\t{:.2f}\t{:.2f}'.format(psnr[0], psnr[1], psnr[2])
 
   if not args.m == 'psnr':
     ssim = calc_ssim_values(args.dataset_path)
-    print('SSIM:\t{:.2f}\t{:.2f}\t{:.2f}'.format(ssim[0], ssim[1], ssim[2]))
+    ssim_line = 'SSIM:\t{:.2f}\t{:.2f}\t{:.2f}'.format(ssim[0], ssim[1], ssim[2])
 
+  if args.o:
+    with open(args.o, 'w') as f:
+      f.write(header + '\n')
+      if not args.m == 'ssim':
+        f.write(psnr_line + '\n')
+      if not args.m == 'psnr':
+        f.write(ssim_line + '\n')
+  else:
+    print(header)
+    if not args.m == 'ssim':
+      print(psnr_line)
+    if not args.m == 'psnr':
+      print(ssim_line)
