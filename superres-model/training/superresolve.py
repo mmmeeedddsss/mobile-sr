@@ -28,7 +28,7 @@ def parse_arguments():
 
 def extend_filename(file_path, extra):
     # add an extra to the file name, such as _interp
-    left, extension = file_path.rsplit('.')
+    left, extension = file_path.rsplit('.', 1)
     return left + extra + '.' + extension
 
 
