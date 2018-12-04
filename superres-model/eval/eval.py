@@ -127,8 +127,12 @@ if __name__ == '__main__':
   args = parse_arguments()
   #create_low_res(path)
   #apply_SR(path)
+  print('\t{}\t{}\t{}'.format('Set5', 'Set14', 'BSD100'))
   if not args.m == 'ssim':
-    print(calc_psnr_values(args.dataset_path))
+    psnr = calc_psnr_values(args.dataset_path)
+    print('PSNR:\t{:.2f}\t{:.2f}\t{:.2f}'.format(psnr[0], psnr[1], psnr[2]))
+
   if not args.m == 'psnr':
-    print(calc_ssim_values(args.dataset_path))
+    ssim = calc_ssim_values(args.dataset_path)
+    print('SSIM:\t{:.2f}\t{:.2f}\t{:.2f}'.format(ssim[0], ssim[1], ssim[2]))
 
