@@ -22,6 +22,9 @@ def cmd_for_downscale(file_path):
   cmd = 'convert ' + file_path + ' -scale 50% ' + new_path
   return cmd
 
+# create images in Low-Resolution domain, takes datasets root path as arg
+# and individual flags for separate datasets
+# creates them by 2x downscaling
 def create_low_res(path, set5_flag=True, set14_flag=True, bsd100_flag=True):
   set5_path, set14_path, bsd100_path = dataset_paths(path)
   if set5_flag:
@@ -38,6 +41,9 @@ def cmd_for_SR(file_path):
   cmd = 'python bilinear.py {}'.format(file_path)
   return cmd
 
+# apply super resolution to images in the Low-Resolution domain
+# takes the datasets root path as argument
+# and optional flags for individual datasets
 def apply_SR(path, set5_flag=True, set14_flag=True, bsd100_flag=True):
   set5_path, set14_path, bsd100_path = dataset_paths(path)
   if set5_flag:
@@ -50,6 +56,9 @@ def apply_SR(path, set5_flag=True, set14_flag=True, bsd100_flag=True):
     for i in range(*bsd100_range):
       subprocess.call(cmd_for_SR(bsd100_path+'{}_LR.png'.format(i)), shell=True)
   
+# calculates psnr values given the dataset root path
+# and also optional individual flags for separate datasets
+# returns a list including values
 def calc_psnr_values(path, set5_flag=True, set14_flag=True, bsd100_flag=True):
   set5_path, set14_path, bsd100_path = dataset_paths(path)
   result = []
@@ -79,6 +88,9 @@ def calc_psnr_values(path, set5_flag=True, set14_flag=True, bsd100_flag=True):
     result.append(bsd100_mean)
   return result
 
+# calculates ssim values given the dataset root path
+# and also optional individual flags for separate datasets
+# returns a list including values
 def calc_ssim_values(path, set5_flag=True, set14_flag=True, bsd100_flag=True):
   set5_path, set14_path, bsd100_path = dataset_paths(path)
   result = []
