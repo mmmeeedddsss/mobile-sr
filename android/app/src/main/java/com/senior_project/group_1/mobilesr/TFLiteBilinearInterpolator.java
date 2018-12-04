@@ -14,7 +14,7 @@ import java.nio.ByteOrder;
 
 // Class representing the bilinear interpolator built for TFLite.
 public class TFLiteBilinearInterpolator implements BitmapProcessor {
-    private static final String MODEL_PATH = "bilinear512_conv.tflite";
+    private static final String MODEL_PATH = "basic_srcnn_64.tflite";
 
     private static final int SIZEOF_FLOAT = 4;
 
@@ -22,8 +22,8 @@ public class TFLiteBilinearInterpolator implements BitmapProcessor {
     private int INPUT_IMAGE_HEIGHT = ApplicationConstants.IMAGE_CHUNK_SIZE_Y;
 
     private static final int INPUT_TENSOR_BATCH = 1;
-    private int INPUT_TENSOR_WIDTH = INPUT_IMAGE_WIDTH * 2;
-    private int INPUT_TENSOR_HEIGHT = INPUT_IMAGE_HEIGHT * 2;
+    private int INPUT_TENSOR_WIDTH = INPUT_IMAGE_WIDTH;
+    private int INPUT_TENSOR_HEIGHT = INPUT_IMAGE_HEIGHT;
     private static final int INPUT_TENSOR_CHANNELS = 3;
 
     private static final int OUTPUT_TENSOR_BATCH = 1;
@@ -43,7 +43,7 @@ public class TFLiteBilinearInterpolator implements BitmapProcessor {
 
     public TFLiteBilinearInterpolator(Activity creatingActivity) {
         interpreter = new Interpreter(loadModelFile(creatingActivity));
-        interpreter.setUseNNAPI(true);
+        // interpreter.setUseNNAPI(true);
         reallocBuffers();
     }
 
@@ -135,28 +135,10 @@ public class TFLiteBilinearInterpolator implements BitmapProcessor {
         // reset the buffer
         inputImageData.rewind();
         // insert the data into the buffer
-        // this is the old, proper style
-        /*
         for(int color : inputImagePixels) {
             inputImageData.putFloat(Color.red(color));
             inputImageData.putFloat(Color.green(color));
             inputImageData.putFloat(Color.blue(color));
-        }
-        */
-        // now, we have to add zero padding since we use conv. for interpolation
-        for(int i = 0; i < INPUT_IMAGE_HEIGHT; ++i) {
-            for(int j = 0; j < INPUT_IMAGE_WIDTH; ++j) {
-                // insert a pixel
-                int color = inputImagePixels[i*INPUT_IMAGE_WIDTH+j];
-                inputImageData.putFloat(Color.red(color));
-                inputImageData.putFloat(Color.green(color));
-                inputImageData.putFloat(Color.blue(color));
-                // insert a zero pixel
-                putFloats(inputImageData, 0.0f, 3);
-            }
-            // insert a full zero row
-            for(int j = 0; j < INPUT_IMAGE_WIDTH; ++j)
-                putFloats(inputImageData, 0.0f, 6);
         }
     }
 
