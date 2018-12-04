@@ -62,7 +62,7 @@ def create_data_loader(input_files, batch_size, num_epochs, opts):
     return lambda: itr.get_next()
 
 
-def wrap_model(data_loader, model, loss, optimizer):
+def wrap_model(data_loader, model, loss, optimizer, opts):
     # create global step
     global_step = tf.train.create_global_step()
     # load the data batches
@@ -75,18 +75,31 @@ def wrap_model(data_loader, model, loss, optimizer):
     output_hr_batch = tf.identity(output_hr_batch, name='output_image')
     # get the losses through the input & output HR images
     losses = loss(input_hr_batch, output_hr_batch)
+    
+    # add summaries for interesting variables
+    tf.summary.scalar('loss', losses) # summary for the loss
+    tf.summary.image('lr_patch', input_lr_batch) # summary for the input LR
+    tf.summary.image('hr_batch', input_hr_batch) # summary for the input HR
+    tf.summary.image('output_batch', output_hr_batch) # summary for the output HR batch
+    # also summarize trained weights as histograms
+    if opts['summarize_weights']:
+        for var in tf.trainable_variables():
+            tf.summary.histogram(var)
+    # merge summaries
+    merged_summary = tf.summary.merge_all()
+
     # insert control dependencies and optimize the loss
     with tf.control_dependencies(tf.get_collection(tf.GraphKeys.UPDATE_OPS)):
         train_op = optimizer.minimize(losses, global_step=global_step)
     # return some useful variables
-    return input_lr_batch, output_hr_batch, losses, train_op 
+    return input_lr_batch, output_hr_batch, losses, train_op, merged_summary
 
 
 def train(model_vars, opts):
     '''
     Train the given model on the given dataset.
     '''
-    input_lr_sym, output_hr_sym, loss_sym, train_op = model_vars
+    input_lr_sym, output_hr_sym, loss_sym, train_op, merged_summary = model_vars
     saver = tf.train.Saver()
     global_step = tf.train.get_global_step()
     with tf.Session() as sess:
@@ -103,14 +116,23 @@ def train(model_vars, opts):
             tf.gfile.MkDir(opts['checkpoint_dir'])
             sess.run(tf.global_variables_initializer())
         try:
-            while True:
-                _, loss, step = sess.run([train_op, loss_sym, global_step])
+            with tf.summary.FileWriter(opts['log_dir'], sess.graph) as summ_writer:
+                while True:
+                    _, loss, step = sess.run([train_op, loss_sym, global_step])
 
-                if step % opts['print_every'] == 0:
-                    print(f'Step {step}: loss {loss:.2e}')
+                    if step % opts['print_every'] == 0:
+                        print(f'Step {step}: loss {loss:.2e}')
 
-                if step % opts['save_every'] == 0:
-                    saver.save(sess, opts['checkpoint_file'], global_step=global_step)
+                    if step % opts['save_every'] == 0:
+                        saver.save(sess, opts['checkpoint_file'], global_step=global_step)
+
+                    # log results, if required by the steps
+                    if step % opts['log_every'] == 0:
+                        # rerun a session to get a merged summary
+                        summary = sess.run(merged_summary)
+                        # write the summary
+                        summ_writer.add_summary(summary)
+
         except (tf.errors.OutOfRangeError, KeyboardInterrupt):
             print('Training done. Saving model...')
             tf.saved_model.simple_save(
@@ -133,7 +155,7 @@ def main():
     loss = mse_loss_layer
     optimizer = tf.train.AdamOptimizer(args.learning_rate)
     ### 
-    model_vars = wrap_model(data_loader, model, loss, optimizer)
+    model_vars = wrap_model(data_loader, model, loss, optimizer, OPTS.MODEL)
     train(model_vars, OPTS.TRAIN)
 
 if __name__ == '__main__':
