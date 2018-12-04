@@ -5,6 +5,7 @@ import sys
 import subprocess
 import psnr
 import ssim
+from argparse import ArgumentParser
 datasets = ['Set5', 'Set14', 'BSDS100']
 set5_range = (1, 6)
 set14_range = (1, 15)
@@ -107,10 +108,27 @@ def calc_ssim_values(path, set5_flag=True, set14_flag=True, bsd100_flag=True):
     result.append(bsd100_mean)
   return result
 
+def parse_arguments():
+    # define, read and verify the command line arguments
+    parser = ArgumentParser()
+    parser.add_argument(
+        'dataset_path',
+        help='path to datasets root',)
+    parser.add_argument(
+        '-m', 
+        help='if specified, calculate only METRIC values(psnr/ssim)')
+    args = parser.parse_args()
+    if not args.dataset_path:
+        print('error: dataset path have to be specified')
+        exit(1)
+    return args
+
 if __name__ == '__main__':
-  path = sys.argv[1]
+  args = parse_arguments()
   #create_low_res(path)
   #apply_SR(path)
-  #print(calc_psnr_values(path))
-  print(calc_ssim_values(path))
+  if not args.m == 'ssim':
+    print(calc_psnr_values(args.dataset_path))
+  if not args.m == 'psnr':
+    print(calc_ssim_values(args.dataset_path))
 
