@@ -54,7 +54,6 @@ def calc_psnr_values(path, set5_flag=True, set14_flag=True, bsd100_flag=True):
   if set5_flag:
     set5_sum = []
     for i in range(*set5_range):
-      print i
       set5_sum.append(\
         psnr.calc_psnr_file_path(set5_path+'{}.png'.format(i),\
                                  set5_path+'{}_LR_interp.png'.format(i)))
@@ -80,7 +79,7 @@ def calc_psnr_values(path, set5_flag=True, set14_flag=True, bsd100_flag=True):
 
 if __name__ == '__main__':
   path = sys.argv[1]
-  create_low_res(path)
-  apply_SR(path)
+  #create_low_res(path)
+  #apply_SR(path)
   print(calc_psnr_values(path))
 
