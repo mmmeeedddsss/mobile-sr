@@ -1,1 +1,1 @@
-rm -rf saved-model ckpts __pycache__ *.pb *.tflite *.png
+rm -rf saved-model ckpts __pycache__ *.pb *.tflite *.png log train-log

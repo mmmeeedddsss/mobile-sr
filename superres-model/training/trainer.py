@@ -84,7 +84,7 @@ def wrap_model(data_loader, model, loss, optimizer, opts):
     # also summarize trained weights as histograms
     if opts['summarize_weights']:
         for var in tf.trainable_variables():
-            tf.summary.histogram(var)
+            tf.summary.histogram(f'{var.name}', var)
     # merge summaries
     merged_summary = tf.summary.merge_all()
 
@@ -131,7 +131,7 @@ def train(model_vars, opts):
                         # rerun a session to get a merged summary
                         summary = sess.run(merged_summary)
                         # write the summary
-                        summ_writer.add_summary(summary)
+                        summ_writer.add_summary(summary, step)
 
         except (tf.errors.OutOfRangeError, KeyboardInterrupt):
             print('Training done. Saving model...')
