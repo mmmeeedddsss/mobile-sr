@@ -88,7 +88,11 @@ public class ImageProcessingHelper {
     public static ArrayList<Bitmap> prepareChunks(int chunkHeight, int chunkWidth, int overlapX, int overlapY) {
         ArrayList<Bitmap> result = new ArrayList<>();
         for(int i=0; i<chunkImages.size(); i++) {
-            result.add(Bitmap.createBitmap(chunkImages.get(i), overlapX*2, overlapY*2, (chunkWidth-overlapX*2)*2, (chunkHeight-overlapY*2)*2));
+            result.add(Bitmap.createBitmap(chunkImages.get(i),
+                    overlapX*ApplicationConstants.MODEL_ZOOM_FACTOR,
+                    overlapY*ApplicationConstants.MODEL_ZOOM_FACTOR,
+                    (chunkWidth-overlapX*2)*ApplicationConstants.MODEL_ZOOM_FACTOR,
+                    (chunkHeight-overlapY*2)*ApplicationConstants.MODEL_ZOOM_FACTOR));
         }
         Log.i("PrepareChunks", String.format("Reconstruction Chunk sizes %dx%d",result.get(0).getWidth(), result.get(0).getHeight()));
         return result;
