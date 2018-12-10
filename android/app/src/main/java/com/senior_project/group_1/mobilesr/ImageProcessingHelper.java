@@ -88,8 +88,13 @@ public class ImageProcessingHelper {
     public static ArrayList<Bitmap> prepareChunks(int chunkHeight, int chunkWidth, int overlapX, int overlapY) {
         ArrayList<Bitmap> result = new ArrayList<>();
         for(int i=0; i<chunkImages.size(); i++) {
-            result.add(Bitmap.createBitmap(chunkImages.get(i), overlapX*2, overlapY*2, (chunkWidth-overlapX*2)*2, (chunkHeight-overlapY*2)*2));
+            result.add(Bitmap.createBitmap(chunkImages.get(i),
+                    overlapX*ApplicationConstants.MODEL_ZOOM_FACTOR,
+                    overlapY*ApplicationConstants.MODEL_ZOOM_FACTOR,
+                    (chunkWidth-overlapX*2)*ApplicationConstants.MODEL_ZOOM_FACTOR,
+                    (chunkHeight-overlapY*2)*ApplicationConstants.MODEL_ZOOM_FACTOR));
         }
+        Log.i("PrepareChunks", String.format("Reconstruction Chunk sizes %dx%d",result.get(0).getWidth(), result.get(0).getHeight()));
         return result;
     }
 
@@ -102,28 +107,25 @@ public class ImageProcessingHelper {
      * @return bitmap.
      */
     public static Bitmap reconstructImage(int chunkHeight, int chunkWidth, int overlapX, int overlapY) {
-        int originalHeight = (chunkHeight-overlapX*2)*rows;
-        int originalWidth = (chunkWidth-overlapY*2)*columns;
+        int originalHeight = (chunkHeight-overlapY*2)*rows;
+        int originalWidth = (chunkWidth-overlapX*2)*columns;
         Bitmap bitmap = Bitmap.createBitmap(
                 originalWidth*ApplicationConstants.MODEL_ZOOM_FACTOR,
                 originalHeight*ApplicationConstants.MODEL_ZOOM_FACTOR,
                 Bitmap.Config.ARGB_4444);
+        Log.i("ReconstructImage", String.format("New bm is created : %dx%d",bitmap.getWidth(), bitmap.getHeight()));
         Canvas canvas = new Canvas(bitmap); // this constructor causes canvas operations to write on provided bitmap
 
         ArrayList<Bitmap> result = prepareChunks(chunkHeight, chunkWidth,overlapX, overlapY); // Prepare the chunks to reassemble the image.
 
-        int index = 0;
-        int top = 0 , left =0;
-        for (int c = 0 ; c<columns; c++){
-            for (int r =0 ; r<rows ; r++){
-                canvas.drawBitmap(result.get(index), left, top, null);
-                left+=result.get(index).getWidth();
-                index++;
-            }
-            left=0;
-            top += result.get(index-1).getHeight();
-        }
-        Log.i("ImageCheck(): ", String.format("Bitmap size: %d %d", bitmap.getHeight(), bitmap.getWidth()));
+
+        int newChunkWidth = result.get(0).getWidth();
+        int newChunkHeight = result.get(0).getHeight();
+        for (int r = 0 ; r<rows; r++) // y
+            for (int c =0 ; c<columns ; c++) // x
+                canvas.drawBitmap(result.get(c+r*columns), c*newChunkWidth, r*newChunkHeight, null);
+
+        Log.i("ImageCheck(): ", String.format("Bitmap size: %d %d", bitmap.getWidth(), bitmap.getHeight()));
         return bitmap;
     }
 
@@ -172,12 +174,11 @@ public class ImageProcessingHelper {
 
                 for (int coordinateX = 0; coordinateX <= scaledBitmap.getWidth()-chunkWidth; coordinateX += chunkWidth - overlapX*2) {
                     chunkImages.add(Bitmap.createBitmap(scaledBitmap, coordinateX, coordinateY, chunkWidth, chunkHeight));
-                    rows++;
-
+                    columns++;
                 }
-                columns++;
+                rows++;
             }
-            rows=rows/columns;
+            columns=columns/rows;
 
             Log.i("DivideImage","Image is divided to  "+rows+"x"+columns);
         }
