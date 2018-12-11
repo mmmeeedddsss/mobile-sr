@@ -202,7 +202,9 @@ if __name__ == '__main__':
       psnr_values = calc_psnr_values(args.dataset_path, mean=False)
       ssim_values = calc_ssim_values(args.dataset_path, mean=False)
       for i in range(*set5_range):
-        print('{}\t{:.2f}/{:.2f}\t{:.2f}/{:.2f}\t{:.2f}/{:.2f}'.format(i, psnr_values[0][i-1], ssim_values[0][i-1], psnr_values[1][i-1], ssim_values[1][i-1], psnr_values[2][i-1], ssim_values[2][i-1]))
+        print('{}\t{:.2f}/{:.2f}\t{:.2f}/{:.2f}\t{:.2f}/{:.2f}'.format(i,\
+          psnr_values[0][i-1], ssim_values[0][i-1], psnr_values[1][i-1],\
+          ssim_values[1][i-1], psnr_values[2][i-1], ssim_values[2][i-1]))
     else:
       print(header)
       if not args.m == 'ssim':
