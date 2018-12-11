@@ -6,6 +6,7 @@ import subprocess
 import psnr
 import ssim
 from argparse import ArgumentParser
+import cv2
 datasets = ['Set5', 'Set14', 'BSDS100']
 set5_range = (1, 6)
 set14_range = (1, 15)
@@ -136,6 +137,9 @@ def parse_arguments():
         '-d', action='store_true',
         help='show detailed output')
     parser.add_argument(
+        '-hm', action='store_true',
+        help='create heatmap')
+    parser.add_argument(
         '-v',
         help='visualization for DATASET')
     parser.add_argument(
@@ -196,6 +200,26 @@ if __name__ == '__main__':
           cv2.waitKey()
       else:
         print('not recognized option for dataset')
+  elif args.hm:
+    set5_path, set14_path, bsd100_path = dataset_paths(args.dataset_path)
+    for i in range(*set5_range):
+      path=set5_path
+      im1 = cv2.imread(path+'/{}.png'.format(i))
+      im2 = cv2.imread(path+'/{}_LR_interp.png'.format(i))
+      diff = np.sum(np.absolute(im1-im2), axis=2)
+      cv2.imwrite('set5_{}_diff.png'.format(i), diff)
+    for i in range(*set14_range):
+      path=set14_path
+      im1 = cv2.imread(path+'/{}.png'.format(i))
+      im2 = cv2.imread(path+'/{}_LR_interp.png'.format(i))
+      diff = np.sum(np.absolute(im1-im2), axis=2)
+      cv2.imwrite('set14_{}_diff.png'.format(i), diff)
+    for i in range(*bsd100_range):
+      path=bsd100_path
+      im1 = cv2.imread(path+'/{}.png'.format(i))
+      im2 = cv2.imread(path+'/{}_LR_interp.png'.format(i))
+      diff = np.sum(np.absolute(im1-im2), axis=2)
+      cv2.imwrite('bsd100_{}_diff.png'.format(i), diff)
   else:
     if args.d:
       print('\tSet5\t\tSet14')
