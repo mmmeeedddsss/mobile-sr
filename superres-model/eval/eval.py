@@ -91,7 +91,7 @@ def calc_psnr_values(path, mean=True, set5_flag=True, set14_flag=True, bsd100_fl
 # calculates ssim values given the dataset root path
 # and also optional individual flags for separate datasets
 # returns a list including values
-def calc_ssim_values(path, set5_flag=True, set14_flag=True, bsd100_flag=True):
+def calc_ssim_values(path, mean=True, set5_flag=True, set14_flag=True, bsd100_flag=True):
   set5_path, set14_path, bsd100_path = dataset_paths(path)
   result = []
   if set5_flag:
@@ -101,7 +101,7 @@ def calc_ssim_values(path, set5_flag=True, set14_flag=True, bsd100_flag=True):
         ssim.calc_ssim_file_path(set5_path+'{}.png'.format(i),\
                                  set5_path+'{}_LR_interp.png'.format(i)))
     set5_mean = np.mean(set5_sum)
-    result.append(set5_mean)
+    result.append(set5_mean if mean else set5_sum)
   if set14_flag:
     set14_sum = []
     for i in range(*set14_range):
@@ -109,7 +109,7 @@ def calc_ssim_values(path, set5_flag=True, set14_flag=True, bsd100_flag=True):
         ssim.calc_ssim_file_path(set14_path+'{}.png'.format(i),\
                                  set14_path+'{}_LR_interp.png'.format(i)))
     set14_mean = np.mean(set14_sum)
-    result.append(set14_mean)
+    result.append(set14_mean if mean else set14_sum)
   if bsd100_flag:
     bsd100_sum = []
     for i in range(*bsd100_range):
@@ -117,7 +117,7 @@ def calc_ssim_values(path, set5_flag=True, set14_flag=True, bsd100_flag=True):
         ssim.calc_ssim_file_path(bsd100_path+'{}.png'.format(i),\
                                  bsd100_path+'{}_LR_interp.png'.format(i)))
     bsd100_mean = np.mean(bsd100_sum)
-    result.append(bsd100_mean)
+    result.append(bsd100_mean if mean else bsd100_sum)
   return result
 
 def parse_arguments():
@@ -158,8 +158,8 @@ if __name__ == '__main__':
     psnr_line = 'PSNR:\t{:.2f}\t{:.2f}\t{:.2f}'.format(psnr_vals[0], psnr_vals[1], psnr_vals[2])
 
   if not args.m == 'psnr':
-    ssim = calc_ssim_values(args.dataset_path)
-    ssim_line = 'SSIM:\t{:.2f}\t{:.2f}\t{:.2f}'.format(ssim[0], ssim[1], ssim[2])
+    ssim_vals = calc_ssim_values(args.dataset_path)
+    ssim_line = 'SSIM:\t{:.2f}\t{:.2f}\t{:.2f}'.format(ssim_vals[0], ssim_vals[1], ssim_vals[2])
 
   if args.o:
     with open(args.o, 'w') as f:
@@ -198,10 +198,11 @@ if __name__ == '__main__':
         print('not recognized option for dataset')
   else:
     if args.d:
-      print('\tSet5\tSet14\tBSD100')
+      print('\tSet5\t\tSet14\t\tBSD100')
       psnr_values = calc_psnr_values(args.dataset_path, mean=False)
+      ssim_values = calc_ssim_values(args.dataset_path, mean=False)
       for i in range(*set5_range):
-        print('{}\t{:.2f}\t{:.2f}\t{:.2f}'.format(i, psnr_values[0][i-1], psnr_values[1][i-1], psnr_values[2][i-1]))
+        print('{}\t{:.2f}/{:.2f}\t{:.2f}/{:.2f}\t{:.2f}/{:.2f}'.format(i, psnr_values[0][i-1], ssim_values[0][i-1], psnr_values[1][i-1], ssim_values[1][i-1], psnr_values[2][i-1], ssim_values[2][i-1]))
     else:
       print(header)
       if not args.m == 'ssim':
