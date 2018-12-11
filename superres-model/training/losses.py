@@ -11,7 +11,7 @@ def create_loss_layer(input_hr_batch, output_hr_batch, img_loss_fn):
     return total_loss
 
 def mse_loss(input_hr_batch, output_hr_batch):
-    return tf.nn.l2_loss(input_hr_batch - output_hr_batch) 
+    return tf.reduce_mean(tf.squared_difference(input_hr_batch, output_hr_batch))
 
 def mse_loss_layer(input_hr_batch, output_hr_batch):
     return create_loss_layer(input_hr_batch, output_hr_batch, mse_loss)
