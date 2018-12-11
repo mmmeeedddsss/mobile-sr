@@ -133,6 +133,9 @@ def parse_arguments():
         '-m', 
         help='if specified, calculate only METRIC values(psnr/ssim)')
     parser.add_argument(
+        '-v',
+        help='visualization for DATASET')
+    parser.add_argument(
         '-c',
         help='compare with file')
     args = parser.parse_args()
@@ -171,6 +174,25 @@ if __name__ == '__main__':
       print(psnr_line)
       print('old:\t' + '\t'.join(ssim))
       print(ssim_line)
+  elif args.v:
+      path = args.dataset_path
+      if args.v == 'set5':
+        for i in range(set5_range):
+          cv2.imshow(path+'/{}.png'.format(i))
+          cv2.imshow(path+'/{}_LR_interp.png'.format(i))
+          cv2.waitKey()
+      elif args.v == 'set14':
+        for i in range(set14_range):
+          cv2.imshow(path+'/{}.png'.format(i))
+          cv2.imshow(path+'/{}_LR_interp.png'.format(i))
+          cv2.waitKey()
+      elif args.v == 'bsd100':
+        for i in range(bsd100_range):
+          cv2.imshow(path+'/{}.png'.format(i))
+          cv2.imshow(path+'/{}_LR_interp.png'.format(i))
+          cv2.waitKey()
+      else:
+        print('not recognized option for dataset')
   else:
     print(header)
     if not args.m == 'ssim':
