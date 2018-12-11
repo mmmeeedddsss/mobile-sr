@@ -58,6 +58,8 @@ def show_dataset(args):
     fig = plt.figure()
     hr_ax = plt.subplot(1, 2, 1)
     lr_ax = plt.subplot(1, 2, 2)
+    hr_ax.set_title('High Res. Patch')
+    lr_ax.set_title('Low Res. Patch')
     try:
         # start the tf session
         with tf.Session() as sess:
