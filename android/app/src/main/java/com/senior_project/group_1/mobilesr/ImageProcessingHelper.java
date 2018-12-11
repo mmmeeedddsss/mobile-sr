@@ -88,11 +88,16 @@ public class ImageProcessingHelper {
     public static ArrayList<Bitmap> prepareChunks(int chunkHeight, int chunkWidth, int overlapX, int overlapY) {
         ArrayList<Bitmap> result = new ArrayList<>();
         for(int i=0; i<chunkImages.size(); i++) {
-            result.add(Bitmap.createBitmap(chunkImages.get(i),
-                    overlapX*ApplicationConstants.MODEL_ZOOM_FACTOR,
-                    overlapY*ApplicationConstants.MODEL_ZOOM_FACTOR,
-                    (chunkWidth-overlapX*2)*ApplicationConstants.MODEL_ZOOM_FACTOR,
-                    (chunkHeight-overlapY*2)*ApplicationConstants.MODEL_ZOOM_FACTOR));
+            try {
+                result.add(Bitmap.createBitmap(chunkImages.get(i),
+                        overlapX * ApplicationConstants.MODEL_ZOOM_FACTOR,
+                        overlapY * ApplicationConstants.MODEL_ZOOM_FACTOR,
+                        (chunkWidth - overlapX * 2) * ApplicationConstants.MODEL_ZOOM_FACTOR,
+                        (chunkHeight - overlapY * 2) * ApplicationConstants.MODEL_ZOOM_FACTOR));
+            }
+            catch(NullPointerException e) {
+                Log.e("prepareChunks", "image: " + i);
+            }
         }
         Log.i("PrepareChunks", String.format("Reconstruction Chunk sizes %dx%d",result.get(0).getWidth(), result.get(0).getHeight()));
         return result;
@@ -130,13 +135,26 @@ public class ImageProcessingHelper {
     }
 
     public static void processImages(Activity requestingActivity) {
-        BitmapProcessor bitmapProcessor;
-        bitmapProcessor = new TFLiteBilinearInterpolator(requestingActivity);
-        for( int i=0; i<chunkImages.size(); i++ ){
-            Log.i("Divided Image Sizes","Image sizes for image "+i+"  "+chunkImages.get(i).getWidth()+"x"+chunkImages.get(i).getHeight());
-            chunkImages.set(i, bitmapProcessor.processBitmap(chunkImages.get(i)));
-            // TODO parallelism can be used in here
+        int batchSize = ApplicationConstants.BATCH_SIZE;
+        Bitmap[] bitmaps = new Bitmap [batchSize]; // buffer to hold input bitmaps
+        BitmapProcessor bitmapProcessor = new TFLiteBilinearInterpolator(requestingActivity, batchSize);
+        int i = 0, nchunks = chunkImages.size();
+        while(i < nchunks) {
+            // load bitmaps into the array
+            int j = 0;
+            while(j < batchSize && i < nchunks) {
+                Bitmap chunk = chunkImages.get(i++);
+                // Log.i("Divided Image Sizes","Image sizes for image "+ (i++) +"  "+chunk.getWidth()+"x"+chunk.getHeight());
+                bitmaps[j++] = chunk;
+            }
+            // process the bitmaps
+            Bitmap[] outputBitmaps = bitmapProcessor.processBitmaps(bitmaps);
+            // unload the bitmaps back into the list
+            int k = i;
+            while(j > 0)
+                chunkImages.set(--k, outputBitmaps[--j]);
         }
+        bitmapProcessor.close();
     }
 
 

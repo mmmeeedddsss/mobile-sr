@@ -14,19 +14,19 @@ import java.nio.ByteOrder;
 
 // Class representing the bilinear interpolator built for TFLite.
 public class TFLiteBilinearInterpolator implements BitmapProcessor {
-    private static final String MODEL_PATH = "basic_srcnn_64.tflite";
+    private static final String MODEL_PATH = "basic_srcnn_nearestn_64.tflite";
 
     private static final int SIZEOF_FLOAT = 4;
 
     private int INPUT_IMAGE_WIDTH = ApplicationConstants.IMAGE_CHUNK_SIZE_X;
     private int INPUT_IMAGE_HEIGHT = ApplicationConstants.IMAGE_CHUNK_SIZE_Y;
 
-    private static final int INPUT_TENSOR_BATCH = 1;
+    private int INPUT_TENSOR_BATCH = 1;
     private int INPUT_TENSOR_WIDTH = INPUT_IMAGE_WIDTH;
     private int INPUT_TENSOR_HEIGHT = INPUT_IMAGE_HEIGHT;
     private static final int INPUT_TENSOR_CHANNELS = 3;
 
-    private static final int OUTPUT_TENSOR_BATCH = 1;
+    private int OUTPUT_TENSOR_BATCH = 1;
     private int OUTPUT_TENSOR_WIDTH = INPUT_IMAGE_WIDTH * 2;
     private int OUTPUT_TENSOR_HEIGHT = INPUT_IMAGE_WIDTH * 2;
     private static final int OUTPUT_TENSOR_CHANNELS = 3;
@@ -41,33 +41,20 @@ public class TFLiteBilinearInterpolator implements BitmapProcessor {
     private int[] outputImagePixels;
 
 
-    public TFLiteBilinearInterpolator(Activity creatingActivity) {
+    public TFLiteBilinearInterpolator(Activity creatingActivity, int batchSize) {
         interpreter = new Interpreter(loadModelFile(creatingActivity));
-        // interpreter.setUseNNAPI(true);
-        reallocBuffers();
+        setBatchSize(batchSize);
     }
 
     @Override
-    public Bitmap processBitmap(final Bitmap inputBitmap) {
+    public Bitmap[] processBitmaps(final Bitmap[] inputBitmaps) {
         // do some logging
-        Log.i("TFLite processBitmap", "Width:" + inputBitmap.getWidth() + " Height:" + inputBitmap.getHeight());
-
-        // Experimental resizing trial, does not work
-        // If I understand correctly, we do resize the input but this does not propagate to the rest of the tensors,
-        // and there is currently no other method provided by Interpreter to handle this stuff
         /*
-        // huge waste of time here, for reallocations
-        // first, set sizes depending on the input bitmap
-        setSizes(inputBitmap);
-        // reallocate everything depending on these sizes (might find a way to circumvent this in the future)
-        reallocBuffers();
-        // reallocate the input tensor
-        int[] newDims = new int[] {INPUT_TENSOR_BATCH, INPUT_TENSOR_HEIGHT, INPUT_TENSOR_WIDTH, INPUT_TENSOR_CHANNELS};
-        interpreter.resizeInput(interpreter.getInputIndex("input_image"), newDims);
+        for(final Bitmap bitmap : inputBitmaps)
+            Log.i("TFLite processBitmaps", "Width:" + bitmap.getWidth() + " Height:" + bitmap.getHeight());
         */
-
-        // the usual operation, same with constant input size
-        bufferInputBitmap(inputBitmap);
+        // buffer the input bitmaps, run the interpreter, unbuffer them back to bitmaps
+        bufferInputBitmaps(inputBitmaps);
         interpreter.run(inputImageData, outputImageData);
         return unbufferOutput();
     }
@@ -77,16 +64,16 @@ public class TFLiteBilinearInterpolator implements BitmapProcessor {
         interpreter.close();
     }
 
-    // resizing trial: set parameters
-    private void setSizes(final Bitmap inputBitmap) {
-        INPUT_TENSOR_HEIGHT = inputBitmap.getHeight();
-        INPUT_TENSOR_WIDTH = inputBitmap.getWidth();
-        OUTPUT_TENSOR_HEIGHT = 2 * INPUT_TENSOR_HEIGHT;
-        OUTPUT_TENSOR_WIDTH = 2 * INPUT_TENSOR_WIDTH;
+    // called from the constructor to set the batch size
+    private void setBatchSize(int batchSize) {
+        OUTPUT_TENSOR_BATCH = INPUT_TENSOR_BATCH = batchSize;
+        allocBuffers();
+        int[] newDims = new int[] {INPUT_TENSOR_BATCH, INPUT_TENSOR_HEIGHT, INPUT_TENSOR_WIDTH, INPUT_TENSOR_CHANNELS};
+        interpreter.resizeInput(interpreter.getInputIndex("input_image"), newDims);
     }
 
-    // reallocate buffers depending on current sizes
-    private void reallocBuffers() {
+    // allocate buffers depending on current sizes
+    private void allocBuffers() {
         inputImageData = ByteBuffer.allocateDirect(SIZEOF_FLOAT * INPUT_TENSOR_BATCH * INPUT_TENSOR_HEIGHT * INPUT_TENSOR_WIDTH * INPUT_TENSOR_CHANNELS);
         inputImageData.order(ByteOrder.nativeOrder());
         inputImagePixels = new int[INPUT_IMAGE_WIDTH * INPUT_IMAGE_HEIGHT];
@@ -121,37 +108,48 @@ public class TFLiteBilinearInterpolator implements BitmapProcessor {
         return modelBuffer;
     }
 
-    private static void putFloats(ByteBuffer byteBuffer, float value, int n) {
-        for(int i = 0; i < n; ++i)
-            byteBuffer.putFloat(value);
-    }
-
-    // method to transform an insert the bitmap into a ByteBuffer for input to the interpreter
-    private void bufferInputBitmap(final Bitmap bitmap) {
-        // get the top-left 32x32 patch
-        final Bitmap subsetBitmap = Bitmap.createBitmap(bitmap, 0, 0, INPUT_IMAGE_WIDTH, INPUT_IMAGE_HEIGHT);
-        // read the bitmap into the integer array
-        subsetBitmap.getPixels(inputImagePixels, 0, subsetBitmap.getWidth(), 0, 0, INPUT_IMAGE_WIDTH, INPUT_IMAGE_HEIGHT);
+    // method to transform an insert the bitmaps into a ByteBuffer for input to the interpreter
+    private void bufferInputBitmaps(final Bitmap[] bitmaps) {
         // reset the buffer
         inputImageData.rewind();
-        // insert the data into the buffer
-        for(int color : inputImagePixels) {
-            inputImageData.putFloat(Color.red(color));
-            inputImageData.putFloat(Color.green(color));
-            inputImageData.putFloat(Color.blue(color));
+        for(final Bitmap bitmap : bitmaps) {
+            // read the bitmap into the integer array
+            bitmap.getPixels(inputImagePixels, 0, bitmap.getWidth(), 0, 0, INPUT_IMAGE_WIDTH, INPUT_IMAGE_HEIGHT);
+            // insert the data into the buffer
+            for (int color : inputImagePixels) {
+                inputImageData.putFloat(Color.red(color));
+                inputImageData.putFloat(Color.green(color));
+                inputImageData.putFloat(Color.blue(color));
+            }
         }
     }
 
     // method to transform the output ByteBuffer into a bitmap
-    private Bitmap unbufferOutput() {
+    private Bitmap[] unbufferOutput() {
+        // create a bitmap array to store output bitmaps in
+        Bitmap[] outputBitmaps = new Bitmap [OUTPUT_TENSOR_BATCH];
+        // reset the buffer
         outputImageData.rewind();
-        for(int i = 0; i < outputImagePixels.length; ++i) {
+        // loop through the image pixels: i is the byte counter, j is the pixel counter per patch
+        // and k is the patch counter
+        int j = 0, k = 0;
+        int outputImageSize = outputImagePixels.length;
+        int outputDataSize = outputImageSize * OUTPUT_TENSOR_BATCH;
+        for(int i = 0; i < outputDataSize; ++i) {
             float r = outputImageData.getFloat();
             float g = outputImageData.getFloat();
             float b = outputImageData.getFloat();
-            outputImagePixels[i] = Color.rgb((int) r, (int) g, (int) b);
+            outputImagePixels[j++] = Color.rgb((int) r, (int) g, (int) b);
+            if(j == outputImageSize) { // a full patch has been unbuffered
+                // create a bitmap for the patch
+                Bitmap bitmap = Bitmap.createBitmap(outputImagePixels, OUTPUT_TENSOR_WIDTH, OUTPUT_TENSOR_HEIGHT, Bitmap.Config.ARGB_8888);
+                // add the bitmap to the array
+                outputBitmaps[k++] = bitmap;
+                // reset the per patch pixel counter
+                j = 0;
+            }
         }
         outputImageData.rewind(); // re-reset the output to prepare for next use
-        return Bitmap.createBitmap(outputImagePixels, OUTPUT_TENSOR_WIDTH, OUTPUT_TENSOR_HEIGHT, Bitmap.Config.ARGB_8888);
+        return outputBitmaps;
     }
 }

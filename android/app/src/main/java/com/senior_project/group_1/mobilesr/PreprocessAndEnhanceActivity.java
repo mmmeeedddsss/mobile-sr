@@ -24,7 +24,8 @@ public class PreprocessAndEnhanceActivity extends AppCompatActivity {
     @Override
     public void onCreate(Bundle savedInstance) {
         super.onCreate(savedInstance);
-        bitmapProcessor = new TFLiteBilinearInterpolator(this);
+        // TODO: fix the helper to use this instance of BitmapProcessor
+        bitmapProcessor = null; // new TFLiteBilinearInterpolator(this, ApplicationConstants.BATCH_SIZE);
         //Get the view From pick_photo_activity
         setContentView(R.layout.pick_photo_activity);
 
@@ -89,6 +90,7 @@ public class PreprocessAndEnhanceActivity extends AppCompatActivity {
     @Override
     protected void onDestroy() {
         super.onDestroy();
-        bitmapProcessor.close();
+        if(bitmapProcessor != null)
+            bitmapProcessor.close();
     }
 }

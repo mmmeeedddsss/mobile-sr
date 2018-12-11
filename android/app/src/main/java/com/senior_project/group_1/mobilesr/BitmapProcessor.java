@@ -7,6 +7,6 @@ import android.graphics.Bitmap;
 // consists of a single simple function which takes an input bitmap and returns the
 // processed bitmap. Also a possibly empty function for doing cleanup.
 public interface BitmapProcessor {
-    Bitmap processBitmap(final Bitmap inputBitmap);
+    Bitmap[] processBitmaps(final Bitmap[] inputBitmaps);
     void close();
 }
