@@ -25,7 +25,7 @@ public class PreprocessAndEnhanceActivity extends AppCompatActivity {
     public void onCreate(Bundle savedInstance) {
         super.onCreate(savedInstance);
         // TODO: fix the helper to use this instance of BitmapProcessor
-        bitmapProcessor = null; // new TFLiteBilinearInterpolator(this, ApplicationConstants.BATCH_SIZE);
+        bitmapProcessor = null; // new TFLiteSuperResolver(this, ApplicationConstants.BATCH_SIZE);
         //Get the view From pick_photo_activity
         setContentView(R.layout.pick_photo_activity);
 

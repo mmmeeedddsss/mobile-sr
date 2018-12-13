@@ -23,5 +23,5 @@ toco --graph_def_file optim.pb \
     --inference-type FLOAT \
     --inference_input_type FLOAT \
     --input_arrays $input_tensor \
-     --input_shapes 1,128,128,3 \
-     --output_arrays $output_tensor
+    --input_shapes 1,128,128,3 \
+    --output_arrays $output_tensor
