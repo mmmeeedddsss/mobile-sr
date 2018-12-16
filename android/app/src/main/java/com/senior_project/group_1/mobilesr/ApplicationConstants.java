@@ -7,4 +7,5 @@ public final class ApplicationConstants {
     public static final int IMAGE_CHUNK_SIZE_X = 64;
     public static final int IMAGE_CHUNK_SIZE_Y = 64;
     public static final int MODEL_ZOOM_FACTOR = 2;
+    public static final double DeltaForPinchZoomScaling = 4;
 }
