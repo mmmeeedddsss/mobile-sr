@@ -14,17 +14,18 @@ import java.nio.ByteOrder;
 
 // Class representing the bilinear interpolator built for TFLite.
 public class TFLiteSuperResolver implements BitmapProcessor {
-    private static final String MODEL_PATH = "basic_srcnn_nearestn_noresize_64.tflite";
-    private static final String INPUT_TENSOR_NAME = "resized_image";
+
+    private final String MODEL_PATH;
+    private final String INPUT_TENSOR_NAME;
     // extra for models that do not apply rescaling, should be true if the model does the rescaling itself
-    private static final boolean MODEL_RESCALES = false;
+    private final boolean MODEL_RESCALES;
+
+    private final int RESCALING_FACTOR;
+
+    private final int INPUT_IMAGE_WIDTH;
+    private final int INPUT_IMAGE_HEIGHT;
 
     private static final int SIZEOF_FLOAT = 4;
-
-    private static final int RESCALING_FACTOR = ApplicationConstants.MODEL_ZOOM_FACTOR;
-
-    private static final int INPUT_IMAGE_WIDTH = ApplicationConstants.IMAGE_CHUNK_SIZE_X;
-    private static final int INPUT_IMAGE_HEIGHT = ApplicationConstants.IMAGE_CHUNK_SIZE_Y;
 
     private int inputTensorBatch;
     private int inputTensorWidth;
@@ -32,8 +33,8 @@ public class TFLiteSuperResolver implements BitmapProcessor {
     private static final int INPUT_TENSOR_CHANNELS = 3;
 
     private int outputTensorBatch;
-    private static final int OUTPUT_TENSOR_WIDTH = INPUT_IMAGE_WIDTH * RESCALING_FACTOR;
-    private static final int OUTPUT_TENSOR_HEIGHT = INPUT_IMAGE_WIDTH * RESCALING_FACTOR;
+    private final int OUTPUT_TENSOR_WIDTH;
+    private final int OUTPUT_TENSOR_HEIGHT;
     private static final int OUTPUT_TENSOR_CHANNELS = 3;
 
     // the tflite interpreter
@@ -50,9 +51,19 @@ public class TFLiteSuperResolver implements BitmapProcessor {
     private ImageRescaler imageRescaler;
 
 
-    public TFLiteSuperResolver(Activity creatingActivity, int batchSize) {
+    public TFLiteSuperResolver(Activity creatingActivity, int batchSize, SRModelConfiguration srModelConfiguration) {
+        MODEL_PATH = srModelConfiguration.getModelPath();
+        INPUT_TENSOR_NAME = srModelConfiguration.getInputTensorName();
+        MODEL_RESCALES = srModelConfiguration.getModelRescales();
+        RESCALING_FACTOR = srModelConfiguration.getRescalingFactor();
+        INPUT_IMAGE_WIDTH = srModelConfiguration.getInputImageWidth();
+        INPUT_IMAGE_HEIGHT = srModelConfiguration.getInputImageHeight();
+        OUTPUT_TENSOR_WIDTH = srModelConfiguration.getOutputTensorWidth();
+        OUTPUT_TENSOR_HEIGHT = srModelConfiguration.getOutputTensorHeight();
+
+
         Interpreter.Options options = new Interpreter.Options();
-        options.setUseNNAPI(true);
+        options.setUseNNAPI(srModelConfiguration.getNNAPISetting());
         interpreter = new Interpreter(loadModelFile(creatingActivity), options);
         // the ordering of the calls here are critical!
         allocPixelArrays();
