@@ -1,5 +1,6 @@
 package com.senior_project.group_1.mobilesr;
 
+import android.annotation.SuppressLint;
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
@@ -36,7 +37,7 @@ public class ZoomableImageView extends AppCompatImageView {
     // for ideal operation, src_rect's edge ratio should be same with the dest_rect
     Paint clearing_paint; // Paint for clearing canvas on draw method
 
-    final float zoom_constant = 0.05F; // Constant numbers to adjust the sensitivity of user gestures
+    final float zoom_constant = 0.035F; // Constant numbers to adjust the sensitivity of user gestures
     final float movement_constant = 14F;
 
     // Constructors
@@ -139,17 +140,24 @@ public class ZoomableImageView extends AppCompatImageView {
                     float x = e.getX(1);
                     float y = e.getY(1);
                     current_distance = getDistance(start_x, start_y, x, y);
+                    //Log.i("Distances on screen", String.format("%f , %f",current_distance, start_distance));
 
                     // Differantially:
                     // If distance has increased, increase zoom_factor
-                    if( current_distance > start_distance )
+                    if( current_distance > start_distance + ApplicationConstants.DeltaForPinchZoomScaling )
+                    {
                         zoom_factor += zoom_constant*zoom_factor;
-                    else if(current_distance < start_distance)// If distance has decrased, increase zoom_factor
-                        zoom_factor -= zoom_constant*zoom_factor;
+                        start_distance = current_distance;
+                        invalidate();// this triggers draw method of view
+                    }
+                    else if(current_distance < start_distance - ApplicationConstants.DeltaForPinchZoomScaling )// If distance has decrased, increase zoom_factor
+                    {
+                        zoom_factor -= zoom_constant * zoom_factor;
+                        start_distance = current_distance;
+                        invalidate();// this triggers draw method of view
+                    }
                     if(zoom_factor < 1) // Dont allow to zoom out
                         zoom_factor = 1;
-                    start_distance = current_distance;
-                    invalidate();// this triggers draw method of view
                     return true;
                 }
         }
@@ -170,6 +178,7 @@ public class ZoomableImageView extends AppCompatImageView {
     }
 
 
+    @SuppressLint("MissingSuperCall")
     @Override
     public void draw(Canvas canvas) {
         if( bm != null ) {
