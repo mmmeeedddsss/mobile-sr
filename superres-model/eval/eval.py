@@ -132,6 +132,9 @@ def parse_arguments():
         '-o',
         help='save the output to file')
     parser.add_argument(
+        '-e',
+        help='extension for enhanced images')
+    parser.add_argument(
         '-m', 
         help='if specified, calculate only METRIC values(psnr/ssim)')
     parser.add_argument(
@@ -156,6 +159,8 @@ if __name__ == '__main__':
   args = parse_arguments()
   #create_low_res(path)
   #apply_SR(path)
+  if args.e:
+    extension = args.e
 
   header = '\t{}\t{}\t{}'.format('Set5', 'Set14', 'BSD100')
   if not args.m == 'ssim':
