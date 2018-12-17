@@ -68,7 +68,7 @@ def calc_psnr_values(path, mean=True, set5_flag=True, set14_flag=True, bsd100_fl
     for i in range(*set5_range):
       set5_sum.append(\
         psnr.calc_psnr_file_path(set5_path+'{}.png'.format(i),\
-                                 set5_path+'{}_LR_interp.png'.format(i)))
+                                 set5_path+'{}_LR-sr.png'.format(i)))
     set5_mean = np.mean(set5_sum)
     result.append(set5_mean if mean else set5_sum)
   if set14_flag:
@@ -76,7 +76,7 @@ def calc_psnr_values(path, mean=True, set5_flag=True, set14_flag=True, bsd100_fl
     for i in range(*set14_range):
       set14_sum.append(\
         psnr.calc_psnr_file_path(set14_path+'{}.png'.format(i),\
-                                 set14_path+'{}_LR_interp.png'.format(i)))
+                                 set14_path+'{}_LR-sr.png'.format(i)))
     set14_mean = np.mean(set14_sum)
     result.append(set14_mean if mean else set14_sum)
   if bsd100_flag:
@@ -84,7 +84,7 @@ def calc_psnr_values(path, mean=True, set5_flag=True, set14_flag=True, bsd100_fl
     for i in range(*bsd100_range):
       bsd100_sum.append(\
         psnr.calc_psnr_file_path(bsd100_path+'{}.png'.format(i),\
-                                 bsd100_path+'{}_LR_interp.png'.format(i)))
+                                 bsd100_path+'{}_LR-sr.png'.format(i)))
     bsd100_mean = np.mean(bsd100_sum)
     result.append(bsd100_mean if mean else bsd100_sum)
   return result
@@ -100,7 +100,7 @@ def calc_ssim_values(path, mean=True, set5_flag=True, set14_flag=True, bsd100_fl
     for i in range(*set5_range):
       set5_sum.append(\
         ssim.calc_ssim_file_path(set5_path+'{}.png'.format(i),\
-                                 set5_path+'{}_LR_interp.png'.format(i)))
+                                 set5_path+'{}_LR-sr.png'.format(i)))
     set5_mean = np.mean(set5_sum)
     result.append(set5_mean if mean else set5_sum)
   if set14_flag:
@@ -108,7 +108,7 @@ def calc_ssim_values(path, mean=True, set5_flag=True, set14_flag=True, bsd100_fl
     for i in range(*set14_range):
       set14_sum.append(\
         ssim.calc_ssim_file_path(set14_path+'{}.png'.format(i),\
-                                 set14_path+'{}_LR_interp.png'.format(i)))
+                                 set14_path+'{}_LR-sr.png'.format(i)))
     set14_mean = np.mean(set14_sum)
     result.append(set14_mean if mean else set14_sum)
   if bsd100_flag:
@@ -116,7 +116,7 @@ def calc_ssim_values(path, mean=True, set5_flag=True, set14_flag=True, bsd100_fl
     for i in range(*bsd100_range):
       bsd100_sum.append(\
         ssim.calc_ssim_file_path(bsd100_path+'{}.png'.format(i),\
-                                 bsd100_path+'{}_LR_interp.png'.format(i)))
+                                 bsd100_path+'{}_LR-sr.png'.format(i)))
     bsd100_mean = np.mean(bsd100_sum)
     result.append(bsd100_mean if mean else bsd100_sum)
   return result
@@ -186,17 +186,17 @@ if __name__ == '__main__':
       if args.v == 'set5':
         for i in range(*set5_range):
           cv2.imshow(path+'/{}.png'.format(i))
-          cv2.imshow(path+'/{}_LR_interp.png'.format(i))
+          cv2.imshow(path+'/{}_LR-sr.png'.format(i))
           cv2.waitKey()
       elif args.v == 'set14':
         for i in range(*set14_range):
           cv2.imshow(path+'/{}.png'.format(i))
-          cv2.imshow(path+'/{}_LR_interp.png'.format(i))
+          cv2.imshow(path+'/{}_LR-sr.png'.format(i))
           cv2.waitKey()
       elif args.v == 'bsd100':
         for i in range(*bsd100_range):
           cv2.imshow(path+'/{}.png'.format(i))
-          cv2.imshow(path+'/{}_LR_interp.png'.format(i))
+          cv2.imshow(path+'/{}_LR-sr.png'.format(i))
           cv2.waitKey()
       else:
         print('not recognized option for dataset')
@@ -205,19 +205,19 @@ if __name__ == '__main__':
     for i in range(*set5_range):
       path=set5_path
       im1 = cv2.imread(path+'/{}.png'.format(i))
-      im2 = cv2.imread(path+'/{}_LR_interp.png'.format(i))
+      im2 = cv2.imread(path+'/{}_LR-sr.png'.format(i))
       diff = np.sum(np.absolute(im1-im2), axis=2)
       cv2.imwrite('set5_{}_diff.png'.format(i), diff)
     for i in range(*set14_range):
       path=set14_path
       im1 = cv2.imread(path+'/{}.png'.format(i))
-      im2 = cv2.imread(path+'/{}_LR_interp.png'.format(i))
+      im2 = cv2.imread(path+'/{}_LR-sr.png'.format(i))
       diff = np.sum(np.absolute(im1-im2), axis=2)
       cv2.imwrite('set14_{}_diff.png'.format(i), diff)
     for i in range(*bsd100_range):
       path=bsd100_path
       im1 = cv2.imread(path+'/{}.png'.format(i))
-      im2 = cv2.imread(path+'/{}_LR_interp.png'.format(i))
+      im2 = cv2.imread(path+'/{}_LR-sr.png'.format(i))
       diff = np.sum(np.absolute(im1-im2), axis=2)
       cv2.imwrite('bsd100_{}_diff.png'.format(i), diff)
   else:
