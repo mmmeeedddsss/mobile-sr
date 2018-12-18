@@ -75,7 +75,9 @@ public class MainActivity extends AppCompatActivity {
         });
 
         try { // Load configuration xml
-            SRModelConfigurationParser.initilizeConfigurations( getAssets().open(ApplicationConstants.CONFIGURATION_FILE_NAME));
+            SRModelConfigurationManager
+                    .initilizeConfigurations( getAssets().open(ApplicationConstants.CONFIGURATION_FILE_NAME),
+                            "resized_image");
         } catch (IOException e) {
             e.printStackTrace();
         }

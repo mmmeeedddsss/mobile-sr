@@ -11,14 +11,14 @@ import java.io.InputStream;
 import java.util.HashMap;
 import java.util.Map;
 
-public class SRModelConfigurationParser {
-    private SRModelConfigurationParser() {
+public class SRModelConfigurationManager {
+    private SRModelConfigurationManager() {
     }
 
     private static Map<String, SRModelConfiguration> configurationMap;
-    public static String lastRequestedConfigurationName;
+    private static SRModelConfiguration currentConfiguration;
 
-    public static void initilizeConfigurations( InputStream inputStream ){
+    public static void initilizeConfigurations( InputStream inputStream, String initialModelName ){
         XmlPullParserFactory parserFactory;
         configurationMap = new HashMap<>();
         try {
@@ -28,6 +28,7 @@ public class SRModelConfigurationParser {
             parser.setInput(inputStream, null);
 
             processParsing(parser);
+            currentConfiguration = configurationMap.get(initialModelName);
 
         } catch (XmlPullParserException e) {
             Log.i("ConfigInit", e.getMessage());
@@ -80,9 +81,11 @@ public class SRModelConfigurationParser {
     }
 
     public static SRModelConfiguration getConfiguration( String key ){
-        lastRequestedConfigurationName = key;
+        currentConfiguration = configurationMap.get(key);
         return configurationMap.get(key);
     }
 
-
+    public static SRModelConfiguration getCurrentConfiguration(){
+        return currentConfiguration;
+    }
 }
