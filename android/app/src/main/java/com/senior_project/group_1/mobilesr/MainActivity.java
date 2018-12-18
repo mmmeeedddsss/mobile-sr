@@ -74,6 +74,11 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
+        try { // Load configuration xml
+            SRModelConfigurationParser.initilizeConfigurations( getAssets().open(ApplicationConstants.CONFIGURATION_FILE_NAME));
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 
     public void pickImageFromGallery() {

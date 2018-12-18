@@ -1,7 +1,6 @@
 package com.senior_project.group_1.mobilesr;
 
 import android.util.Log;
-import android.util.Xml;
 
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
@@ -9,16 +8,19 @@ import org.xmlpull.v1.XmlPullParserFactory;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.HashMap;
 import java.util.Map;
 
-public class SRModelConfigurationFactory{
-    private SRModelConfigurationFactory() {
+public class SRModelConfigurationParser {
+    private SRModelConfigurationParser() {
     }
 
     private static Map<String, SRModelConfiguration> configurationMap;
+    public static String lastRequestedConfigurationName;
 
     public static void initilizeConfigurations( InputStream inputStream ){
         XmlPullParserFactory parserFactory;
+        configurationMap = new HashMap<>();
         try {
             parserFactory = XmlPullParserFactory.newInstance();
             XmlPullParser parser = parserFactory.newPullParser();
@@ -39,9 +41,10 @@ public class SRModelConfigurationFactory{
         SRModelConfiguration currentConfiguration = new SRModelConfiguration();
 
         while (eventType != XmlPullParser.END_DOCUMENT) {
+            String currentTag = parser.getName();
             if( eventType == XmlPullParser.START_TAG ) // like <configuration>
             {
-                String currentTag = parser.getName().toLowerCase();
+                // Fun fact : I learned that java uses .equals when strings are used in switch statements
                 switch (currentTag)
                 {
                     case "model_path":
@@ -67,7 +70,7 @@ public class SRModelConfigurationFactory{
                         break;
                 }
 
-            } else if( eventType == XmlPullParser.END_TAG){
+            } else if( eventType == XmlPullParser.END_TAG && currentTag.equals("configuration")){
                 configurationMap.put(currentConfiguration.getInputTensorName(),currentConfiguration);
                 currentConfiguration = new SRModelConfiguration();
             }
@@ -77,6 +80,7 @@ public class SRModelConfigurationFactory{
     }
 
     public static SRModelConfiguration getConfiguration( String key ){
+        lastRequestedConfigurationName = key;
         return configurationMap.get(key);
     }
 

@@ -1,0 +1,11 @@
+<sr_mobile_configurations>
+    <configuration>
+        <model_path>basic_srcnn_nearestn_noresize_64.tflite</model_path>
+        <input_tensor_name>resized_image</input_tensor_name>
+        <model_rescales>false</model_rescales>
+        <use_nnapi>false</use_nnapi>
+        <rescaling_factor>2</rescaling_factor>
+        <input_image_width>64</input_image_width>
+        <input_image_height>64</input_image_height>
+    </configuration>
+</sr_mobile_configurations>

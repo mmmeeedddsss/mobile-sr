@@ -9,4 +9,5 @@ public final class ApplicationConstants {
     public static final int MODEL_ZOOM_FACTOR = 2;
 
     public static final double DeltaForPinchZoomScaling = 4;
+    public static final String CONFIGURATION_FILE_NAME = "sr_model_configurations.xml";
 }

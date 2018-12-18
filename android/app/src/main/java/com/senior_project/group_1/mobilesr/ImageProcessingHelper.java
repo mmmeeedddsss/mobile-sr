@@ -138,8 +138,7 @@ public class ImageProcessingHelper {
     public static void processImages(Activity requestingActivity) {
         int batchSize = ApplicationConstants.BATCH_SIZE;
         Bitmap[] bitmaps = new Bitmap [batchSize]; // buffer to hold input bitmaps
-        BitmapProcessor bitmapProcessor = new TFLiteSuperResolver(requestingActivity, batchSize,
-                Objects.requireNonNull(SRModelConfigurationFactory.getConfiguration(SRModelConfigurationFactory.BASIC_SRNN)));
+        BitmapProcessor bitmapProcessor = new TFLiteSuperResolver(requestingActivity, batchSize, SRModelConfigurationParser.getConfiguration("resized_image"));
         int i = 0, nchunks = chunkImages.size();
         while(i < nchunks) {
             // load bitmaps into the array
