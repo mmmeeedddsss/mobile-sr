@@ -12,6 +12,7 @@ set5_range = (1, 6)
 set14_range = (1, 15)
 bsd100_range = (1, 101)
 extension = '-sr'
+model_path = '../saved-model/'
 
 def dataset_paths(path):
   set5_path = path + '/Set5/'
@@ -40,7 +41,7 @@ def create_low_res(path, set5_flag=True, set14_flag=True, bsd100_flag=True):
       subprocess.call(cmd_for_downscale(bsd100_path+'{}.png'.format(i)), shell=True)
 
 def cmd_for_SR(file_path):
-  cmd = 'python bilinear.py {}'.format(file_path)
+  cmd = 'python superresolve.py ' + model_path + ' ' + file_path
   return cmd
 
 # apply super resolution to images in the Low-Resolution domain
@@ -158,7 +159,7 @@ def parse_arguments():
 if __name__ == '__main__':
   args = parse_arguments()
   #create_low_res(path)
-  #apply_SR(path)
+  #apply_SR(args.dataset_path)
   if args.e:
     extension = args.e
 
