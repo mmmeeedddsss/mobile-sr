@@ -1,66 +1,84 @@
 package com.senior_project.group_1.mobilesr;
 
-/*
- * Adding a new configuration:
- * 1 - Add a new class as an inner class of SRModelConfigurationFactory
- *      which extends SRModelConfiguration
- * 2 - Implements required methods
- * 3 - Create a public static final String as the identifier of the configuration
- * 4 - Implement singleton classes, as in one of the other configurations( rename required parts )
- * 5 - Create a new case statement for the SRModelConfigurationFactory.getConfiguration() method
- */
+import android.util.Log;
+import android.util.Xml;
 
+import org.xmlpull.v1.XmlPullParser;
+import org.xmlpull.v1.XmlPullParserException;
+import org.xmlpull.v1.XmlPullParserFactory;
+
+import java.io.IOException;
+import java.io.InputStream;
+import java.util.Map;
 
 public class SRModelConfigurationFactory{
     private SRModelConfigurationFactory() {
     }
 
-    public static SRModelConfiguration getConfiguration( String model_type ){
-        switch (model_type){
-            case SRModelConfigurationFactory.BASIC_SRNN:
-                return SRModelConfiguration_BASIC_SRCNN.getInstance();
+    private static Map<String, SRModelConfiguration> configurationMap;
+
+    public static void initilizeConfigurations( InputStream inputStream ){
+        XmlPullParserFactory parserFactory;
+        try {
+            parserFactory = XmlPullParserFactory.newInstance();
+            XmlPullParser parser = parserFactory.newPullParser();
+            parser.setFeature(XmlPullParser.FEATURE_PROCESS_NAMESPACES, false);
+            parser.setInput(inputStream, null);
+
+            processParsing(parser);
+
+        } catch (XmlPullParserException e) {
+            Log.i("ConfigInit", e.getMessage());
+        } catch (IOException e) {
+            e.printStackTrace();
         }
-        return null;
+    }
+
+    private static void processParsing(XmlPullParser parser) throws XmlPullParserException, IOException {
+        int eventType = parser.getEventType();
+        SRModelConfiguration currentConfiguration = new SRModelConfiguration();
+
+        while (eventType != XmlPullParser.END_DOCUMENT) {
+            if( eventType == XmlPullParser.START_TAG ) // like <configuration>
+            {
+                String currentTag = parser.getName().toLowerCase();
+                switch (currentTag)
+                {
+                    case "model_path":
+                        currentConfiguration.setModelPath( parser.nextText() );
+                        break;
+                    case "input_tensor_name":
+                        currentConfiguration.setInputTensorName( parser.nextText() );
+                        break;
+                    case "model_rescales":
+                        currentConfiguration.setModelRescales( Boolean.parseBoolean(parser.nextText()) );
+                        break;
+                    case "use_nnapi":
+                        currentConfiguration.setNNAPISetting( Boolean.parseBoolean(parser.nextText()) );
+                        break;
+                    case "rescaling_factor":
+                        currentConfiguration.setRescalingFactor( Integer.parseInt(parser.nextText()) );
+                        break;
+                    case "input_image_width":
+                        currentConfiguration.setInputImageWidth( Integer.parseInt(parser.nextText()) );
+                        break;
+                    case "input_image_height":
+                        currentConfiguration.setInputImageHeight( Integer.parseInt(parser.nextText()) );
+                        break;
+                }
+
+            } else if( eventType == XmlPullParser.END_TAG){
+                configurationMap.put(currentConfiguration.getInputTensorName(),currentConfiguration);
+                currentConfiguration = new SRModelConfiguration();
+            }
+            eventType = parser.next();
+        }
+
+    }
+
+    public static SRModelConfiguration getConfiguration( String key ){
+        return configurationMap.get(key);
     }
 
 
-    // CONFIGURATIONS
-
-    public static final String BASIC_SRNN = "BACIS_SRNN";
-    static class SRModelConfiguration_BASIC_SRCNN extends SRModelConfiguration {
-        // Singleton pattern
-        private static SRModelConfiguration instance = null;
-
-        public static SRModelConfiguration getInstance()
-        {
-            if (instance == null)
-                instance = new SRModelConfiguration_BASIC_SRCNN(); // Override when creating a new config
-
-            return instance;
-        }
-
-        private SRModelConfiguration_BASIC_SRCNN(){} // Override when creating a new config
-
-        // Configurations
-        @Override
-        String getModelPath() { return "basic_srcnn_nearestn_noresize_64.tflite"; }
-
-        @Override
-        String getInputTensorName() { return "resized_image"; }
-
-        @Override
-        boolean getModelRescales() { return false; }
-
-        @Override
-        int getRescalingFactor() { return 2; }
-
-        @Override
-        int getInputImageWidth() { return 64; }
-
-        @Override
-        int getInputImageHeight() { return 64; }
-
-        @Override
-        boolean getNNAPISetting() { return false; }
-    }
 }
