@@ -302,6 +302,17 @@ public class ZoomableImageView extends AppCompatImageView {
             src_rect.bottom = bm.getHeight() - 1;
         }
 
+        // second pass
+
+        if( src_rect.left < 0 || src_rect.right >= bm.getWidth() ){
+            src_rect.left = 0;
+            src_rect.right = bm.getWidth() - 1;
+        }
+        if( src_rect.top < 0 || src_rect.bottom >= bm.getHeight()  ){
+            src_rect.top = 0;
+            src_rect.bottom = bm.getHeight() - 1;
+        }
+
         return src_rect;
     }
 
@@ -320,7 +331,6 @@ public class ZoomableImageView extends AppCompatImageView {
         if( bm != null ) {
             // Main challenge here is selecting a sub-bitmap that fits the model constraints
 
-            // TODO add padding instead of cropping the current selection
             // -> Integer division causes cropping, maybe increasing those divisions
             // with proper handling might be work( also handle setImage, crop the reconstructed one )
             // Overlap*(n+1)+(chunk_size-2*overlap)*n = size_y

@@ -78,7 +78,7 @@ public class MainActivity extends AppCompatActivity {
 
     public void pickImageFromGallery() {
         Intent gallery_intent = new Intent(Intent.ACTION_PICK,
-                android.provider.MediaStore.Images.Media.INTERNAL_CONTENT_URI);
+                MediaStore.Images.Media.INTERNAL_CONTENT_URI);
         startActivityForResult(gallery_intent, REQUEST_IMAGE_SELECT);
     }
 

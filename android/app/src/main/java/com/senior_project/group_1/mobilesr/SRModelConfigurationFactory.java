@@ -61,6 +61,6 @@ public class SRModelConfigurationFactory{
         int getInputImageHeight() { return 64; }
 
         @Override
-        boolean getNNAPISetting() { return true; }
+        boolean getNNAPISetting() { return false; }
     }
 }
