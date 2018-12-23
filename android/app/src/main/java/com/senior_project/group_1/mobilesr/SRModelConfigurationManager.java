@@ -48,6 +48,9 @@ public class SRModelConfigurationManager {
                 // Fun fact : I learned that java uses .equals when strings are used in switch statements
                 switch (currentTag)
                 {
+                    case "model_name":
+                        currentConfiguration.setModelName( parser.nextText() );
+                        break;
                     case "model_path":
                         currentConfiguration.setModelPath( parser.nextText() );
                         break;
@@ -72,7 +75,7 @@ public class SRModelConfigurationManager {
                 }
 
             } else if( eventType == XmlPullParser.END_TAG && currentTag.equals("configuration")){
-                configurationMap.put(currentConfiguration.getInputTensorName(),currentConfiguration);
+                configurationMap.put(currentConfiguration.getModelName(),currentConfiguration);
                 currentConfiguration = new SRModelConfiguration();
             }
             eventType = parser.next();
@@ -82,7 +85,7 @@ public class SRModelConfigurationManager {
 
     public static SRModelConfiguration getConfiguration( String key ){
         currentConfiguration = configurationMap.get(key);
-        return configurationMap.get(key);
+        return currentConfiguration;
     }
 
     public static SRModelConfiguration getCurrentConfiguration(){

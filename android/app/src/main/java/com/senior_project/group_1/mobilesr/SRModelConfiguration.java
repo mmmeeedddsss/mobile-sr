@@ -2,6 +2,7 @@ package com.senior_project.group_1.mobilesr;
 
 public class SRModelConfiguration{
 
+    private String MODEL_NAME;
     private String MODEL_PATH;
     private String INPUT_TENSOR_NAME;
     private boolean MODEL_RESCALES;
@@ -10,6 +11,7 @@ public class SRModelConfiguration{
     private int INPUT_IMAGE_WIDTH;
     private int INPUT_IMAGE_HEIGHT;
 
+    String getModelName() { return MODEL_NAME; }
     String getModelPath(){
         return MODEL_PATH;
     }
@@ -36,6 +38,10 @@ public class SRModelConfiguration{
     }
     int getOutputTensorHeight(){
         return getInputImageHeight()*getRescalingFactor();
+    }
+
+    public void setModelName(String MODEL_NAME) {
+        this.MODEL_NAME = MODEL_NAME;
     }
 
     public void setModelPath(String MODEL_PATH) {

@@ -68,8 +68,10 @@ public class PreprocessAndEnhanceActivity extends AppCompatActivity {
             long startTime = System.nanoTime();
             Log.i("processImage", String.format("Bitmap size: %d %d", bitmap.getWidth(), bitmap.getHeight()));
 
+            SRModelConfiguration modelConfiguration = SRModelConfigurationManager.getConfiguration("sr_model_1");
+
             ImageProcessingHelper.divideImage(imageView.getCurrentBitmap());
-            ImageProcessingHelper.processImages(this);
+            ImageProcessingHelper.processImages(this, modelConfiguration);
             Bitmap processed_bitmap = ImageProcessingHelper.reconstructImage();
 
             long estimatedTime = System.nanoTime() - startTime;
