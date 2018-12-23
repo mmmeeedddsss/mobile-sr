@@ -74,6 +74,13 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
+        try { // Load configuration xml
+            SRModelConfigurationManager
+                    .initilizeConfigurations( getAssets().open(ApplicationConstants.CONFIGURATION_FILE_NAME),
+                            "resized_image");
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 
     public void pickImageFromGallery() {

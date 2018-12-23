@@ -13,9 +13,6 @@ import android.util.Log;
 import android.view.MotionEvent;
 import android.widget.Toast;
 
-import java.io.ByteArrayOutputStream;
-import java.nio.ByteBuffer;
-
 import static java.lang.Math.abs;
 import static java.lang.Math.max;
 import static java.lang.Math.min;
@@ -338,20 +335,22 @@ public class ZoomableImageView extends AppCompatImageView {
             // (size_y-overlap)/(chunk_size-overlap) = n
             // + 1 is selecting a bigger area
 
+            int modelInputSizeX = SRModelConfigurationManager.getCurrentConfiguration().getInputImageWidth();
+            int modelInputSizeY = SRModelConfigurationManager.getCurrentConfiguration().getInputImageWidth();
 
             int chunkCountForX = (getWidth(src_rect)-ApplicationConstants.IMAGE_OVERLAP_X*2)
-                    / (ApplicationConstants.IMAGE_CHUNK_SIZE_X-ApplicationConstants.IMAGE_OVERLAP_X*2) + 1;
+                    / (modelInputSizeX-ApplicationConstants.IMAGE_OVERLAP_X*2) + 1;
             int chunkCountForY = (getHeight(src_rect)-ApplicationConstants.IMAGE_OVERLAP_Y*2)
-                    / (ApplicationConstants.IMAGE_CHUNK_SIZE_Y-ApplicationConstants.IMAGE_OVERLAP_Y*2) + 1;
+                    / (modelInputSizeY-ApplicationConstants.IMAGE_OVERLAP_Y*2) + 1;
 
             Log.i("ZoomableImageView", chunkCountForX + " - " + chunkCountForY);
 
             if( chunkCountForX > 0 && chunkCountForY > 0 ){
                 int subselectionMiddleX = getWidth(src_rect)/2 + src_rect.left;
                 int subselectionMiddleY = getHeight(src_rect)/2 + src_rect.top;
-                int subselectionWidth = chunkCountForX*(ApplicationConstants.IMAGE_CHUNK_SIZE_X-ApplicationConstants.IMAGE_OVERLAP_X*2)
+                int subselectionWidth = chunkCountForX*(modelInputSizeX-ApplicationConstants.IMAGE_OVERLAP_X*2)
                         + ApplicationConstants.IMAGE_OVERLAP_X*2;
-                int subselectionHeight = chunkCountForY*(ApplicationConstants.IMAGE_CHUNK_SIZE_Y-ApplicationConstants.IMAGE_OVERLAP_Y*2)
+                int subselectionHeight = chunkCountForY*(modelInputSizeY-ApplicationConstants.IMAGE_OVERLAP_Y*2)
                         + ApplicationConstants.IMAGE_OVERLAP_Y*2;
                 Log.i("ZoomableImageView", String.format(" subselection w:%d h:%d ", subselectionWidth, subselectionHeight));
                 Rect subselectionRect = new Rect(

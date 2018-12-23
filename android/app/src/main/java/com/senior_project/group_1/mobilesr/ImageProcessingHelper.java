@@ -6,7 +6,6 @@ import android.graphics.Canvas;
 import android.util.Log;
 
 import java.util.ArrayList;
-import java.util.Objects;
 
 public class ImageProcessingHelper {
 
@@ -17,8 +16,8 @@ public class ImageProcessingHelper {
 
     public static Bitmap reconstructImage(){
         return reconstructImage(
-                ApplicationConstants.IMAGE_CHUNK_SIZE_Y,
-                ApplicationConstants.IMAGE_CHUNK_SIZE_X,
+                SRModelConfigurationManager.getCurrentConfiguration().getInputImageHeight(),
+                SRModelConfigurationManager.getCurrentConfiguration().getInputImageWidth(),
                 ApplicationConstants.IMAGE_OVERLAP_X,
                 ApplicationConstants.IMAGE_OVERLAP_Y);
     }
@@ -27,8 +26,8 @@ public class ImageProcessingHelper {
     public static void divideImage( final Bitmap scaledBitmap ) {
         divideImage(
                 scaledBitmap,
-                ApplicationConstants.IMAGE_CHUNK_SIZE_Y,
-                ApplicationConstants.IMAGE_CHUNK_SIZE_X,
+                SRModelConfigurationManager.getCurrentConfiguration().getInputImageHeight(),
+                SRModelConfigurationManager.getCurrentConfiguration().getInputImageWidth(),
                 ApplicationConstants.IMAGE_OVERLAP_X,
                 ApplicationConstants.IMAGE_OVERLAP_Y);
     }
@@ -88,13 +87,14 @@ public class ImageProcessingHelper {
 
     public static ArrayList<Bitmap> prepareChunks(int chunkHeight, int chunkWidth, int overlapX, int overlapY) {
         ArrayList<Bitmap> result = new ArrayList<>();
+        int modelZoomFactor = SRModelConfigurationManager.getCurrentConfiguration().getRescalingFactor();
         for(int i=0; i<chunkImages.size(); i++) {
             try {
                 result.add(Bitmap.createBitmap(chunkImages.get(i),
-                        overlapX * ApplicationConstants.MODEL_ZOOM_FACTOR,
-                        overlapY * ApplicationConstants.MODEL_ZOOM_FACTOR,
-                        (chunkWidth - overlapX * 2) * ApplicationConstants.MODEL_ZOOM_FACTOR,
-                        (chunkHeight - overlapY * 2) * ApplicationConstants.MODEL_ZOOM_FACTOR));
+                        overlapX * modelZoomFactor,
+                        overlapY * modelZoomFactor,
+                        (chunkWidth - overlapX * 2) * modelZoomFactor,
+                        (chunkHeight - overlapY * 2) * modelZoomFactor));
             }
             catch(NullPointerException e) {
                 Log.e("prepareChunks", "image: " + i);
@@ -116,8 +116,8 @@ public class ImageProcessingHelper {
         int originalHeight = (chunkHeight-overlapY*2)*rows;
         int originalWidth = (chunkWidth-overlapX*2)*columns;
         Bitmap bitmap = Bitmap.createBitmap(
-                originalWidth*ApplicationConstants.MODEL_ZOOM_FACTOR,
-                originalHeight*ApplicationConstants.MODEL_ZOOM_FACTOR,
+                originalWidth * SRModelConfigurationManager.getCurrentConfiguration().getRescalingFactor(),
+                originalHeight * SRModelConfigurationManager.getCurrentConfiguration().getRescalingFactor(),
                 Bitmap.Config.ARGB_4444);
         Log.i("ReconstructImage", String.format("New bm is created : %dx%d",bitmap.getWidth(), bitmap.getHeight()));
         Canvas canvas = new Canvas(bitmap); // this constructor causes canvas operations to write on provided bitmap
@@ -138,8 +138,7 @@ public class ImageProcessingHelper {
     public static void processImages(Activity requestingActivity) {
         int batchSize = ApplicationConstants.BATCH_SIZE;
         Bitmap[] bitmaps = new Bitmap [batchSize]; // buffer to hold input bitmaps
-        BitmapProcessor bitmapProcessor = new TFLiteSuperResolver(requestingActivity, batchSize,
-                Objects.requireNonNull(SRModelConfigurationFactory.getConfiguration(SRModelConfigurationFactory.BASIC_SRNN)));
+        BitmapProcessor bitmapProcessor = new TFLiteSuperResolver(requestingActivity, batchSize, SRModelConfigurationManager.getConfiguration("resized_image"));
         int i = 0, nchunks = chunkImages.size();
         while(i < nchunks) {
             // load bitmaps into the array
