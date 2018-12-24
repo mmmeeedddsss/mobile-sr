@@ -43,7 +43,7 @@ public class PreprocessAndEnhanceActivity extends AppCompatActivity {
         processButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                processImage();
+                startImageProcessing();
             }
         });
 
@@ -51,9 +51,11 @@ public class PreprocessAndEnhanceActivity extends AppCompatActivity {
         splitButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                ImageProcessingHelper.divideImage(bitmap);
+                /*
+                ImageProcessingTask.divideImage(bitmap);
                 Intent splitImageIntent = new Intent(PreprocessAndEnhanceActivity.this, DivideImageActivity.class);
                 startActivity(splitImageIntent);
+                */
             }
         });
 
@@ -63,21 +65,20 @@ public class PreprocessAndEnhanceActivity extends AppCompatActivity {
         setImage();
     }
 
-    public void processImage() {
+    public void startImageProcessing() {
         if (bitmap != null) {
-            long startTime = System.nanoTime();
             Log.i("processImage", String.format("Bitmap size: %d %d", bitmap.getWidth(), bitmap.getHeight()));
 
-            SRModelConfiguration modelConfiguration = SRModelConfigurationManager.getConfiguration("SRCNN_NR_256");
+            SRModelConfiguration modelConfiguration = SRModelConfigurationManager.getConfiguration("SRCNN_NR_128");
 
-            ImageProcessingHelper.divideImage(imageView.getCurrentBitmap());
-            ImageProcessingHelper.processImages(this, modelConfiguration);
-            Bitmap processed_bitmap = ImageProcessingHelper.reconstructImage();
-
-            long estimatedTime = System.nanoTime() - startTime;
-            Toast.makeText(this, "Elapsed Time in ms: " + estimatedTime / 1000000, Toast.LENGTH_LONG).show();
-            imageView.setImageBitmap(processed_bitmap);
+            Bitmap inputBitmap = imageView.getCurrentBitmap();
+            new ImageProcessingTask(this, modelConfiguration).execute(inputBitmap);
         }
+    }
+
+    // called by asynctask
+    public void endImageProcessing(Bitmap outputBitmap) {
+        imageView.setImageBitmap(outputBitmap);
     }
 
     protected void setImage() {

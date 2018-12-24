@@ -8,8 +8,6 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.GridView;
 
-import java.util.ArrayList;
-
 public class DivideImageActivity extends Activity {
     private Button mergeButton;
     public static Bitmap bitmap;
@@ -17,12 +15,13 @@ public class DivideImageActivity extends Activity {
     @Override
     public void onCreate(Bundle savedInstance) {
         super.onCreate(savedInstance);
+        /*
         setContentView(R.layout.divide_image_activity);
         mergeButton = findViewById(R.id.buttonMergeImage);
         mergeButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                bitmap = ImageProcessingHelper.reconstructImage();
+                bitmap = ImageProcessingTask.reconstructImage();
                 Intent mergeImageIntent = new Intent(DivideImageActivity.this, MergeImageActivity.class);
                 startActivity(mergeImageIntent);
             }
@@ -30,7 +29,8 @@ public class DivideImageActivity extends Activity {
 
         //Getting the grid view and setting an adapter to it
         GridView grid = findViewById(R.id.divided_image_grid_view);
-        grid.setAdapter(new ImageAdapter(this, ImageProcessingHelper.chunkImages));
-        grid.setNumColumns(ImageProcessingHelper.columns);
+        grid.setAdapter(new ImageAdapter(this, ImageProcessingTask.chunkImages));
+        grid.setNumColumns(ImageProcessingTask.columns);
+        */
     }
 }
