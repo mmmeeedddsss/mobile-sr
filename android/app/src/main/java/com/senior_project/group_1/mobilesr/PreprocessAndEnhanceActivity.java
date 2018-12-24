@@ -2,7 +2,9 @@ package com.senior_project.group_1.mobilesr;
 
 import android.app.Activity;
 import android.content.Intent;
+import android.content.res.ColorStateList;
 import android.graphics.Bitmap;
+import android.graphics.Color;
 import android.media.Image;
 import android.net.Uri;
 import android.os.Bundle;
@@ -60,6 +62,7 @@ public class PreprocessAndEnhanceActivity extends AppCompatActivity {
         mProgressbar = findViewById(R.id.pbarImageProcessingProgress);
         mProgressbar.setMin(0);
         mProgressbar.setProgress(0);
+        mProgressbar.setProgressTintList(ColorStateList.valueOf(Color.rgb(65, 242, 71)));
 
         // Set content of Zoomable image view
         Intent intent = getIntent();
