@@ -409,7 +409,7 @@ public class ZoomableImageView extends AppCompatImageView {
             Bitmap new_bm = Bitmap.createBitmap(newPixelArray, getWidth(subselectionRect), getHeight(subselectionRect), Bitmap.Config.ARGB_8888);
 
             long estimatedTime = System.nanoTime() - startTime;
-            Toast.makeText(getContext(), "Elapsed Time in ms for reflection: " + estimatedTime / 1000000, Toast.LENGTH_LONG).show();
+            //Toast.makeText(getContext(), "Elapsed Time in ms for reflection: " + estimatedTime / 1000000, Toast.LENGTH_LONG).show();
             return new_bm;
         }
     }

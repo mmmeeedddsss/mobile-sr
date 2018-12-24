@@ -3,6 +3,8 @@ package com.senior_project.group_1.mobilesr;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 
+import android.view.View;
+import android.widget.AdapterView;
 import android.widget.TextView;
 import android.widget.Spinner;
 import android.widget.ArrayAdapter;
@@ -20,7 +22,18 @@ public class SettingsActivity extends AppCompatActivity {
                 this, android.R.layout.simple_spinner_dropdown_item, conf_list);
         Spinner spinner = (Spinner) findViewById(R.id.spinner);
         spinner.setAdapter(adapter);
-        fill_table();
+        spinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+            @Override
+            public void onItemSelected(AdapterView<?> parentView, View selectedItemView, int position, long id) {
+                SRModelConfigurationManager.getConfiguration(conf_list[position]);
+                fill_table();
+            }
+
+            @Override
+            public void onNothingSelected(AdapterView<?> parentView) {
+            }
+
+        });
     }
 
     private void fill_table()

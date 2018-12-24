@@ -18,7 +18,7 @@ public class SRModelConfigurationManager {
     private static Map<String, SRModelConfiguration> configurationMap;
     private static SRModelConfiguration currentConfiguration;
 
-    public static void initilizeConfigurations( InputStream inputStream, String initialModelName ){
+    public static void initilizeConfigurations( InputStream inputStream){
         XmlPullParserFactory parserFactory;
         configurationMap = new HashMap<>();
         try {
@@ -28,7 +28,8 @@ public class SRModelConfigurationManager {
             parser.setInput(inputStream, null);
 
             processParsing(parser);
-            currentConfiguration = configurationMap.get(initialModelName);
+
+            Log.i("SRModelConfigurationManager","Default conf:"+currentConfiguration.toString());
 
         } catch (XmlPullParserException e) {
             Log.i("ConfigInit", e.getMessage());
@@ -71,6 +72,9 @@ public class SRModelConfigurationManager {
                         break;
                     case "input_image_height":
                         newConfiguration.setInputImageHeight( Integer.parseInt(parser.nextText()) );
+                        break;
+                    case "num_parallel_batch":
+                        newConfiguration.setNumParallelBatch(Integer.parseInt(parser.nextText()));
                         break;
                     case "default_selection":
                         if( Boolean.parseBoolean( parser.nextText() ) )
