@@ -1,11 +1,8 @@
 package com.senior_project.group_1.mobilesr;
 
 import android.app.Activity;
-import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
-import android.os.AsyncTask;
-import android.os.Environment;
 import android.util.Log;
 import android.widget.ProgressBar;
 
@@ -13,7 +10,6 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
 import java.util.ArrayList;
 
@@ -171,7 +167,7 @@ public class ImageProcessingHelper {
     }
 
     public static void processImages(Activity requestingActivity, SRModelConfiguration model_configuration, ProgressBar progressBar) {
-        int batchSize = ApplicationConstants.BATCH_SIZE;
+        int batchSize = model_configuration.getNumParallelBatch();
         Bitmap[] bitmaps = new Bitmap [batchSize]; // buffer to hold input bitmaps
         BitmapProcessor bitmapProcessor = new TFLiteSuperResolver(requestingActivity, batchSize, model_configuration);
         int i = 0, nchunks = chunkImages.size();

@@ -1,9 +1,11 @@
 package com.senior_project.group_1.mobilesr;
 
+import android.Manifest;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Environment;
 import android.provider.MediaStore;
+import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.FileProvider;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -76,11 +78,14 @@ public class MainActivity extends AppCompatActivity {
 
         try { // Load configuration xml
             SRModelConfigurationManager
-                    .initilizeConfigurations( getAssets().open(ApplicationConstants.CONFIGURATION_FILE_NAME),
-                            "SRCNN_NR_64");
+                    .initilizeConfigurations( getAssets().open(ApplicationConstants.CONFIGURATION_FILE_NAME));
         } catch (IOException e) {
             e.printStackTrace();
         }
+
+        ActivityCompat.requestPermissions(this,
+                new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE},
+                ApplicationConstants.EXTERNAL_WRITE_PERMISSION_ID);
     }
 
     public void pickImageFromGallery() {

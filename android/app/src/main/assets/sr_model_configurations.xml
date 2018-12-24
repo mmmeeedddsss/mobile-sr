@@ -8,6 +8,7 @@
         <rescaling_factor>2</rescaling_factor>
         <input_image_width>64</input_image_width>
         <input_image_height>64</input_image_height>
+        <num_parallel_batch>32</num_parallel_batch>
         <use_nnapi>true</use_nnapi>
     </configuration>
     <configuration>
@@ -18,6 +19,7 @@
         <rescaling_factor>2</rescaling_factor>
         <input_image_width>128</input_image_width>
         <input_image_height>128</input_image_height>
+        <num_parallel_batch>8</num_parallel_batch>
         <use_nnapi>true</use_nnapi>
     </configuration>
     <configuration>
@@ -28,6 +30,7 @@
         <rescaling_factor>2</rescaling_factor>
         <input_image_width>256</input_image_width>
         <input_image_height>256</input_image_height>
+        <num_parallel_batch>2</num_parallel_batch>
         <use_nnapi>true</use_nnapi>
     </configuration>
 </sr_mobile_configurations>

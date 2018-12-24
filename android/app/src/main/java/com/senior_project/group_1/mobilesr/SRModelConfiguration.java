@@ -1,5 +1,7 @@
 package com.senior_project.group_1.mobilesr;
 
+import java.util.Locale;
+
 public class SRModelConfiguration{
 
     private String MODEL_NAME;
@@ -10,6 +12,7 @@ public class SRModelConfiguration{
     private int RESCALING_FACTOR;
     private int INPUT_IMAGE_WIDTH;
     private int INPUT_IMAGE_HEIGHT;
+    private int NUM_PARALLEL_BATCH;
 
     String getModelName() { return MODEL_NAME; }
     String getModelPath(){
@@ -30,6 +33,7 @@ public class SRModelConfiguration{
     int getInputImageHeight(){
         return INPUT_IMAGE_HEIGHT;
     }
+    int getNumParallelBatch() { return NUM_PARALLEL_BATCH; }
     boolean getNNAPISetting(){
         return NNAPI_SETTING;
     }
@@ -56,6 +60,10 @@ public class SRModelConfiguration{
         this.MODEL_RESCALES = MODEL_RESCALES;
     }
 
+    public void setNumParallelBatch(int numParellelBatch) {
+        this.NUM_PARALLEL_BATCH = numParellelBatch;
+    }
+
     public void setNNAPISetting(boolean NNAPISetting) {
         this.NNAPI_SETTING = NNAPISetting;
     }
@@ -70,5 +78,10 @@ public class SRModelConfiguration{
 
     public void setInputImageHeight(int INPUT_IMAGE_HEIGHT) {
         this.INPUT_IMAGE_HEIGHT = INPUT_IMAGE_HEIGHT;
+    }
+
+    @Override
+    public String toString() {
+        return String.format(Locale.ENGLISH, "Model: %s, parellel_batch: %d",getModelName(), getNumParallelBatch());
     }
 }
