@@ -95,4 +95,10 @@ public class SRModelConfigurationManager {
     public static SRModelConfiguration getCurrentConfiguration(){
         return currentConfiguration;
     }
+
+    public static String[] getConfigurationMapKeys()
+    {
+        return configurationMap.keySet().toArray(new String[0]);
+    }
+
 }

@@ -23,6 +23,7 @@
         <activity android:name="com.senior_project.group_1.mobilesr.TutorialActivity"></activity>
         <activity android:name="com.senior_project.group_1.mobilesr.DivideImageActivity"></activity>
         <activity android:name="com.senior_project.group_1.mobilesr.MergeImageActivity"></activity>
+        <activity android:name="com.senior_project.group_1.mobilesr.SettingsActivity"></activity>
         <provider
             android:name="android.support.v4.content.FileProvider"
             android:authorities="com.senior_project.group_1.mobilesr.MainActivity"
