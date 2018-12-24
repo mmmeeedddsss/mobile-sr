@@ -1,10 +1,20 @@
 package com.senior_project.group_1.mobilesr;
 
 import android.app.Activity;
+import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
+import android.os.AsyncTask;
+import android.os.Environment;
 import android.util.Log;
+import android.widget.ProgressBar;
 
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.OutputStreamWriter;
+import java.io.PrintWriter;
 import java.util.ArrayList;
 
 public class ImageProcessingHelper {
@@ -12,6 +22,31 @@ public class ImageProcessingHelper {
     public static ArrayList<Bitmap> chunkImages; // TODO: Only for debugging purpose (DELETE later.)
     public static int columns;
     public static int rows;
+
+    public static void writeToSDFile(String data){
+
+        // Find the root of the external storage.
+        // See http://developer.android.com/guide/topics/data/data-  storage.html#filesExternal
+
+        File root = android.os.Environment.getExternalStorageDirectory();
+        // See http://stackoverflow.com/questions/3551821/android-write-to-sd-card-folder
+
+        File file = new File(root.getAbsolutePath(), "statistics.txt");
+
+        try {
+            file.createNewFile();
+            FileOutputStream f = new FileOutputStream(file);
+            PrintWriter pw = new PrintWriter(f);
+            pw.println(data);
+            pw.flush();
+            pw.close();
+            f.close();
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
 
 
     public static Bitmap reconstructImage(){
@@ -135,11 +170,17 @@ public class ImageProcessingHelper {
         return bitmap;
     }
 
-    public static void processImages(Activity requestingActivity, SRModelConfiguration model_configuration) {
+    public static void processImages(Activity requestingActivity, SRModelConfiguration model_configuration, ProgressBar progressBar) {
         int batchSize = ApplicationConstants.BATCH_SIZE;
         Bitmap[] bitmaps = new Bitmap [batchSize]; // buffer to hold input bitmaps
         BitmapProcessor bitmapProcessor = new TFLiteSuperResolver(requestingActivity, batchSize, model_configuration);
         int i = 0, nchunks = chunkImages.size();
+        progressBar.post(new Runnable() {
+            @Override
+            public void run() {
+                progressBar.setMax(nchunks);
+            }
+        });
         while(i < nchunks) {
             // load bitmaps into the array
             int j = 0;
@@ -152,8 +193,15 @@ public class ImageProcessingHelper {
             Bitmap[] outputBitmaps = bitmapProcessor.processBitmaps(bitmaps);
             // unload the bitmaps back into the list
             int k = i;
-            while(j > 0)
+            while(j > 0) {
                 chunkImages.set(--k, outputBitmaps[--j]);
+                progressBar.post(new Runnable() {
+                    @Override
+                    public void run() {
+                        progressBar.setProgress( progressBar.getProgress() + 1 );
+                    }
+                });
+            }
         }
         bitmapProcessor.close();
     }

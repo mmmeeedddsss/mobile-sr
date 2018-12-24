@@ -1,7 +1,9 @@
 package com.senior_project.group_1.mobilesr;
 
+import android.app.Activity;
 import android.content.Intent;
 import android.graphics.Bitmap;
+import android.media.Image;
 import android.net.Uri;
 import android.os.Bundle;
 import android.provider.MediaStore;
@@ -9,7 +11,11 @@ import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
+import android.widget.ProgressBar;
 import android.widget.Toast;
+
+import java.util.Calendar;
+import java.util.Locale;
 
 public class PreprocessAndEnhanceActivity extends AppCompatActivity {
 
@@ -20,6 +26,8 @@ public class PreprocessAndEnhanceActivity extends AppCompatActivity {
     private Button splitButton;
     private BitmapProcessor bitmapProcessor;
     private Uri mImageUri;
+    private ProgressBar mProgressbar;
+    private Activity self;
 
     @Override
     public void onCreate(Bundle savedInstance) {
@@ -47,15 +55,11 @@ public class PreprocessAndEnhanceActivity extends AppCompatActivity {
             }
         });
 
-        splitButton = findViewById(R.id.split_image_button);
-        splitButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                ImageProcessingHelper.divideImage(bitmap);
-                Intent splitImageIntent = new Intent(PreprocessAndEnhanceActivity.this, DivideImageActivity.class);
-                startActivity(splitImageIntent);
-            }
-        });
+        self = this;
+
+        mProgressbar = findViewById(R.id.pbarImageProcessingProgress);
+        mProgressbar.setMin(0);
+        mProgressbar.setProgress(0);
 
         // Set content of Zoomable image view
         Intent intent = getIntent();
@@ -65,18 +69,33 @@ public class PreprocessAndEnhanceActivity extends AppCompatActivity {
 
     public void processImage() {
         if (bitmap != null) {
-            long startTime = System.nanoTime();
-            Log.i("processImage", String.format("Bitmap size: %d %d", bitmap.getWidth(), bitmap.getHeight()));
+            Toast.makeText(getApplicationContext(), "Process Started", Toast.LENGTH_LONG).show();
+            new Thread(new Runnable() {
+                @Override
+                public void run() {
 
-            SRModelConfiguration modelConfiguration = SRModelConfigurationManager.getCurrentConfiguration();
+                    long startTime = System.nanoTime();
+                    Log.i("processImage", String.format("Bitmap size: %d %d", bitmap.getWidth(), bitmap.getHeight()));
 
-            ImageProcessingHelper.divideImage(imageView.getCurrentBitmap());
-            ImageProcessingHelper.processImages(this, modelConfiguration);
-            Bitmap processed_bitmap = ImageProcessingHelper.reconstructImage();
+                    SRModelConfiguration modelConfiguration = SRModelConfigurationManager.getCurrentConfiguration();
 
-            long estimatedTime = System.nanoTime() - startTime;
-            Toast.makeText(this, "Elapsed Time in ms: " + estimatedTime / 1000000, Toast.LENGTH_LONG).show();
-            imageView.setImageBitmap(processed_bitmap);
+                    ImageProcessingHelper.divideImage(imageView.getCurrentBitmap());
+                    ImageProcessingHelper.processImages(self, modelConfiguration, mProgressbar);
+                    Bitmap processed_bitmap = ImageProcessingHelper.reconstructImage();
+
+                    long estimatedTime = System.nanoTime() - startTime;
+                    ImageProcessingHelper.writeToSDFile(
+                            String.format(Locale.ENGLISH, "Time: %s | Conf: %s | dT: %d | I: %dx%d",
+                                    Calendar.getInstance().getTime(),
+                                    SRModelConfigurationManager.getCurrentConfiguration().toString(),
+                                    estimatedTime,
+                                    imageView.getCurrentBitmap().getWidth(),
+                                    imageView.getCurrentBitmap().getHeight()));
+
+                    //Toast.makeText(getApplicationContext(), "Elapsed Time in ms: " + estimatedTime / 1000000, Toast.LENGTH_LONG).show();
+                    imageView.setImageBitmap(processed_bitmap);
+                }
+            }).start();
         }
     }
 
