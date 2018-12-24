@@ -1,6 +1,7 @@
 <sr_mobile_configurations>
     <configuration>
         <model_name>SRCNN_NR_64</model_name>
+        <default_selection>true</default_selection>>
         <model_path>basic_srcnn_nearestn_noresize_128.tflite</model_path>
         <input_tensor_name>resized_image</input_tensor_name>
         <model_rescales>false</model_rescales>

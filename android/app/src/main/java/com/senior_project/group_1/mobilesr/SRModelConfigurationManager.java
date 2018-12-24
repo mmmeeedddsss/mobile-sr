@@ -39,7 +39,7 @@ public class SRModelConfigurationManager {
 
     private static void processParsing(XmlPullParser parser) throws XmlPullParserException, IOException {
         int eventType = parser.getEventType();
-        SRModelConfiguration currentConfiguration = new SRModelConfiguration();
+        SRModelConfiguration newConfiguration = new SRModelConfiguration();
 
         while (eventType != XmlPullParser.END_DOCUMENT) {
             String currentTag = parser.getName();
@@ -49,34 +49,38 @@ public class SRModelConfigurationManager {
                 switch (currentTag)
                 {
                     case "model_name":
-                        currentConfiguration.setModelName( parser.nextText() );
+                        newConfiguration.setModelName( parser.nextText() );
                         break;
                     case "model_path":
-                        currentConfiguration.setModelPath( parser.nextText() );
+                        newConfiguration.setModelPath( parser.nextText() );
                         break;
                     case "input_tensor_name":
-                        currentConfiguration.setInputTensorName( parser.nextText() );
+                        newConfiguration.setInputTensorName( parser.nextText() );
                         break;
                     case "model_rescales":
-                        currentConfiguration.setModelRescales( Boolean.parseBoolean(parser.nextText()) );
+                        newConfiguration.setModelRescales( Boolean.parseBoolean(parser.nextText()) );
                         break;
                     case "use_nnapi":
-                        currentConfiguration.setNNAPISetting( Boolean.parseBoolean(parser.nextText()) );
+                        newConfiguration.setNNAPISetting( Boolean.parseBoolean(parser.nextText()) );
                         break;
                     case "rescaling_factor":
-                        currentConfiguration.setRescalingFactor( Integer.parseInt(parser.nextText()) );
+                        newConfiguration.setRescalingFactor( Integer.parseInt(parser.nextText()) );
                         break;
                     case "input_image_width":
-                        currentConfiguration.setInputImageWidth( Integer.parseInt(parser.nextText()) );
+                        newConfiguration.setInputImageWidth( Integer.parseInt(parser.nextText()) );
                         break;
                     case "input_image_height":
-                        currentConfiguration.setInputImageHeight( Integer.parseInt(parser.nextText()) );
+                        newConfiguration.setInputImageHeight( Integer.parseInt(parser.nextText()) );
+                        break;
+                    case "default_selection":
+                        if( Boolean.parseBoolean( parser.nextText() ) )
+                            currentConfiguration = newConfiguration;
                         break;
                 }
 
             } else if( eventType == XmlPullParser.END_TAG && currentTag.equals("configuration")){
-                configurationMap.put(currentConfiguration.getModelName(),currentConfiguration);
-                currentConfiguration = new SRModelConfiguration();
+                configurationMap.put(newConfiguration.getModelName(),newConfiguration);
+                newConfiguration = new SRModelConfiguration();
             }
             eventType = parser.next();
         }
