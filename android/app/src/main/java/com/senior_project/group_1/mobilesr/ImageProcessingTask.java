@@ -46,7 +46,7 @@ public class ImageProcessingTask extends AsyncTask<Bitmap, Integer, Bitmap> {
 
         try {
             file.createNewFile();
-            FileOutputStream f = new FileOutputStream(file);
+            FileOutputStream f = new FileOutputStream(file,true);
             PrintWriter pw = new PrintWriter(f);
             pw.println(data);
             pw.flush();
