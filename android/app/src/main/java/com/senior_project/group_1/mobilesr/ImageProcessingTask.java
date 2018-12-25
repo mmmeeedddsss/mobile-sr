@@ -3,8 +3,9 @@ package com.senior_project.group_1.mobilesr;
 import android.app.Activity;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
+import android.os.AsyncTask;
 import android.util.Log;
-import android.widget.ProgressBar;
+import android.widget.Toast;
 
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -12,14 +13,28 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Locale;
 
-public class ImageProcessingHelper {
+public class ImageProcessingTask extends AsyncTask<Bitmap, Integer, Bitmap> {
 
-    public static ArrayList<Bitmap> chunkImages; // TODO: Only for debugging purpose (DELETE later.)
-    public static int columns;
-    public static int rows;
+    private ArrayList<Bitmap> chunkImages; // TODO: Only for debugging purpose (DELETE later.)
+    private int columns;
+    private int rows;
+    private PreprocessAndEnhanceActivity requestingActivity;
+    private ImageProcessingDialog dialog;
+    private SRModelConfiguration modelConfiguration;
+    private long startTime;
 
-    public static void writeToSDFile(String data){
+    public ImageProcessingTask(PreprocessAndEnhanceActivity requestingActivity, ImageProcessingDialog dialog, SRModelConfiguration modelConfiguration) {
+        super();
+        this.requestingActivity = requestingActivity;
+        this.dialog = dialog;
+        this.modelConfiguration = modelConfiguration;
+    }
+
+
+    public void writeToSDFile(String data){
 
         // Find the root of the external storage.
         // See http://developer.android.com/guide/topics/data/data-  storage.html#filesExternal
@@ -44,21 +59,74 @@ public class ImageProcessingHelper {
         }
     }
 
+    protected void onPreExecute() {
+        startTime = System.nanoTime();
+    }
 
-    public static Bitmap reconstructImage(){
+    protected Bitmap doInBackground(Bitmap... bitmapObjs) {
+        // apparently this replaces assert in Android
+        if(BuildConfig.DEBUG && bitmapObjs.length != 1)
+            throw new AssertionError();
+        Bitmap bitmap = bitmapObjs[0];
+        divideImage(bitmap);
+        // processImages copy & paste
+        int batchSize = modelConfiguration.getNumParallelBatch();
+        Bitmap[] bitmaps = new Bitmap [batchSize]; // buffer to hold input bitmaps
+        BitmapProcessor bitmapProcessor = new TFLiteSuperResolver(requestingActivity, batchSize, modelConfiguration);
+        int i = 0, nchunks = chunkImages.size();
+        while(i < nchunks) {
+            // load bitmaps into the array
+            int j = 0;
+            while(j < batchSize && i < nchunks) {
+                Bitmap chunk = chunkImages.get(i++);
+                // Log.i("Divided Image Sizes","Image sizes for image "+ (i++) +"  "+chunk.getWidth()+"x"+chunk.getHeight());
+                bitmaps[j++] = chunk;
+            }
+            // process the bitmaps
+            Bitmap[] outputBitmaps = bitmapProcessor.processBitmaps(bitmaps);
+            // unload the bitmaps back into the list
+            int k = i;
+            while(j > 0)
+                chunkImages.set(--k, outputBitmaps[--j]);
+            // AsyncTask things
+            publishProgress((int) ((i / (float) nchunks) * 100));
+            if(isCancelled())
+                break;
+        }
+        bitmapProcessor.close();
+        return reconstructImage();
+    }
+
+    protected void onProgressUpdate(Integer... progress) {
+        dialog.updateProgressBar(progress[0]);
+    }
+
+    protected void onPostExecute(Bitmap result) {
+        long estimatedTime = System.nanoTime() - startTime;
+        Toast.makeText(requestingActivity, "Elapsed time: " + estimatedTime / 1000000 + " ms", Toast.LENGTH_LONG).show();
+        requestingActivity.endImageProcessing(result);
+        writeToSDFile(
+                String.format(Locale.ENGLISH, "Time: %s | Conf: %s | dT: %d | I: %dx%d",
+                        Calendar.getInstance().getTime(),
+                        modelConfiguration.toString(),
+                        estimatedTime,
+                        result.getWidth() / modelConfiguration.getRescalingFactor(),
+                        result.getHeight() / modelConfiguration.getRescalingFactor()));
+    }
+
+    public Bitmap reconstructImage(){
         return reconstructImage(
-                SRModelConfigurationManager.getCurrentConfiguration().getInputImageHeight(),
-                SRModelConfigurationManager.getCurrentConfiguration().getInputImageWidth(),
+                modelConfiguration.getInputImageHeight(),
+                modelConfiguration.getInputImageWidth(),
                 ApplicationConstants.IMAGE_OVERLAP_X,
                 ApplicationConstants.IMAGE_OVERLAP_Y);
     }
 
-
-    public static void divideImage( final Bitmap scaledBitmap ) {
+    public void divideImage( final Bitmap scaledBitmap ) {
         divideImage(
                 scaledBitmap,
-                SRModelConfigurationManager.getCurrentConfiguration().getInputImageHeight(),
-                SRModelConfigurationManager.getCurrentConfiguration().getInputImageWidth(),
+                modelConfiguration.getInputImageHeight(),
+                modelConfiguration.getInputImageWidth(),
                 ApplicationConstants.IMAGE_OVERLAP_X,
                 ApplicationConstants.IMAGE_OVERLAP_Y);
     }
@@ -71,7 +139,7 @@ public class ImageProcessingHelper {
      * @param overlapY
      * @return ArrayList<Bitmap>
      */
-    public static ArrayList<Bitmap> arrangeChunks(int overlapX, int overlapY){
+    public ArrayList<Bitmap> arrangeChunks(int overlapX, int overlapY){
         int startX,startY,cutX,cutY;
         ArrayList<Bitmap> result = new ArrayList<>();
         int  index = 0;
@@ -116,9 +184,9 @@ public class ImageProcessingHelper {
      * @return Bitmap ArrayList
      */
 
-    public static ArrayList<Bitmap> prepareChunks(int chunkHeight, int chunkWidth, int overlapX, int overlapY) {
+    public ArrayList<Bitmap> prepareChunks(int chunkHeight, int chunkWidth, int overlapX, int overlapY) {
         ArrayList<Bitmap> result = new ArrayList<>();
-        int modelZoomFactor = SRModelConfigurationManager.getCurrentConfiguration().getRescalingFactor();
+        int modelZoomFactor = modelConfiguration.getRescalingFactor();
         for(int i=0; i<chunkImages.size(); i++) {
             try {
                 result.add(Bitmap.createBitmap(chunkImages.get(i),
@@ -143,12 +211,12 @@ public class ImageProcessingHelper {
      * @param overlapY
      * @return bitmap.
      */
-    public static Bitmap reconstructImage(int chunkHeight, int chunkWidth, int overlapX, int overlapY) {
+    public Bitmap reconstructImage(int chunkHeight, int chunkWidth, int overlapX, int overlapY) {
         int originalHeight = (chunkHeight-overlapY*2)*rows;
         int originalWidth = (chunkWidth-overlapX*2)*columns;
         Bitmap bitmap = Bitmap.createBitmap(
-                originalWidth * SRModelConfigurationManager.getCurrentConfiguration().getRescalingFactor(),
-                originalHeight * SRModelConfigurationManager.getCurrentConfiguration().getRescalingFactor(),
+                originalWidth * modelConfiguration.getRescalingFactor(),
+                originalHeight * modelConfiguration.getRescalingFactor(),
                 Bitmap.Config.ARGB_4444);
         Log.i("ReconstructImage", String.format("New bm is created : %dx%d",bitmap.getWidth(), bitmap.getHeight()));
         Canvas canvas = new Canvas(bitmap); // this constructor causes canvas operations to write on provided bitmap
@@ -166,43 +234,6 @@ public class ImageProcessingHelper {
         return bitmap;
     }
 
-    public static void processImages(Activity requestingActivity, SRModelConfiguration model_configuration, ProgressBar progressBar) {
-        int batchSize = model_configuration.getNumParallelBatch();
-        Bitmap[] bitmaps = new Bitmap [batchSize]; // buffer to hold input bitmaps
-        BitmapProcessor bitmapProcessor = new TFLiteSuperResolver(requestingActivity, batchSize, model_configuration);
-        int i = 0, nchunks = chunkImages.size();
-        progressBar.post(new Runnable() {
-            @Override
-            public void run() {
-                progressBar.setMax(nchunks);
-            }
-        });
-        while(i < nchunks) {
-            // load bitmaps into the array
-            int j = 0;
-            while(j < batchSize && i < nchunks) {
-                Bitmap chunk = chunkImages.get(i++);
-                // Log.i("Divided Image Sizes","Image sizes for image "+ (i++) +"  "+chunk.getWidth()+"x"+chunk.getHeight());
-                bitmaps[j++] = chunk;
-            }
-            // process the bitmaps
-            Bitmap[] outputBitmaps = bitmapProcessor.processBitmaps(bitmaps);
-            // unload the bitmaps back into the list
-            int k = i;
-            while(j > 0) {
-                chunkImages.set(--k, outputBitmaps[--j]);
-                progressBar.post(new Runnable() {
-                    @Override
-                    public void run() {
-                        progressBar.setProgress( progressBar.getProgress() + 1 );
-                    }
-                });
-            }
-        }
-        bitmapProcessor.close();
-    }
-
-
     /**
      * This method divides the image into chunks with some overlap in both X and Y axis.
      * Method creates a bitmap array, each bitmap represents a chunk in the whole picture.
@@ -215,7 +246,7 @@ public class ImageProcessingHelper {
      * @param overlapY
      * @return
      */
-    public static void divideImage(final Bitmap scaledBitmap, int chunkHeight, int chunkWidth, int overlapX, int overlapY) throws RuntimeException{
+    public void divideImage(final Bitmap scaledBitmap, int chunkHeight, int chunkWidth, int overlapX, int overlapY) throws RuntimeException{
 
         // Check that overlap values are not bigger than chunk height and width
         if (overlapX > chunkWidth || overlapY > chunkHeight)

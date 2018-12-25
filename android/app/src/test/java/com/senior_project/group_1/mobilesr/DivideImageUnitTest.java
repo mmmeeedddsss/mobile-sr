@@ -15,7 +15,7 @@ import static com.ibm.icu.impl.Assert.fail;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.Assert.assertArrayEquals;
-import static com.senior_project.group_1.mobilesr.ImageProcessingHelper.chunkImages;
+import static com.senior_project.group_1.mobilesr.ImageProcessingTask.chunkImages;
 
 
 @RunWith(RobolectricTestRunner.class)
@@ -61,7 +61,7 @@ public class DivideImageUnitTest {
         for(int[] color : patchColors)
             expectedAL.add(Bitmap.createBitmap(color, 2, 2, Bitmap.Config.ARGB_8888));
 
-        ImageProcessingHelper.divideImage(testBitmap, 2,2,0,0);
+        ImageProcessingTask.divideImage(testBitmap, 2,2,0,0);
         for(int i=0; i<chunkImages.size(); i++)
                 chunkImages.get(i).setPixels(patchColors.get(i), 0, 2, 0, 0, 2,2);
 
@@ -78,7 +78,7 @@ public class DivideImageUnitTest {
     @Test
     public void throwsRunTimeExceptionWhenImageSizesIsNotDivisibleOverlapX() {
         try {
-            ImageProcessingHelper.divideImage(testBitmap, 2,2,1,0);
+            ImageProcessingTask.divideImage(testBitmap, 2,2,1,0);
             fail("Runtime Exception did not happen!");
         } catch (RuntimeException e) {
             assertThat(e.getMessage(), is("/ by zero"));
@@ -90,7 +90,7 @@ public class DivideImageUnitTest {
     @Test
     public void throwsRunTimeExceptionWhenImageSizesIsNotDivisibleOverlapY() {
         try {
-            ImageProcessingHelper.divideImage(testBitmap, 2,2,0,1);
+            ImageProcessingTask.divideImage(testBitmap, 2,2,0,1);
             fail("Runtime Exception did not happen!");
         } catch (RuntimeException e) {
             assertThat(e.getMessage(), is("/ by zero"));
@@ -102,7 +102,7 @@ public class DivideImageUnitTest {
     @Test
     public void shouldThrowRunTimeExceptionWhenOverlapXGreaterThanChunkWidth() {
         try {
-            ImageProcessingHelper.divideImage(testBitmap, 2,2,3,1);
+            ImageProcessingTask.divideImage(testBitmap, 2,2,3,1);
             fail("Runtime Exception did not happen!");
         } catch (RuntimeException e) {
             assertThat(e.getMessage(), is("Overlap value greater than chunk sizes"));
@@ -113,7 +113,7 @@ public class DivideImageUnitTest {
     @Test
     public void shouldThrowRunTimeExceptionWhenOverlapYGreaterThanChunkHeight() {
         try {
-            ImageProcessingHelper.divideImage(testBitmap, 2,2,3,1);
+            ImageProcessingTask.divideImage(testBitmap, 2,2,3,1);
             fail("Runtime Exception did not happen!");
         } catch (RuntimeException e) {
             assertThat(e.getMessage(), is("Overlap value greater than chunk sizes"));
