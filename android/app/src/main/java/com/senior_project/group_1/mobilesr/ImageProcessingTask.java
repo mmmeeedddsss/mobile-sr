@@ -15,12 +15,14 @@ public class ImageProcessingTask extends AsyncTask<Bitmap, Integer, Bitmap> {
     private int columns;
     private int rows;
     private PreprocessAndEnhanceActivity requestingActivity;
+    private ImageProcessingDialog dialog;
     private SRModelConfiguration modelConfiguration;
     private long startTime;
 
-    public ImageProcessingTask(PreprocessAndEnhanceActivity requestingActivity, SRModelConfiguration modelConfiguration) {
+    public ImageProcessingTask(PreprocessAndEnhanceActivity requestingActivity, ImageProcessingDialog dialog, SRModelConfiguration modelConfiguration) {
         super();
         this.requestingActivity = requestingActivity;
+        this.dialog = dialog;
         this.modelConfiguration = modelConfiguration;
     }
 
@@ -63,7 +65,7 @@ public class ImageProcessingTask extends AsyncTask<Bitmap, Integer, Bitmap> {
     }
 
     protected void onProgressUpdate(Integer... progress) {
-        Toast.makeText(requestingActivity, "Progress: " + progress[0], Toast.LENGTH_LONG).show();
+        dialog.updateProgressBar(progress[0]);
     }
 
     protected void onPostExecute(Bitmap result) {

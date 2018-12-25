@@ -20,6 +20,8 @@ public class PreprocessAndEnhanceActivity extends AppCompatActivity {
     private Button splitButton;
     private BitmapProcessor bitmapProcessor;
     private Uri mImageUri;
+    private ImageProcessingDialog dialog;
+    private ImageProcessingTask imageProcessingTask;
 
     @Override
     public void onCreate(Bundle savedInstance) {
@@ -72,13 +74,30 @@ public class PreprocessAndEnhanceActivity extends AppCompatActivity {
             SRModelConfiguration modelConfiguration = SRModelConfigurationManager.getConfiguration("SRCNN_NR_128");
 
             Bitmap inputBitmap = imageView.getCurrentBitmap();
-            new ImageProcessingTask(this, modelConfiguration).execute(inputBitmap);
+            dialog = new ImageProcessingDialog(this);
+            dialog.show();
+            imageProcessingTask = new ImageProcessingTask(this, dialog, modelConfiguration);
+            imageProcessingTask.execute(inputBitmap);
         }
     }
 
-    // called by asynctask
+    // too many callbacks?!
+
+    // called by imageprocessingdialog
+    public void cancelImageProcessing() {
+        if(BuildConfig.DEBUG && imageProcessingTask == null)
+            throw new AssertionError();
+        imageProcessingTask.cancel(true);
+        dialog.dismiss();
+        dialog = null;
+    }
+
+    // called by imageprocessingtask
     public void endImageProcessing(Bitmap outputBitmap) {
         imageView.setImageBitmap(outputBitmap);
+        imageProcessingTask = null;
+        dialog.dismiss();
+        dialog = null;
     }
 
     protected void setImage() {
