@@ -30,12 +30,13 @@ public class ZoomableImageView extends AppCompatImageView {
     float start_distance, current_distance; // distances between the two fingers
     float zoom_factor; // a number that represents the amount of zoom that user wanted
     Rect src_rect; // a subset of pixel coordinates that will be cropped from original bitmap,
-    // then, will be scaled to fit in the dest_rect( which is not globally defined )
+    // then, will be scaled to fit in the dest_rect
     // for ideal operation, src_rect's edge ratio should be same with the dest_rect
+    Rect dest_rect;
     Paint clearing_paint; // Paint for clearing canvas on draw method
 
-    final float zoom_constant = 0.035F; // Constant numbers to adjust the sensitivity of user gestures
-    final float movement_constant = 14F;
+    float zoom_constant = 0.035F; // Constant numbers to adjust the sensitivity of user gestures
+    float movement_constant = 5.5F;
 
     // Constructors
     public ZoomableImageView(Context context) {
@@ -121,8 +122,8 @@ public class ZoomableImageView extends AppCompatImageView {
                         float y = e.getY(0);
 
                         // Matematically, user is changing the center of the zoom by this opeartion
-                        center_of_zoom_x -= (x - px)*movement_constant/zoom_factor;
-                        center_of_zoom_y -= (y - py)*movement_constant/zoom_factor;
+                        center_of_zoom_x -= (x - px)*(getWidth(src_rect)/(float)getWidth(dest_rect))*movement_constant;
+                        center_of_zoom_y -= (y - py)*(getWidth(src_rect)/(float)getWidth(dest_rect))*movement_constant;
 
                         center_of_zoom_x_tba = center_of_zoom_x;
                         center_of_zoom_y_tba = center_of_zoom_y;
@@ -252,6 +253,7 @@ public class ZoomableImageView extends AppCompatImageView {
             }
         }
         fit_in_original_bm(src_rect);
+        this.dest_rect = dest_rect;
         return dest_rect;
     }
 
