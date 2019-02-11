@@ -222,7 +222,7 @@ public class ImageProcessingTask extends AsyncTask<Bitmap, Integer, Bitmap> {
                 originalWidth * modelConfiguration.getRescalingFactor(),
                 originalHeight * modelConfiguration.getRescalingFactor(),
                 Bitmap.Config.ARGB_4444);
-        Log.i("ReconstructImage", String.format("New bm is created : %dx%d",bitmap.getWidth(), bitmap.getHeight()));
+        Log.i("ReconstructImage", String.format("%d chunks with size %dx%d is created",chunkImages.size(), chunkImages.get(0).getWidth(), chunkImages.get(0).getHeight()));
         Canvas canvas = new Canvas(bitmap); // this constructor causes canvas operations to write on provided bitmap
 
         ArrayList<Bitmap> result = prepareChunks(chunkHeight, chunkWidth,overlapX, overlapY); // Prepare the chunks to reassemble the image.
@@ -230,9 +230,11 @@ public class ImageProcessingTask extends AsyncTask<Bitmap, Integer, Bitmap> {
 
         int newChunkWidth = result.get(0).getWidth();
         int newChunkHeight = result.get(0).getHeight();
+        Log.i("ReconstructImage ", String.format("Chunks : %d", rows*columns));
         for (int r = 0 ; r<rows; r++) // y
             for (int c =0 ; c<columns ; c++) // x
                 canvas.drawBitmap(result.get(c+r*columns), c*newChunkWidth, r*newChunkHeight, null);
+
 
         Log.i("ImageCheck(): ", String.format("Bitmap size: %d %d", bitmap.getWidth(), bitmap.getHeight()));
         return bitmap;

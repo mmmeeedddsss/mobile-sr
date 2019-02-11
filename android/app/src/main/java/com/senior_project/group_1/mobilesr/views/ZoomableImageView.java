@@ -15,6 +15,9 @@ import android.view.MotionEvent;
 import com.senior_project.group_1.mobilesr.configurations.ApplicationConstants;
 import com.senior_project.group_1.mobilesr.configurations.SRModelConfigurationManager;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import static java.lang.Math.abs;
 import static java.lang.Math.max;
 import static java.lang.Math.min;
@@ -23,7 +26,7 @@ import static java.lang.Math.sqrt;
 
 public class ZoomableImageView extends AppCompatImageView {
     Bitmap bm; // original picture bitmap
-    Bitmap processedBitmap; // processed picture bitmap
+    List<ProcessedBitmapViewInfo> processedBitmaps;
     float start_x,start_y; // first finger, first touch
     float pinched_x, pinched_y; // second finger, first touch
     float center_of_zoom_x, center_of_zoom_y; // center of zooming, in source rectange of drawing
@@ -55,6 +58,7 @@ public class ZoomableImageView extends AppCompatImageView {
         super.onFinishInflate();
         clearing_paint = new Paint();
         clearing_paint.setARGB(0,255,255,255);
+        processedBitmaps = new ArrayList<>();
     }
 
     // Overrided to get the original bitmap
@@ -77,9 +81,14 @@ public class ZoomableImageView extends AppCompatImageView {
     /*
         Call this one with the resultant processed image
      */
-    public void setProcessedBitmap(Bitmap processedBitmap)
-    {
-        this.processedBitmap = processedBitmap;
+    public void attachProcessedBitmap(Bitmap processedBitmap){
+        int addedPaddingX = processedBitmap.getWidth() - BitmapHelpers.getWidth(src_rect);
+        int addedPaddingY = processedBitmap.getHeight() - BitmapHelpers.getHeight(src_rect);
+        Log.i("ZoomableImageView", String.format("processedBitmap sizes are w:%d h:%d ", processedBitmap.getWidth(), processedBitmap.getHeight()));
+        ProcessedBitmapViewInfo bmInfo = new ProcessedBitmapViewInfo(
+                Bitmap.createBitmap(processedBitmap, addedPaddingX,addedPaddingY,BitmapHelpers.getWidth(src_rect)*2, BitmapHelpers.getHeight(src_rect)*2),
+                dest_rect, zoom_factor);
+        processedBitmaps.add( bmInfo );
     }
 
     @Override
@@ -109,8 +118,8 @@ public class ZoomableImageView extends AppCompatImageView {
                     // Below, im converting the coordinates of the screen to the current subset of
                     // Original image bitmap, to find the actual location of the zoom center on
                     // original bitmap
-                    center_of_zoom_x_tba = center_of_zoom_x_tba/viewWidth*getWidth(src_rect)+src_rect.left;
-                    center_of_zoom_y_tba = center_of_zoom_y_tba/viewHeight*getHeight(src_rect)+src_rect.top;
+                    center_of_zoom_x_tba = center_of_zoom_x_tba/viewWidth* BitmapHelpers.getWidth(src_rect)+src_rect.left;
+                    center_of_zoom_y_tba = center_of_zoom_y_tba/viewHeight* BitmapHelpers.getHeight(src_rect)+src_rect.top;
                     // Current distance between fingers, note that change on this distance means
                     // User is trying to zoom in our out
                     // -----------------
@@ -132,12 +141,18 @@ public class ZoomableImageView extends AppCompatImageView {
                         float x = e.getX(0);
                         float y = e.getY(0);
 
-                        // Matematically, user is changing the center of the zoom by this opeartion
-                        center_of_zoom_x -= (x - px)*(getWidth(src_rect)/(float)getWidth(dest_rect))*movement_constant;
-                        center_of_zoom_y -= (y - py)*(getWidth(src_rect)/(float)getWidth(dest_rect))*movement_constant;
+                        double translation_x = (x - px)*(BitmapHelpers.getWidth(src_rect)/(float) BitmapHelpers.getWidth(dest_rect))*movement_constant;
+                        double translation_y = (y - py)*(BitmapHelpers.getWidth(src_rect)/(float) BitmapHelpers.getWidth(dest_rect))*movement_constant;
 
-                        center_of_zoom_x_tba = center_of_zoom_x;
-                        center_of_zoom_y_tba = center_of_zoom_y;
+                        // Matematically, user is changing the center of the zoom by this opeartion
+                        center_of_zoom_x -= translation_x;
+                        center_of_zoom_y -= translation_y;
+
+                        for( ProcessedBitmapViewInfo bmInfo : processedBitmaps )
+                            bmInfo.translate(translation_x, translation_y);
+
+                        //center_of_zoom_x_tba = center_of_zoom_x;
+                        //center_of_zoom_y_tba = center_of_zoom_y;
 
                         align_center_of_zoom(); // prevent if center of zoom is outside of the bm,
 
@@ -176,14 +191,14 @@ public class ZoomableImageView extends AppCompatImageView {
     private void align_center_of_zoom() {
         // Code to prevent user to change center of zoom locations
         // to outside of the image
-        if( center_of_zoom_x < getWidth(src_rect)/2 )
-            center_of_zoom_x = getWidth(src_rect)/2;
-        if( center_of_zoom_x > bm.getWidth() - getWidth(src_rect)/2 )
-            center_of_zoom_x = bm.getWidth() - getWidth(src_rect)/2;
-        if( center_of_zoom_y < getHeight(src_rect)/2 )
-            center_of_zoom_y = getHeight(src_rect)/2;
-        if( center_of_zoom_y > bm.getHeight() - getHeight(src_rect)/2 )
-            center_of_zoom_y = bm.getHeight() - getHeight(src_rect)/2;
+        if( center_of_zoom_x < BitmapHelpers.getWidth(src_rect)/2 )
+            center_of_zoom_x = BitmapHelpers.getWidth(src_rect)/2;
+        if( center_of_zoom_x > bm.getWidth() - BitmapHelpers.getWidth(src_rect)/2 )
+            center_of_zoom_x = bm.getWidth() - BitmapHelpers.getWidth(src_rect)/2;
+        if( center_of_zoom_y < BitmapHelpers.getHeight(src_rect)/2 )
+            center_of_zoom_y = BitmapHelpers.getHeight(src_rect)/2;
+        if( center_of_zoom_y > bm.getHeight() - BitmapHelpers.getHeight(src_rect)/2 )
+            center_of_zoom_y = bm.getHeight() - BitmapHelpers.getHeight(src_rect)/2;
     }
 
 
@@ -210,27 +225,18 @@ public class ZoomableImageView extends AppCompatImageView {
 
             // After drawing the original one, draw the processed bm to top of that if present
 
-            if( processedBitmap != null )
-            {
-                //TODO fill
+            for( ProcessedBitmapViewInfo bmInfo : processedBitmaps ) {
+                bmInfo.drawOn(canvas, zoom_factor);
             }
         }
     }
 
     private void iterateCenterOfZoom()
     {
-        center_of_zoom_x += (center_of_zoom_x_tba - center_of_zoom_x)/10;
-        center_of_zoom_y += (center_of_zoom_y_tba - center_of_zoom_y)/10;
-        center_of_zoom_x_tba -= (center_of_zoom_x_tba - center_of_zoom_x)/10;
-        center_of_zoom_y_tba -= (center_of_zoom_y_tba - center_of_zoom_y)/10;
-    }
-
-    private Rect generateSourceRectangleOfProcessed(int src_width, int src_height){
-        Rect src_rect = new Rect((int)(center_of_zoom_x-processedBitmap.getWidth()/zoom_factor),
-                (int)(center_of_zoom_y-processedBitmap.getHeight()/zoom_factor),
-                (int)(center_of_zoom_x+processedBitmap.getWidth()/zoom_factor),
-                (int)(center_of_zoom_y+processedBitmap.getHeight()/zoom_factor));
-        return fit_in_original_bm( src_rect );
+        //center_of_zoom_x += (center_of_zoom_x_tba - center_of_zoom_x);
+        //center_of_zoom_y += (center_of_zoom_y_tba - center_of_zoom_y);
+        //center_of_zoom_x_tba -= (center_of_zoom_x_tba - center_of_zoom_x)/10;
+        //center_of_zoom_y_tba -= (center_of_zoom_y_tba - center_of_zoom_y)/10;
     }
 
     private Rect generateSourceRectangle(int src_width, int src_height){
@@ -244,86 +250,40 @@ public class ZoomableImageView extends AppCompatImageView {
     private Rect generateDestinationRectange(Rect src_rect){
         Rect dest_rect = new Rect(0,0, viewWidth, viewHeight);
 
-        float original_ratio = getWidth(src_rect)/(float)getHeight(src_rect); // w/h ratio of src
+        float original_ratio = BitmapHelpers.getWidth(src_rect)/(float) BitmapHelpers.getHeight(src_rect); // w/h ratio of src
 
         if( abs(original_ratio - viewWidth/(float)viewHeight) < 0.00001F ) // if scaling is okay, return
             return dest_rect;
 
         // if I need to add padding to the dest rect, add
         if( viewWidth/viewHeight > original_ratio ) {
-            if( viewWidth/(float)viewHeight > bm.getWidth()/(float)getHeight(src_rect) ) {// what we can get at most still not enough
+            if( viewWidth/(float)viewHeight > bm.getWidth()/(float) BitmapHelpers.getHeight(src_rect) ) {// what we can get at most still not enough
                 src_rect.left = 0;
                 src_rect.right = bm.getWidth(); // do that best scenario
-                original_ratio = getWidth(src_rect)/(float)getHeight(src_rect);
+                original_ratio = BitmapHelpers.getWidth(src_rect)/(float) BitmapHelpers.getHeight(src_rect);
                 dest_rect.left += original_ratio*viewHeight/2; // then add padding to the screen
                 dest_rect.right -= original_ratio*viewHeight/2;
 
             }
             else{ // We can adjust the src as we want
-                int desired_width = (int)((viewWidth/(float)viewHeight)*getHeight(src_rect));
-                int previous_width = getWidth(src_rect);
+                int desired_width = (int)((viewWidth/(float)viewHeight)* BitmapHelpers.getHeight(src_rect));
+                int previous_width = BitmapHelpers.getWidth(src_rect);
                 src_rect.top -= (desired_width - previous_width)/2; // then adjust it
                 src_rect.bottom += (desired_width - previous_width)/2;
             }
         }
         else{ // viewWidth/viewHeight < original_ratio -- increasing src height or decerasing dest height
-            if( viewWidth/(float)viewHeight < getWidth(src_rect)/(float)bm.getHeight() ) {// what we can get at most
+            if( viewWidth/(float)viewHeight < BitmapHelpers.getWidth(src_rect)/(float)bm.getHeight() ) {// what we can get at most
                 src_rect.top = 0;
                 src_rect.bottom = bm.getHeight();
-                original_ratio = getWidth(src_rect)/(float)getHeight(src_rect);
+                original_ratio = BitmapHelpers.getWidth(src_rect)/(float) BitmapHelpers.getHeight(src_rect);
                 dest_rect.top = (int)(viewHeight/2 - viewWidth/original_ratio/2);
                 dest_rect.bottom = (int)(viewHeight/2 + viewWidth/original_ratio/2);
 
             }
             else{ // In this case, desired src H is
-                int desired_height = (int)(getWidth(src_rect)/(viewWidth/(float)viewHeight));
-                int previous_height = getHeight(src_rect);
-                src_rect.top -= (desired_height - previous_height)/2;
-                src_rect.bottom += (desired_height - previous_height)/2;
-            }
-        }
-        fit_in_original_bm(src_rect);
-        this.dest_rect = dest_rect;
-        return dest_rect;
-    }
-
-    private Rect generateDestinationRectangeOfProcessed(Rect src_rect){
-        Rect dest_rect = new Rect(0,0, viewWidth, viewHeight);
-
-        float original_ratio = getWidth(src_rect)/(float)getHeight(src_rect); // w/h ratio of src
-
-        if( abs(original_ratio - viewWidth/(float)viewHeight) < 0.00001F ) // if scaling is okay, return
-            return dest_rect;
-
-        // if I need to add padding to the dest rect, add
-        if( viewWidth/viewHeight > original_ratio ) {
-            if( viewWidth/(float)viewHeight > bm.getWidth()/(float)getHeight(src_rect) ) {// what we can get at most still not enough
-                src_rect.left = 0;
-                src_rect.right = bm.getWidth(); // do that best scenario
-                original_ratio = getWidth(src_rect)/(float)getHeight(src_rect);
-                dest_rect.left += original_ratio*viewHeight/2; // then add padding to the screen
-                dest_rect.right -= original_ratio*viewHeight/2;
-
-            }
-            else{ // We can adjust the src as we want
-                int desired_width = (int)((viewWidth/(float)viewHeight)*getHeight(src_rect));
-                int previous_width = getWidth(src_rect);
-                src_rect.top -= (desired_width - previous_width)/2; // then adjust it
-                src_rect.bottom += (desired_width - previous_width)/2;
-            }
-        }
-        else{ // viewWidth/viewHeight < original_ratio -- increasing src height or decerasing dest height
-            if( viewWidth/(float)viewHeight < getWidth(src_rect)/(float)bm.getHeight() ) {// what we can get at most
-                src_rect.top = 0;
-                src_rect.bottom = bm.getHeight();
-                original_ratio = getWidth(src_rect)/(float)getHeight(src_rect);
-                dest_rect.top = (int)(viewHeight/2 - viewWidth/original_ratio/2);
-                dest_rect.bottom = (int)(viewHeight/2 + viewWidth/original_ratio/2);
-
-            }
-            else{ // In this case, desired src H is
-                int desired_height = (int)(getWidth(src_rect)/(viewWidth/(float)viewHeight));
-                int previous_height = getHeight(src_rect);
+                int desired_height = (int)(BitmapHelpers.getWidth(src_rect)/(viewWidth/(float)viewHeight));
+                int previous_height = BitmapHelpers.getHeight(src_rect);
                 src_rect.top -= (desired_height - previous_height)/2;
                 src_rect.bottom += (desired_height - previous_height)/2;
             }
@@ -344,17 +304,6 @@ public class ZoomableImageView extends AppCompatImageView {
         viewHeight= MeasureSpec.getSize(heightMeasureSpec);
         viewWidth= MeasureSpec.getSize(widthMeasureSpec);
         super.onMeasure(widthMeasureSpec, heightMeasureSpec);
-    }
-
-    // Basic helpers, might be migrated
-    protected int getWidth( Rect r )
-    {
-        return r.right - r.left;
-    }
-
-    protected int getHeight( Rect r )
-    {
-        return r.bottom - r.top;
     }
 
     // A method that shifts the src rect to be sure that it is a sub-rectangle of bm
@@ -416,44 +365,40 @@ public class ZoomableImageView extends AppCompatImageView {
             int modelInputSizeX = SRModelConfigurationManager.getCurrentConfiguration().getInputImageWidth();
             int modelInputSizeY = SRModelConfigurationManager.getCurrentConfiguration().getInputImageWidth();
 
-            int chunkCountForX = (getWidth(src_rect)-ApplicationConstants.IMAGE_OVERLAP_X*2)
+            int chunkCountForX = (BitmapHelpers.getWidth(src_rect)-ApplicationConstants.IMAGE_OVERLAP_X*2)
                     / (modelInputSizeX-ApplicationConstants.IMAGE_OVERLAP_X*2) + 1;
-            int chunkCountForY = (getHeight(src_rect)-ApplicationConstants.IMAGE_OVERLAP_Y*2)
+            int chunkCountForY = (BitmapHelpers.getHeight(src_rect)-ApplicationConstants.IMAGE_OVERLAP_Y*2)
                     / (modelInputSizeY-ApplicationConstants.IMAGE_OVERLAP_Y*2) + 1;
 
             Log.i("ZoomableImageView", chunkCountForX + " - " + chunkCountForY);
 
             if( chunkCountForX > 0 && chunkCountForY > 0 ){
-                int subselectionMiddleX = getWidth(src_rect)/2 + src_rect.left;
-                int subselectionMiddleY = getHeight(src_rect)/2 + src_rect.top;
+                int subselectionMiddleX = BitmapHelpers.getWidth(src_rect)/2 + src_rect.left;
+                int subselectionMiddleY = BitmapHelpers.getHeight(src_rect)/2 + src_rect.top;
                 int subselectionWidth = chunkCountForX*(modelInputSizeX-ApplicationConstants.IMAGE_OVERLAP_X*2)
                         + ApplicationConstants.IMAGE_OVERLAP_X*2;
                 int subselectionHeight = chunkCountForY*(modelInputSizeY-ApplicationConstants.IMAGE_OVERLAP_Y*2)
                         + ApplicationConstants.IMAGE_OVERLAP_Y*2;
                 Log.i("ZoomableImageView", String.format(" subselection w:%d h:%d ", subselectionWidth, subselectionHeight));
+                Log.i("ZoomableImageView", String.format(" while src_size is w:%d h:%d ", BitmapHelpers.getWidth(src_rect), BitmapHelpers.getHeight(src_rect)));
                 Rect subselectionRect = new Rect(
                         (subselectionMiddleX-subselectionWidth/2),
                         (subselectionMiddleY-subselectionHeight/2),
                         (subselectionMiddleX+( subselectionWidth%2 == 0 ? subselectionWidth/2 : subselectionWidth/2 + 1)),
                         (subselectionMiddleY+( subselectionHeight%2 == 0 ? subselectionHeight/2 : subselectionHeight/2 + 1)));
-                Log.i("ZoomableImageView","Selected a subrectangle with sizes: "+getWidth(subselectionRect)+"x"+getHeight(subselectionRect) );
+                Log.i("ZoomableImageView","Selected a subrectangle with sizes: "+ BitmapHelpers.getWidth(subselectionRect)+"x"+ BitmapHelpers.getHeight(subselectionRect) );
                 return createSubBitmapWithPadding( subselectionRect );
             }
         }
         return null;
     }
 
-    Rect getBitmapRect( Bitmap bm )
-    {
-        return new Rect(0,0,bm.getWidth(), bm.getHeight());
-    }
-
     private Bitmap createSubBitmapWithPadding(Rect subselectionRect) {
 
-        Rect originalBmRect = getBitmapRect(bm);
+        Rect originalBmRect = BitmapHelpers.getBitmapRect(bm);
         if( originalBmRect.contains(subselectionRect) )
             return Bitmap.createBitmap(bm, subselectionRect.left, subselectionRect.top,
-                    getWidth(subselectionRect), getHeight(subselectionRect));
+                    BitmapHelpers.getWidth(subselectionRect), BitmapHelpers.getHeight(subselectionRect));
         else {
 
             long startTime = System.nanoTime();
@@ -462,16 +407,16 @@ public class ZoomableImageView extends AppCompatImageView {
             int originalHeight = bm.getHeight();
             int[] pixelArray = new int[ originalHeight*originalWidth ];
             bm.getPixels(pixelArray, 0, bm.getWidth(), 0, 0, bm.getWidth(), bm.getHeight());
-            int[] newPixelArray = new int[ getWidth(subselectionRect)*getHeight(subselectionRect) ];
+            int[] newPixelArray = new int[ BitmapHelpers.getWidth(subselectionRect)* BitmapHelpers.getHeight(subselectionRect) ];
 
-            for( int y=0; y<getHeight(subselectionRect); y++ )
+            for(int y = 0; y< BitmapHelpers.getHeight(subselectionRect); y++ )
             {
-                for( int x=0; x<getWidth(subselectionRect); x++ )
+                for(int x = 0; x< BitmapHelpers.getWidth(subselectionRect); x++ )
                 {
                     int px = x + subselectionRect.left;
                     int py = y + subselectionRect.top;
                     if( originalBmRect.contains( px, py) )
-                        newPixelArray[ x + y*getWidth(subselectionRect) ] = pixelArray[ px + py*originalWidth ];
+                        newPixelArray[ x + y* BitmapHelpers.getWidth(subselectionRect) ] = pixelArray[ px + py*originalWidth ];
                     else
                     {
                         // Reflecting
@@ -480,11 +425,11 @@ public class ZoomableImageView extends AppCompatImageView {
                         if( py < 0 ) py = -py;
                         else if( py >= originalBmRect.bottom  ) py = py - 2*( py - originalHeight ) - 1; // minus 1 for bounds
                         //Log.i("ZoomableImageView", "x,y -> "+x+":"+y+"  px,py -> "+px+","+py);
-                        newPixelArray[ x + y*getWidth(subselectionRect) ] = pixelArray[ px + py*originalWidth ];
+                        newPixelArray[ x + y* BitmapHelpers.getWidth(subselectionRect) ] = pixelArray[ px + py*originalWidth ];
                     }
                 }
             }
-            Bitmap new_bm = Bitmap.createBitmap(newPixelArray, getWidth(subselectionRect), getHeight(subselectionRect), Bitmap.Config.ARGB_8888);
+            Bitmap new_bm = Bitmap.createBitmap(newPixelArray, BitmapHelpers.getWidth(subselectionRect), BitmapHelpers.getHeight(subselectionRect), Bitmap.Config.ARGB_8888);
 
             long estimatedTime = System.nanoTime() - startTime;
             //Toast.makeText(getContext(), "Elapsed Time in ms for reflection: " + estimatedTime / 1000000, Toast.LENGTH_LONG).show();

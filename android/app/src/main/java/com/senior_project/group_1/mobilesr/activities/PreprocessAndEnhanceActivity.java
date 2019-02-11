@@ -90,7 +90,7 @@ public class PreprocessAndEnhanceActivity extends AppCompatActivity {
 
     // called by imageprocessingtask
     public void endImageProcessing(Bitmap outputBitmap) {
-        imageView.setImageBitmap(outputBitmap);
+        imageView.attachProcessedBitmap(outputBitmap);
         imageProcessingTask = null;
         dialog.dismiss();
         dialog = null;
