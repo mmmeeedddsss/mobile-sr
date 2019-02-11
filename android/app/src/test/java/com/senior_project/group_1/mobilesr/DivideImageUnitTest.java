@@ -2,6 +2,7 @@ package com.senior_project.group_1.mobilesr;
 import android.graphics.Bitmap;
 
 
+import com.senior_project.group_1.mobilesr.img_processing.ImageProcessingTask;
 
 import org.junit.Before;
 import org.junit.BeforeClass;
@@ -15,7 +16,7 @@ import static com.ibm.icu.impl.Assert.fail;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.Assert.assertArrayEquals;
-import static com.senior_project.group_1.mobilesr.ImageProcessingTask.chunkImages;
+import static com.senior_project.group_1.mobilesr.img_processing.ImageProcessingTask.chunkImages;
 
 
 @RunWith(RobolectricTestRunner.class)

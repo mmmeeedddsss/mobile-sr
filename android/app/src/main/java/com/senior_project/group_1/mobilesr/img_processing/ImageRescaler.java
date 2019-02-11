@@ -1,4 +1,4 @@
-package com.senior_project.group_1.mobilesr;
+package com.senior_project.group_1.mobilesr.img_processing;
 
 // As we plan on including models that leave the resizing to the application to
 // leverage the GPU (by using only conv. layers), we want to be able to execute

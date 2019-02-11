@@ -1,4 +1,4 @@
-package com.senior_project.group_1.mobilesr;
+package com.senior_project.group_1.mobilesr.configurations;
 
 import java.util.Locale;
 
@@ -14,33 +14,33 @@ public class SRModelConfiguration{
     private int INPUT_IMAGE_HEIGHT;
     private int NUM_PARALLEL_BATCH;
 
-    String getModelName() { return MODEL_NAME; }
-    String getModelPath(){
+    public String getModelName() { return MODEL_NAME; }
+    public String getModelPath(){
         return MODEL_PATH;
     }
-    String getInputTensorName(){
+    public String getInputTensorName(){
         return INPUT_TENSOR_NAME;
     }
-    boolean getModelRescales(){
+    public boolean getModelRescales(){
         return MODEL_RESCALES;
     }
-    int getRescalingFactor(){
+    public int getRescalingFactor(){
         return RESCALING_FACTOR;
     }
-    int getInputImageWidth(){
+    public int getInputImageWidth(){
         return INPUT_IMAGE_WIDTH;
     }
-    int getInputImageHeight(){
+    public int getInputImageHeight(){
         return INPUT_IMAGE_HEIGHT;
     }
-    int getNumParallelBatch() { return NUM_PARALLEL_BATCH; }
-    boolean getNNAPISetting(){
+    public int getNumParallelBatch() { return NUM_PARALLEL_BATCH; }
+    public boolean getNNAPISetting(){
         return NNAPI_SETTING;
     }
-    int getOutputTensorWidth(){
+    public int getOutputTensorWidth(){
         return getInputImageWidth()*getRescalingFactor();
     }
-    int getOutputTensorHeight(){
+    public int getOutputTensorHeight(){
         return getInputImageHeight()*getRescalingFactor();
     }
 

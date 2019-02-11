@@ -1,4 +1,4 @@
-package com.senior_project.group_1.mobilesr;
+package com.senior_project.group_1.mobilesr.configurations;
 
 public final class ApplicationConstants {
     public static final int IMAGE_OVERLAP_X = 16; // %10 of width & height might be ideal

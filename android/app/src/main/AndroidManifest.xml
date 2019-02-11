@@ -12,21 +12,21 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
-        <activity android:name="com.senior_project.group_1.mobilesr.MainActivity">
+        <activity android:name="com.senior_project.group_1.mobilesr.activities.MainActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity android:name="com.senior_project.group_1.mobilesr.PreprocessAndEnhanceActivity"></activity>
-        <activity android:name="com.senior_project.group_1.mobilesr.TutorialActivity"></activity>
-        <activity android:name="com.senior_project.group_1.mobilesr.DivideImageActivity"></activity>
-        <activity android:name="com.senior_project.group_1.mobilesr.MergeImageActivity"></activity>
-        <activity android:name="com.senior_project.group_1.mobilesr.SettingsActivity"></activity>
+        <activity android:name="com.senior_project.group_1.mobilesr.activities.PreprocessAndEnhanceActivity"></activity>
+        <activity android:name="com.senior_project.group_1.mobilesr.activities.TutorialActivity"></activity>
+        <activity android:name="com.senior_project.group_1.mobilesr.activities.DivideImageActivity"></activity>
+        <activity android:name="com.senior_project.group_1.mobilesr.activities.MergeImageActivity"></activity>
+        <activity android:name="com.senior_project.group_1.mobilesr.activities.SettingsActivity"></activity>
         <provider
             android:name="android.support.v4.content.FileProvider"
-            android:authorities="com.senior_project.group_1.mobilesr.MainActivity"
+            android:authorities="com.senior_project.group_1.mobilesr.activities.MainActivity"
             android:exported="false"
             android:grantUriPermissions="true">
             <meta-data

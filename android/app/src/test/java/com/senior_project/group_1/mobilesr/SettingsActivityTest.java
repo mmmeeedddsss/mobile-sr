@@ -3,6 +3,9 @@ package com.senior_project.group_1.mobilesr;
 import android.content.Intent;
 import android.widget.Button;
 
+import com.senior_project.group_1.mobilesr.activities.MainActivity;
+import com.senior_project.group_1.mobilesr.activities.SettingsActivity;
+
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;

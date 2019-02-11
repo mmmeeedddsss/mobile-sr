@@ -1,4 +1,4 @@
-package com.senior_project.group_1.mobilesr;
+package com.senior_project.group_1.mobilesr.activities;
 
 import android.content.Intent;
 import android.graphics.Bitmap;
@@ -9,7 +9,15 @@ import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
-import android.widget.Toast;
+
+import com.senior_project.group_1.mobilesr.img_processing.BitmapProcessor;
+import com.senior_project.group_1.mobilesr.BuildConfig;
+import com.senior_project.group_1.mobilesr.img_processing.ImageProcessingDialog;
+import com.senior_project.group_1.mobilesr.img_processing.ImageProcessingTask;
+import com.senior_project.group_1.mobilesr.R;
+import com.senior_project.group_1.mobilesr.configurations.SRModelConfiguration;
+import com.senior_project.group_1.mobilesr.configurations.SRModelConfigurationManager;
+import com.senior_project.group_1.mobilesr.views.ZoomableImageView;
 
 public class PreprocessAndEnhanceActivity extends AppCompatActivity {
 

@@ -1,8 +1,10 @@
-package com.senior_project.group_1.mobilesr;
+package com.senior_project.group_1.mobilesr.activities;
 
 import android.app.Activity;
 import android.os.Bundle;
-import android.widget.ImageView;
+
+import com.senior_project.group_1.mobilesr.R;
+import com.senior_project.group_1.mobilesr.views.ZoomableImageView;
 
 
 public class MergeImageActivity extends Activity {

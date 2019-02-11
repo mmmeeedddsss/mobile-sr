@@ -1,4 +1,4 @@
-package com.senior_project.group_1.mobilesr;
+package com.senior_project.group_1.mobilesr.views;
 
 import android.annotation.SuppressLint;
 import android.content.Context;
@@ -11,7 +11,9 @@ import android.support.v7.widget.AppCompatImageView;
 import android.util.AttributeSet;
 import android.util.Log;
 import android.view.MotionEvent;
-import android.widget.Toast;
+
+import com.senior_project.group_1.mobilesr.configurations.ApplicationConstants;
+import com.senior_project.group_1.mobilesr.configurations.SRModelConfigurationManager;
 
 import static java.lang.Math.abs;
 import static java.lang.Math.max;
@@ -21,6 +23,7 @@ import static java.lang.Math.sqrt;
 
 public class ZoomableImageView extends AppCompatImageView {
     Bitmap bm; // original picture bitmap
+    Bitmap processedBitmap; // processed picture bitmap
     float start_x,start_y; // first finger, first touch
     float pinched_x, pinched_y; // second finger, first touch
     float center_of_zoom_x, center_of_zoom_y; // center of zooming, in source rectange of drawing
@@ -66,9 +69,17 @@ public class ZoomableImageView extends AppCompatImageView {
         center_of_zoom_x = bm.getWidth()/2;
         center_of_zoom_y = bm.getHeight()/2;
 
-        generateSourceRectange(bm.getWidth(), bm.getHeight());
+        generateSourceRectangle(bm.getWidth(), bm.getHeight());
 
         invalidate();
+    }
+
+    /*
+        Call this one with the resultant processed image
+     */
+    public void setProcessedBitmap(Bitmap processedBitmap)
+    {
+        this.processedBitmap = processedBitmap;
     }
 
     @Override
@@ -181,7 +192,8 @@ public class ZoomableImageView extends AppCompatImageView {
     public void draw(Canvas canvas) {
         if( bm != null ) {
             canvas.drawRect( 0,0, viewWidth, viewHeight, clearing_paint); // clear the canvas
-            src_rect = generateSourceRectange( bm.getWidth(), bm.getHeight() ); // calculate src and dsc rects
+            iterateCenterOfZoom();
+            src_rect = generateSourceRectangle( bm.getWidth(), bm.getHeight() ); // calculate src and dsc rects
             Rect dest_rect = generateDestinationRectange( src_rect );
             canvas.drawBitmap(bm, src_rect, dest_rect, null); // draw image
             /*
@@ -195,15 +207,33 @@ public class ZoomableImageView extends AppCompatImageView {
             ratio with the src rectange. Note that src rectangle may not have same w/h ratio with bm,
             as dst may not have the same ratio with View ratio.
              */
+
+            // After drawing the original one, draw the processed bm to top of that if present
+
+            if( processedBitmap != null )
+            {
+                //TODO fill
+            }
         }
     }
 
-    private Rect generateSourceRectange( int src_width, int src_height){
+    private void iterateCenterOfZoom()
+    {
         center_of_zoom_x += (center_of_zoom_x_tba - center_of_zoom_x)/10;
         center_of_zoom_y += (center_of_zoom_y_tba - center_of_zoom_y)/10;
         center_of_zoom_x_tba -= (center_of_zoom_x_tba - center_of_zoom_x)/10;
         center_of_zoom_y_tba -= (center_of_zoom_y_tba - center_of_zoom_y)/10;
+    }
 
+    private Rect generateSourceRectangleOfProcessed(int src_width, int src_height){
+        Rect src_rect = new Rect((int)(center_of_zoom_x-processedBitmap.getWidth()/zoom_factor),
+                (int)(center_of_zoom_y-processedBitmap.getHeight()/zoom_factor),
+                (int)(center_of_zoom_x+processedBitmap.getWidth()/zoom_factor),
+                (int)(center_of_zoom_y+processedBitmap.getHeight()/zoom_factor));
+        return fit_in_original_bm( src_rect );
+    }
+
+    private Rect generateSourceRectangle(int src_width, int src_height){
         Rect src_rect = new Rect((int)(center_of_zoom_x-bm.getWidth()/zoom_factor/2),
                 (int)(center_of_zoom_y-bm.getHeight()/zoom_factor/2),
                 (int)(center_of_zoom_x+bm.getWidth()/zoom_factor/2),
@@ -212,6 +242,52 @@ public class ZoomableImageView extends AppCompatImageView {
     }
 
     private Rect generateDestinationRectange(Rect src_rect){
+        Rect dest_rect = new Rect(0,0, viewWidth, viewHeight);
+
+        float original_ratio = getWidth(src_rect)/(float)getHeight(src_rect); // w/h ratio of src
+
+        if( abs(original_ratio - viewWidth/(float)viewHeight) < 0.00001F ) // if scaling is okay, return
+            return dest_rect;
+
+        // if I need to add padding to the dest rect, add
+        if( viewWidth/viewHeight > original_ratio ) {
+            if( viewWidth/(float)viewHeight > bm.getWidth()/(float)getHeight(src_rect) ) {// what we can get at most still not enough
+                src_rect.left = 0;
+                src_rect.right = bm.getWidth(); // do that best scenario
+                original_ratio = getWidth(src_rect)/(float)getHeight(src_rect);
+                dest_rect.left += original_ratio*viewHeight/2; // then add padding to the screen
+                dest_rect.right -= original_ratio*viewHeight/2;
+
+            }
+            else{ // We can adjust the src as we want
+                int desired_width = (int)((viewWidth/(float)viewHeight)*getHeight(src_rect));
+                int previous_width = getWidth(src_rect);
+                src_rect.top -= (desired_width - previous_width)/2; // then adjust it
+                src_rect.bottom += (desired_width - previous_width)/2;
+            }
+        }
+        else{ // viewWidth/viewHeight < original_ratio -- increasing src height or decerasing dest height
+            if( viewWidth/(float)viewHeight < getWidth(src_rect)/(float)bm.getHeight() ) {// what we can get at most
+                src_rect.top = 0;
+                src_rect.bottom = bm.getHeight();
+                original_ratio = getWidth(src_rect)/(float)getHeight(src_rect);
+                dest_rect.top = (int)(viewHeight/2 - viewWidth/original_ratio/2);
+                dest_rect.bottom = (int)(viewHeight/2 + viewWidth/original_ratio/2);
+
+            }
+            else{ // In this case, desired src H is
+                int desired_height = (int)(getWidth(src_rect)/(viewWidth/(float)viewHeight));
+                int previous_height = getHeight(src_rect);
+                src_rect.top -= (desired_height - previous_height)/2;
+                src_rect.bottom += (desired_height - previous_height)/2;
+            }
+        }
+        fit_in_original_bm(src_rect);
+        this.dest_rect = dest_rect;
+        return dest_rect;
+    }
+
+    private Rect generateDestinationRectangeOfProcessed(Rect src_rect){
         Rect dest_rect = new Rect(0,0, viewWidth, viewHeight);
 
         float original_ratio = getWidth(src_rect)/(float)getHeight(src_rect); // w/h ratio of src

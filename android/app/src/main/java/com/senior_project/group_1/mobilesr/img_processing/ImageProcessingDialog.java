@@ -1,4 +1,4 @@
-package com.senior_project.group_1.mobilesr;
+package com.senior_project.group_1.mobilesr.img_processing;
 
 import android.app.Dialog;
 import android.os.Bundle;
@@ -6,6 +6,9 @@ import android.view.View;
 import android.view.Window;
 import android.widget.Button;
 import android.widget.ProgressBar;
+
+import com.senior_project.group_1.mobilesr.R;
+import com.senior_project.group_1.mobilesr.activities.PreprocessAndEnhanceActivity;
 
 public class ImageProcessingDialog extends Dialog {
 

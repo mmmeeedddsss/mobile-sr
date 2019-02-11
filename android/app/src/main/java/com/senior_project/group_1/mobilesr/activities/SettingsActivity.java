@@ -1,4 +1,4 @@
-package com.senior_project.group_1.mobilesr;
+package com.senior_project.group_1.mobilesr.activities;
 
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
@@ -8,6 +8,10 @@ import android.widget.AdapterView;
 import android.widget.TextView;
 import android.widget.Spinner;
 import android.widget.ArrayAdapter;
+
+import com.senior_project.group_1.mobilesr.R;
+import com.senior_project.group_1.mobilesr.configurations.SRModelConfiguration;
+import com.senior_project.group_1.mobilesr.configurations.SRModelConfigurationManager;
 
 
 public class SettingsActivity extends AppCompatActivity {

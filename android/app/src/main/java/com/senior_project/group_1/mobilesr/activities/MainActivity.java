@@ -1,4 +1,4 @@
-package com.senior_project.group_1.mobilesr;
+package com.senior_project.group_1.mobilesr.activities;
 
 import android.Manifest;
 import android.content.Intent;
@@ -12,6 +12,10 @@ import android.os.Bundle;
 import android.view.View;
 import android.widget.Button;
 import android.widget.Toast;
+
+import com.senior_project.group_1.mobilesr.configurations.ApplicationConstants;
+import com.senior_project.group_1.mobilesr.R;
+import com.senior_project.group_1.mobilesr.configurations.SRModelConfigurationManager;
 
 import java.io.File;
 import java.io.IOException;
@@ -108,7 +112,7 @@ public class MainActivity extends AppCompatActivity {
             // Continue only if the File was successfully created
             if (photoFile != null) {
                 Uri photoURI = FileProvider.getUriForFile(this,
-                        "com.senior_project.group_1.mobilesr.MainActivity",
+                        "com.senior_project.group_1.mobilesr.activities.MainActivity",
                         photoFile);
                 takePictureIntent.putExtra(MediaStore.EXTRA_OUTPUT, photoURI);
                 mImageUri = photoURI;

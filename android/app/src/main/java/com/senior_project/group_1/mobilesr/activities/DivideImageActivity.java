@@ -1,4 +1,4 @@
-package com.senior_project.group_1.mobilesr;
+package com.senior_project.group_1.mobilesr.activities;
 
 import android.app.Activity;
 import android.content.Intent;

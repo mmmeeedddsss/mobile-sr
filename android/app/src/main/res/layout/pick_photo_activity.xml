@@ -6,7 +6,7 @@
     android:orientation="vertical">
 
 
-    <com.senior_project.group_1.mobilesr.ZoomableImageView
+    <com.senior_project.group_1.mobilesr.views.ZoomableImageView
         android:id="@+id/pick_photo_image_view"
         android:layout_width="fill_parent"
         android:layout_height="468dp"

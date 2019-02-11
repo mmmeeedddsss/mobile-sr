@@ -5,7 +5,7 @@
     android:layout_height="match_parent"
     android:orientation="vertical">
 
-    <com.senior_project.group_1.mobilesr.ZoomableImageView
+    <com.senior_project.group_1.mobilesr.views.ZoomableImageView
         android:id="@+id/merged_image_view"
         android:layout_width="fill_parent"
         android:layout_height="fill_parent"

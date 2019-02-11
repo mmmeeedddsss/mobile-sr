@@ -1,4 +1,4 @@
-package com.senior_project.group_1.mobilesr;
+package com.senior_project.group_1.mobilesr.img_processing;
 
 public class NearestNeighborRescaler implements ImageRescaler {
     public void resizePixels(int[] inputPixels, int inputWidth, int[] outputPixels, int rescaleFactor) {
