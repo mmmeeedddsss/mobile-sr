@@ -19,4 +19,13 @@ public class BitmapHelpers {
     {
         return r.bottom - r.top;
     }
+
+    static Rect scale( Rect r, double factor ){
+        double center_x = getWidth(r)/2+r.left;
+        double center_y = getHeight(r)/2+r.top;
+        factor/=2;
+        return new Rect( (int)(center_x-getWidth(r)*factor),(int)(center_y-getHeight(r)*factor),
+                (int)(center_x+getWidth(r)*factor),(int)(center_y+getHeight(r)*factor));
+    }
 }
+

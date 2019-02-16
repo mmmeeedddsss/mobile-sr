@@ -82,11 +82,11 @@ public class ZoomableImageView extends AppCompatImageView {
         Call this one with the resultant processed image
      */
     public void attachProcessedBitmap(Bitmap processedBitmap){
-        int addedPaddingX = processedBitmap.getWidth() - BitmapHelpers.getWidth(src_rect);
-        int addedPaddingY = processedBitmap.getHeight() - BitmapHelpers.getHeight(src_rect);
+        int addedPaddingX = processedBitmap.getWidth()/2 - BitmapHelpers.getWidth(src_rect);
+        int addedPaddingY = processedBitmap.getHeight()/2 - BitmapHelpers.getHeight(src_rect);
         Log.i("ZoomableImageView", String.format("processedBitmap sizes are w:%d h:%d ", processedBitmap.getWidth(), processedBitmap.getHeight()));
         ProcessedBitmapViewInfo bmInfo = new ProcessedBitmapViewInfo(
-                Bitmap.createBitmap(processedBitmap, addedPaddingX,addedPaddingY,BitmapHelpers.getWidth(src_rect)*2, BitmapHelpers.getHeight(src_rect)*2),
+                Bitmap.createBitmap(processedBitmap, addedPaddingX/2,addedPaddingY/2,BitmapHelpers.getWidth(src_rect)*2, BitmapHelpers.getHeight(src_rect)*2),
                 dest_rect, zoom_factor);
         processedBitmaps.add( bmInfo );
     }
