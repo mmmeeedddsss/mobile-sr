@@ -21,11 +21,22 @@ public class BitmapHelpers {
     }
 
     static Rect scale( Rect r, double factor ){
-        double center_x = getWidth(r)/2+r.left;
-        double center_y = getHeight(r)/2+r.top;
-        factor/=2;
-        return new Rect( (int)(center_x-getWidth(r)*factor),(int)(center_y-getHeight(r)*factor),
-                (int)(center_x+getWidth(r)*factor),(int)(center_y+getHeight(r)*factor));
+        return scale( r, factor, false );
+    }
+
+    static Rect scale( Rect r, double factor, boolean use_top_left ){
+        if( use_top_left )
+        {
+            return new Rect(r.left,r.top,
+                    (int) (r.left + getWidth(r) * factor), (int) (r.top + getHeight(r) * factor));
+        }
+        else {
+            double center_x = getWidth(r) / 2 + r.left;
+            double center_y = getHeight(r) / 2 + r.top;
+            factor /= 2;
+            return new Rect((int) (center_x - getWidth(r) * factor), (int) (center_y - getHeight(r) * factor),
+                    (int) (center_x + getWidth(r) * factor), (int) (center_y + getHeight(r) * factor));
+        }
     }
 }
 

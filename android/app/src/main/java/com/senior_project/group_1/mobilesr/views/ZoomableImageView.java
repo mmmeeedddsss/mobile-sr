@@ -91,9 +91,10 @@ public class ZoomableImageView extends AppCompatImageView {
         int addedPaddingY = processedBitmap.getHeight()/2 - BitmapHelpers.getHeight(src_rect);
         Log.i("ZoomableImageView", String.format("processedBitmap sizes are w:%d h:%d ", processedBitmap.getWidth(), processedBitmap.getHeight()));
         ProcessedBitmapViewInfo bmInfo = new ProcessedBitmapViewInfo(
-                Bitmap.createBitmap(processedBitmap, addedPaddingX/2,addedPaddingY/2,BitmapHelpers.getWidth(src_rect)*2, BitmapHelpers.getHeight(src_rect)*2),
-                new PointF(center_of_zoom_x,center_of_zoom_y), zoom_factor);
+                Bitmap.createBitmap(processedBitmap, addedPaddingX,addedPaddingY,BitmapHelpers.getWidth(src_rect)*2, BitmapHelpers.getHeight(src_rect)*2),
+                new PointF(src_rect.left, src_rect.top), zoom_factor, dest_rect);
         processedBitmaps.add( bmInfo );
+        invalidate();
     }
 
     public void toggleSrDrawal()
@@ -234,8 +235,7 @@ public class ZoomableImageView extends AppCompatImageView {
             // After drawing the original one, draw the processed bm to top of that if present
 
             for( ProcessedBitmapViewInfo bmInfo : processedBitmaps )
-                bmInfo.translate(-center_of_zoom_x+previous_center_x,
-                                 -center_of_zoom_y+previous_center_y);
+                bmInfo.setOffset( getDestCoordinatesOfPixel(bmInfo.creationOffset) );
 
             previous_center_x = center_of_zoom_x;
             previous_center_y = center_of_zoom_y;
@@ -246,6 +246,14 @@ public class ZoomableImageView extends AppCompatImageView {
                 }
             }
         }
+    }
+
+    public PointF getDestCoordinatesOfPixel(PointF pixel)
+    {
+        PointF coords = new PointF();
+        coords.x = ( pixel.x - src_rect.left )/BitmapHelpers.getWidth(src_rect)*BitmapHelpers.getWidth(dest_rect) + dest_rect.left;
+        coords.y = ( pixel.y - src_rect.top )/BitmapHelpers.getHeight(src_rect)*BitmapHelpers.getHeight(dest_rect) + dest_rect.top;
+        return coords;
     }
 
     private void iterateCenterOfZoom()
@@ -411,7 +419,6 @@ public class ZoomableImageView extends AppCompatImageView {
     }
 
     private Bitmap createSubBitmapWithPadding(Rect subselectionRect) {
-
         Rect originalBmRect = BitmapHelpers.getBitmapRect(bm);
         if( originalBmRect.contains(subselectionRect) )
             return Bitmap.createBitmap(bm, subselectionRect.left, subselectionRect.top,

@@ -13,28 +13,33 @@ import com.senior_project.group_1.mobilesr.configurations.ApplicationConstants;
 public class ProcessedBitmapViewInfo {
     Bitmap processedBitmap; // processed picture bitmap
     Rect dest_rect;
+    final Rect creation_dest_rect;
     Rect src_rect;
     double creationZoomFactor;
     PointF corresponding_center;
     Paint paint;
 
+    final PointF creationOffset;
+
     float zoom_constant = ApplicationConstants.ZOOM_CONSTANT;
     float movement_constant = ApplicationConstants.MOVEMENT_CONSTANT;
 
-    public ProcessedBitmapViewInfo(Bitmap processedBitmap, PointF corresponding_center, double creationZoomFactor) {
+    public ProcessedBitmapViewInfo(Bitmap processedBitmap, PointF offset, double creationZoomFactor, Rect current_dest_rect) {
         this.processedBitmap = processedBitmap;
-        this.dest_rect = new Rect(dest_rect);
+        this.dest_rect = new Rect(current_dest_rect);
         this.src_rect = BitmapHelpers.getBitmapRect(processedBitmap);
         this.creationZoomFactor = creationZoomFactor;
-        this.corresponding_center = new PointF(corresponding_center.x, corresponding_center.y);
         paint = new Paint();
         paint.setColor(Color.rgb(255, 0, 0));
         paint.setStrokeWidth(10);
         paint.setStyle(Paint.Style.STROKE);
+
+        this.creationOffset = new PointF(offset.x, offset.y);
+        this.creation_dest_rect = new Rect(dest_rect);
     }
 
     public void drawOn(Canvas canvas, double currentZoomFactor) {
-        Log.i("ProcessedBitmapViewInfo", String.format("Current Zoom=%f, initial=%f, corresponding_center=%f,%f",currentZoomFactor, creationZoomFactor, corresponding_center.x,corresponding_center.y));
+        //Log.i("ProcessedBitmapViewInfo", String.format("Current Zoom=%f, initial=%f, corresponding_center=%f,%f",currentZoomFactor, creationZoomFactor, corresponding_center.x,corresponding_center.y));
         canvas.drawBitmap( processedBitmap, calculateSrcRect(currentZoomFactor), calculateDstRect(currentZoomFactor), null );
         canvas.drawRect(calculateDstRect(currentZoomFactor), paint);
     }
@@ -46,18 +51,25 @@ public class ProcessedBitmapViewInfo {
     }
 
     private Rect calculateDstRect(double currentZoomFactor) {
-        /*if( creationZoomFactor > currentZoomFactor )
-            return BitmapHelpers.scale(dest_rect, currentZoomFactor/creationZoomFactor);
-        return dest_rect;*/
-        return new Rect(
-                (int)corresponding_center.x - processedBitmap.getWidth()/2,
-                (int)corresponding_center.y - processedBitmap.getHeight()/2,
-                (int)corresponding_center.x + processedBitmap.getWidth()/2,
-                (int)corresponding_center.y + processedBitmap.getHeight()/2);
+        if( creationZoomFactor > currentZoomFactor )
+            return BitmapHelpers.scale(dest_rect, currentZoomFactor/creationZoomFactor, true);
+        return dest_rect;
+        /*return new Rect(
+                (int)corresponding_center.x - BitmapHelpers.getWidth(dest_rect)/2,
+                (int)corresponding_center.y - BitmapHelpers.getHeight(dest_rect)/2,
+                (int)corresponding_center.x + BitmapHelpers.getWidth(dest_rect)/2,
+                (int)corresponding_center.y + BitmapHelpers.getHeight(dest_rect)/2);*/
     }
 
-    public void translate(double translation_x, double translation_y) {
-        corresponding_center.x -= translation_x;
-        corresponding_center.y -= translation_y;
+    public void translate(float translation_x, float translation_y) {
+        Log.i("ProcessedBitmapViewInfo", String.format("x : %f, y: %f", translation_x, translation_y));
+        dest_rect.offset((int)translation_x, (int)translation_y);
+    }
+
+    public void setOffset(PointF currentOffset) {
+        dest_rect.left = creation_dest_rect.left + (int) currentOffset.x;
+        dest_rect.right = creation_dest_rect.right + (int) currentOffset.x;
+        dest_rect.top = creation_dest_rect.top + (int) currentOffset.y;
+        dest_rect.bottom = creation_dest_rect.bottom + (int) currentOffset.y;
     }
 }
