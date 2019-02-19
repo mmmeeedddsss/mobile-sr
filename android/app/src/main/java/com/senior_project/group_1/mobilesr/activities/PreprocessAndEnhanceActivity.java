@@ -26,6 +26,7 @@ import com.senior_project.group_1.mobilesr.views.ZoomableImageView;
 public class PreprocessAndEnhanceActivity extends AppCompatActivity {
 
     public static Bitmap bitmap;
+    private boolean isPaused;
     private ZoomableImageView imageView;
     private Button rotateButton;
     private Button processButton;
@@ -39,6 +40,7 @@ public class PreprocessAndEnhanceActivity extends AppCompatActivity {
     public void onCreate(Bundle savedInstance) {
         super.onCreate(savedInstance);
         // TODO: fix the helper to use this instance of BitmapProcessor
+        isPaused = false;
         bitmapProcessor = null; // new TFLiteSuperResolver(this, ApplicationConstants.BATCH_SIZE);
         //Get the view From pick_photo_activity
         setContentView(R.layout.pick_photo_activity);
@@ -98,7 +100,7 @@ public class PreprocessAndEnhanceActivity extends AppCompatActivity {
         imageProcessingTask = null;
         dialog.dismiss();
         dialog = null;
-        sendNotification();
+        // sendNotification();
     }
 
     protected void setImage() {
@@ -117,18 +119,31 @@ public class PreprocessAndEnhanceActivity extends AppCompatActivity {
             bitmapProcessor.close();
     }
 
-    // send a notification, for use when processing is complete
-    private void sendNotification() {
-        NotificationCompat.Builder mBuilder = new NotificationCompat.Builder(this, ApplicationConstants.NOTIFICATION_CHANNEL_ID)
-                .setSmallIcon(R.drawable.notification_icon)
-                .setContentTitle("Superresolution Completed")
-                .setContentText("The images you have assigned for superresolution have been processed.")
-                .setAutoCancel(true);
+    @Override
+    protected void onPause() {
+        super.onPause();
+        Log.i("MobileSR", "Preprocess & enhance activity paused");
+        synchronized(this) {
+            isPaused = true;
+        }
+    }
 
-        NotificationManagerCompat notificationManager = NotificationManagerCompat.from(this);
+    @Override
+    protected void onResume() {
+        super.onResume();
+        Log.i("MobileSR", "Preprocess & enhance activity resumed");
+        synchronized(this) {
+            isPaused = false;
+        }
+    }
 
-        // notificationId is a unique int for each notification that you must define
-        notificationManager.notify(492, mBuilder.build());
-
+    // used by the image-processing asynchronous task to determine
+    // whether to send a notification or not
+    public boolean inBackground() {
+        // TODO; access to isPaused COULD be concurrent in an extreme case,
+        // but I am not sure if locking is really necessary or not
+        synchronized(this) {
+            return isPaused;
+        }
     }
 }

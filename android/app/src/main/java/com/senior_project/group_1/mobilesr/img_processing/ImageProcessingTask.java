@@ -5,6 +5,7 @@ import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.os.AsyncTask;
 import android.support.v4.app.NotificationCompat;
+import android.support.v4.app.NotificationManagerCompat;
 import android.util.Log;
 import android.widget.Toast;
 
@@ -120,6 +121,9 @@ public class ImageProcessingTask extends AsyncTask<Bitmap, Integer, Bitmap> {
                         estimatedTime,
                         result.getWidth() / modelConfiguration.getRescalingFactor(),
                         result.getHeight() / modelConfiguration.getRescalingFactor()));
+        // send a notification if the app is in the background
+        if(requestingActivity.inBackground())
+            sendNotification();
     }
 
     public Bitmap reconstructImage(){
@@ -285,6 +289,20 @@ public class ImageProcessingTask extends AsyncTask<Bitmap, Integer, Bitmap> {
             Log.i("DivideImage","Image is divided to  "+rows+"x"+columns);
         }
 
+    }
+
+    // send a notification, for use when processing is complete
+    private void sendNotification() {
+        NotificationCompat.Builder mBuilder = new NotificationCompat.Builder(requestingActivity, ApplicationConstants.NOTIFICATION_CHANNEL_ID)
+                .setSmallIcon(R.drawable.notification_icon)
+                .setContentTitle("Superresolution Completed")
+                .setContentText("The images you have assigned for superresolution have been processed.")
+                .setAutoCancel(true);
+
+        NotificationManagerCompat notificationManager = NotificationManagerCompat.from(requestingActivity);
+
+        // notificationId is a unique int for each notification that you must define
+        notificationManager.notify(492, mBuilder.build());
     }
 
 }
