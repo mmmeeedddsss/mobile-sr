@@ -33,12 +33,18 @@ public class ImageProcessingTask extends AsyncTask<Bitmap, Integer, Bitmap> {
     private ImageProcessingDialog dialog;
     private SRModelConfiguration modelConfiguration;
     private long startTime;
+    private boolean notifActive = false;
+    private NotificationCompat.Builder notifBuilder;
+    private NotificationManagerCompat notifManager;
+
+    private static final int NOTIF_ID = 0;
 
     public ImageProcessingTask(PreprocessAndEnhanceActivity requestingActivity, ImageProcessingDialog dialog, SRModelConfiguration modelConfiguration) {
         super();
         this.requestingActivity = requestingActivity;
         this.dialog = dialog;
         this.modelConfiguration = modelConfiguration;
+        this.notifManager = NotificationManagerCompat.from(requestingActivity);
     }
 
 
@@ -68,6 +74,7 @@ public class ImageProcessingTask extends AsyncTask<Bitmap, Integer, Bitmap> {
     }
 
     protected void onPreExecute() {
+        // log the starting time
         startTime = System.nanoTime();
     }
 
@@ -106,7 +113,23 @@ public class ImageProcessingTask extends AsyncTask<Bitmap, Integer, Bitmap> {
     }
 
     protected void onProgressUpdate(Integer... progress) {
-        dialog.updateProgressBar(progress[0]);
+        if(requestingActivity.inBackground()) {
+            // activate the notification bar
+            notifActive = true;
+            notifBuilder = new NotificationCompat.Builder(requestingActivity, ApplicationConstants.NOTIFICATION_CHANNEL_ID)
+                    .setSmallIcon(R.drawable.notification_icon)
+                    .setContentTitle("Superresolution in progress...");
+        }
+        else {
+            // update the visible progress bar
+            dialog.updateProgressBar(progress[0]);
+        }
+
+        // update the notification progress bar if the app was put in the background at least once
+        if(notifActive) {
+            notifBuilder.setProgress(100, progress[0], false);
+            notifManager.notify(NOTIF_ID, notifBuilder.build());
+        }
     }
 
     protected void onPostExecute(Bitmap result) {
@@ -121,9 +144,13 @@ public class ImageProcessingTask extends AsyncTask<Bitmap, Integer, Bitmap> {
                         estimatedTime,
                         result.getWidth() / modelConfiguration.getRescalingFactor(),
                         result.getHeight() / modelConfiguration.getRescalingFactor()));
-        // send a notification if the app is in the background
-        if(requestingActivity.inBackground())
-            sendNotification();
+        // complete the notification if it was active
+        if(notifActive) {
+            notifBuilder.setProgress(0, 0, false)
+                    .setContentTitle("Superresolution Complete")
+                    .setContentText("The superresolution of your image was completed in the background.");
+            notifManager.notify(NOTIF_ID, notifBuilder.build());
+        }
     }
 
     public Bitmap reconstructImage(){
@@ -303,6 +330,10 @@ public class ImageProcessingTask extends AsyncTask<Bitmap, Integer, Bitmap> {
 
         // notificationId is a unique int for each notification that you must define
         notificationManager.notify(492, mBuilder.build());
+    }
+
+    private void updateNotificationProgress() {
+
     }
 
 }
