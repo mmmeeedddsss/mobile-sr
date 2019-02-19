@@ -6,6 +6,7 @@ import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
 import org.xmlpull.v1.XmlPullParserFactory;
 
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.HashMap;
@@ -98,6 +99,19 @@ public class SRModelConfigurationManager {
 
     public static SRModelConfiguration getCurrentConfiguration(){
         return currentConfiguration;
+    }
+
+    public static void setConfiguration(String type, String value) {
+        switch (type) {
+            case "nnapi":
+                currentConfiguration.setNNAPISetting(Boolean.parseBoolean(value));
+                break;
+            case "batch":
+                currentConfiguration.setNumParallelBatch(Integer.parseInt(value));
+                break;
+            default:
+                throw new IllegalArgumentException("not supported. cannot change in xml");
+        }
     }
 
     public static String[] getConfigurationMapKeys()
