@@ -1,8 +1,11 @@
 package com.senior_project.group_1.mobilesr.activities;
 
 import android.Manifest;
+import android.app.NotificationChannel;
+import android.app.NotificationManager;
 import android.content.Intent;
 import android.net.Uri;
+import android.os.Build;
 import android.os.Environment;
 import android.provider.MediaStore;
 import android.support.v4.app.ActivityCompat;
@@ -33,6 +36,9 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
+        // create the notification channel for the application
+        createNotificationChannel();
 
         // Pick photo button activity
         pickPhotoButton = (Button) findViewById(R.id.buttonPickPhoto);
@@ -148,5 +154,23 @@ public class MainActivity extends AppCompatActivity {
         File image = File.createTempFile(imageFileName,".jpg", storageDir );
 
         return image;
+    }
+
+    // have to create a notification channel in Android 8.0+
+    // copied verbatim from https://developer.android.com/training/notify-user/channels
+    private void createNotificationChannel() {
+        // Create the NotificationChannel, but only on API 26+ because
+        // the NotificationChannel class is new and not in the support library
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            CharSequence name = getString(R.string.channel_name);
+            String description = getString(R.string.channel_description);
+            int importance = NotificationManager.IMPORTANCE_DEFAULT;
+            NotificationChannel channel = new NotificationChannel(ApplicationConstants.NOTIFICATION_CHANNEL_ID, name, importance);
+            channel.setDescription(description);
+            // Register the channel with the system; you can't change the importance
+            // or other notification behaviors after this
+            NotificationManager notificationManager = getSystemService(NotificationManager.class);
+            notificationManager.createNotificationChannel(channel);
+        }
     }
 }

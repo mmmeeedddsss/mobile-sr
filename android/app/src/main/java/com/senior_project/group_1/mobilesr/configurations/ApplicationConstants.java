@@ -8,4 +8,6 @@ public final class ApplicationConstants {
 
     public static final String CONFIGURATION_FILE_NAME = "sr_model_configurations.xml";
     public static final int EXTERNAL_WRITE_PERMISSION_ID = 123;
+
+    public static final String NOTIFICATION_CHANNEL_ID = "notif-channel";
 }

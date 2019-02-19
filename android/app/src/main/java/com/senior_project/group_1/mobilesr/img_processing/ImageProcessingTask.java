@@ -1,11 +1,14 @@
 package com.senior_project.group_1.mobilesr.img_processing;
 
+import android.app.Notification;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.os.AsyncTask;
+import android.support.v4.app.NotificationCompat;
 import android.util.Log;
 import android.widget.Toast;
 
+import com.senior_project.group_1.mobilesr.R;
 import com.senior_project.group_1.mobilesr.configurations.ApplicationConstants;
 import com.senior_project.group_1.mobilesr.BuildConfig;
 import com.senior_project.group_1.mobilesr.configurations.SRModelConfiguration;
@@ -106,6 +109,7 @@ public class ImageProcessingTask extends AsyncTask<Bitmap, Integer, Bitmap> {
     }
 
     protected void onPostExecute(Bitmap result) {
+        // log results
         long estimatedTime = System.nanoTime() - startTime;
         Toast.makeText(requestingActivity, "Elapsed time: " + estimatedTime / 1000000 + " ms", Toast.LENGTH_LONG).show();
         requestingActivity.endImageProcessing(result);
