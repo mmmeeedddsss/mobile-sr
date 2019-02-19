@@ -25,7 +25,7 @@ public class PreprocessAndEnhanceActivity extends AppCompatActivity {
     private ZoomableImageView imageView;
     private Button rotateButton;
     private Button processButton;
-    private Button splitButton;
+    private Button toggleButton;
     private BitmapProcessor bitmapProcessor;
     private Uri mImageUri;
     private ImageProcessingDialog dialog;
@@ -54,6 +54,14 @@ public class PreprocessAndEnhanceActivity extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 processImage();
+            }
+        });
+
+        toggleButton = findViewById(R.id.toggle_sr_button);
+        toggleButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                imageView.toggleSrDrawal();
             }
         });
 

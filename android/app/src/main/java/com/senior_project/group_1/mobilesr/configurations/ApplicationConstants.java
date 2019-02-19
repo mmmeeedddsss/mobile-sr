@@ -8,4 +8,7 @@ public final class ApplicationConstants {
 
     public static final String CONFIGURATION_FILE_NAME = "sr_model_configurations.xml";
     public static final int EXTERNAL_WRITE_PERMISSION_ID = 123;
+
+    public static final float ZOOM_CONSTANT = 0.035F; // Constant numbers to adjust the sensitivity of user gestures
+    public static final float MOVEMENT_CONSTANT = 5.5F;
 }

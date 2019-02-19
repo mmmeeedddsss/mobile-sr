@@ -18,6 +18,18 @@
         android:orientation="horizontal">
 
         <android.support.v7.widget.AppCompatButton
+            android:id="@+id/toggle_sr_button"
+            android:layout_weight="0.25"
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:layout_gravity="center_vertical|center_horizontal"
+            android:text="Toggle"
+            android:textColor="@color/colorButtonText"
+            android:textStyle="bold"
+            android:typeface="sans"
+            app:backgroundTint="@color/colorButtonBackground" />
+
+        <android.support.v7.widget.AppCompatButton
             android:id="@+id/rotate_image_button"
             android:layout_weight="0.25"
             android:layout_width="wrap_content"

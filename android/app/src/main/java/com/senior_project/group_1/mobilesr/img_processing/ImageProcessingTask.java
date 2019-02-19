@@ -216,8 +216,8 @@ public class ImageProcessingTask extends AsyncTask<Bitmap, Integer, Bitmap> {
      * @return bitmap.
      */
     public Bitmap reconstructImage(int chunkHeight, int chunkWidth, int overlapX, int overlapY) {
-        int originalHeight = (chunkHeight-overlapY*2)*rows;
-        int originalWidth = (chunkWidth-overlapX*2)*columns;
+        int originalHeight = overlapY + (chunkHeight-overlapY)*rows;
+        int originalWidth = overlapX + (chunkWidth-overlapX)*columns;
         Bitmap bitmap = Bitmap.createBitmap(
                 originalWidth * modelConfiguration.getRescalingFactor(),
                 originalHeight * modelConfiguration.getRescalingFactor(),

@@ -6,6 +6,7 @@ import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Matrix;
 import android.graphics.Paint;
+import android.graphics.PointF;
 import android.graphics.Rect;
 import android.support.v7.widget.AppCompatImageView;
 import android.util.AttributeSet;
@@ -31,18 +32,20 @@ public class ZoomableImageView extends AppCompatImageView {
     float pinched_x, pinched_y; // second finger, first touch
     float center_of_zoom_x, center_of_zoom_y; // center of zooming, in source rectange of drawing
     float center_of_zoom_x_tba, center_of_zoom_y_tba; // center of zooming, to be achieved for smooth transformations
+    float previous_center_x, previous_center_y;
     int viewHeight, viewWidth; // original width and height of view in screen, in pixels
     int current_pointer_count; // number of touching fingers
     float start_distance, current_distance; // distances between the two fingers
     float zoom_factor; // a number that represents the amount of zoom that user wanted
+    boolean sr_draw_flag = true;
     Rect src_rect; // a subset of pixel coordinates that will be cropped from original bitmap,
     // then, will be scaled to fit in the dest_rect
     // for ideal operation, src_rect's edge ratio should be same with the dest_rect
     Rect dest_rect;
     Paint clearing_paint; // Paint for clearing canvas on draw method
 
-    float zoom_constant = 0.035F; // Constant numbers to adjust the sensitivity of user gestures
-    float movement_constant = 5.5F;
+    float zoom_constant = ApplicationConstants.ZOOM_CONSTANT;
+    float movement_constant = ApplicationConstants.MOVEMENT_CONSTANT;
 
     // Constructors
     public ZoomableImageView(Context context) {
@@ -72,6 +75,8 @@ public class ZoomableImageView extends AppCompatImageView {
 
         center_of_zoom_x = bm.getWidth()/2;
         center_of_zoom_y = bm.getHeight()/2;
+        previous_center_x = center_of_zoom_x;
+        previous_center_y = center_of_zoom_y;
 
         generateSourceRectangle(bm.getWidth(), bm.getHeight());
 
@@ -87,8 +92,14 @@ public class ZoomableImageView extends AppCompatImageView {
         Log.i("ZoomableImageView", String.format("processedBitmap sizes are w:%d h:%d ", processedBitmap.getWidth(), processedBitmap.getHeight()));
         ProcessedBitmapViewInfo bmInfo = new ProcessedBitmapViewInfo(
                 Bitmap.createBitmap(processedBitmap, addedPaddingX/2,addedPaddingY/2,BitmapHelpers.getWidth(src_rect)*2, BitmapHelpers.getHeight(src_rect)*2),
-                dest_rect, zoom_factor);
+                new PointF(center_of_zoom_x,center_of_zoom_y), zoom_factor);
         processedBitmaps.add( bmInfo );
+    }
+
+    public void toggleSrDrawal()
+    {
+        sr_draw_flag = !sr_draw_flag;
+        invalidate();
     }
 
     @Override
@@ -148,13 +159,10 @@ public class ZoomableImageView extends AppCompatImageView {
                         center_of_zoom_x -= translation_x;
                         center_of_zoom_y -= translation_y;
 
-                        for( ProcessedBitmapViewInfo bmInfo : processedBitmaps )
-                            bmInfo.translate(translation_x, translation_y);
-
-                        //center_of_zoom_x_tba = center_of_zoom_x;
-                        //center_of_zoom_y_tba = center_of_zoom_y;
-
                         align_center_of_zoom(); // prevent if center of zoom is outside of the bm,
+
+                        center_of_zoom_x_tba = center_of_zoom_x;
+                        center_of_zoom_y_tba = center_of_zoom_y;
 
                         invalidate(); // this triggers draw method of view
                         return true;
@@ -225,18 +233,27 @@ public class ZoomableImageView extends AppCompatImageView {
 
             // After drawing the original one, draw the processed bm to top of that if present
 
-            for( ProcessedBitmapViewInfo bmInfo : processedBitmaps ) {
-                bmInfo.drawOn(canvas, zoom_factor);
+            for( ProcessedBitmapViewInfo bmInfo : processedBitmaps )
+                bmInfo.translate(-center_of_zoom_x+previous_center_x,
+                                 -center_of_zoom_y+previous_center_y);
+
+            previous_center_x = center_of_zoom_x;
+            previous_center_y = center_of_zoom_y;
+
+            if( sr_draw_flag ) {
+                for (ProcessedBitmapViewInfo bmInfo : processedBitmaps) {
+                    bmInfo.drawOn(canvas, zoom_factor);
+                }
             }
         }
     }
 
     private void iterateCenterOfZoom()
     {
-        //center_of_zoom_x += (center_of_zoom_x_tba - center_of_zoom_x);
-        //center_of_zoom_y += (center_of_zoom_y_tba - center_of_zoom_y);
-        //center_of_zoom_x_tba -= (center_of_zoom_x_tba - center_of_zoom_x)/10;
-        //center_of_zoom_y_tba -= (center_of_zoom_y_tba - center_of_zoom_y)/10;
+        center_of_zoom_x += (center_of_zoom_x_tba - center_of_zoom_x);
+        center_of_zoom_y += (center_of_zoom_y_tba - center_of_zoom_y);
+        center_of_zoom_x_tba -= (center_of_zoom_x_tba - center_of_zoom_x)/10;
+        center_of_zoom_y_tba -= (center_of_zoom_y_tba - center_of_zoom_y)/10;
     }
 
     private Rect generateSourceRectangle(int src_width, int src_height){
