@@ -73,6 +73,7 @@ public class ImageProcessingTask extends AsyncTask<Bitmap, Integer, Bitmap> {
             throw new AssertionError();
         Bitmap bitmap = bitmapObjs[0];
         divideImage(bitmap);
+        bitmap.recycle();
         // processImages copy & paste
         int batchSize = modelConfiguration.getNumParallelBatch();
         Bitmap[] bitmaps = new Bitmap [batchSize]; // buffer to hold input bitmaps
@@ -235,6 +236,9 @@ public class ImageProcessingTask extends AsyncTask<Bitmap, Integer, Bitmap> {
             for (int c =0 ; c<columns ; c++) // x
                 canvas.drawBitmap(result.get(c+r*columns), c*newChunkWidth, r*newChunkHeight, null);
 
+        for (int r = 0 ; r<rows; r++) // y
+            for (int c =0 ; c<columns ; c++) // x
+                result.get(c+r*columns).recycle();
 
         Log.i("ImageCheck(): ", String.format("Bitmap size: %d %d", bitmap.getWidth(), bitmap.getHeight()));
         return bitmap;

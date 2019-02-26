@@ -376,6 +376,19 @@ public class ZoomableImageView extends AppCompatImageView {
     /**
      * CALL RECYCLE AFTER YOUR JOB IS DONE WITH THE RETURNED BITMAP
      */
+    public Bitmap getFullBitmap(){
+        Bitmap resizedBitmap = Bitmap.createScaledBitmap(bm,bm.getWidth()*2, bm.getHeight()*2,false);
+        Canvas fullCanvas = new Canvas(resizedBitmap);
+
+        for (ProcessedBitmapViewInfo bmInfo : processedBitmaps) {
+            bmInfo.drawOn(fullCanvas, 1); // zoom factor is given 1 since we are getting the full image
+        }
+        return resizedBitmap;
+    }
+
+    /**
+     * CALL RECYCLE AFTER YOUR JOB IS DONE WITH THE RETURNED BITMAP
+     */
     public Bitmap getCurrentBitmap() {
         if( bm != null ) {
             // Main challenge here is selecting a sub-bitmap that fits the model constraints
