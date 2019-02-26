@@ -248,8 +248,11 @@ public class ZoomableImageView extends AppCompatImageView {
         }
     }
 
-    public PointF getDestCoordinatesOfPixel(PointF pixel)
-    {
+    public PointF getDestCoordinatesOfPixel(PointF pixel){
+        return getDestCoordinatesOfPixel(pixel,src_rect, dest_rect);
+    }
+
+    public PointF getDestCoordinatesOfPixel(PointF pixel, Rect src_rect, Rect dest_rect){
         PointF coords = new PointF();
         coords.x = ( pixel.x - src_rect.left )/BitmapHelpers.getWidth(src_rect)*BitmapHelpers.getWidth(dest_rect) + dest_rect.left;
         coords.y = ( pixel.y - src_rect.top )/BitmapHelpers.getHeight(src_rect)*BitmapHelpers.getHeight(dest_rect) + dest_rect.top;
@@ -380,8 +383,18 @@ public class ZoomableImageView extends AppCompatImageView {
         Bitmap resizedBitmap = Bitmap.createScaledBitmap(bm,bm.getWidth()*2, bm.getHeight()*2,false);
         Canvas fullCanvas = new Canvas(resizedBitmap);
 
+        for( ProcessedBitmapViewInfo bmInfo : processedBitmaps ) {
+            PointF offset = getDestCoordinatesOfPixel(bmInfo.creationOffset,
+                    BitmapHelpers.getBitmapRect(resizedBitmap),
+                    BitmapHelpers.getBitmapRect(resizedBitmap) );
+            offset.x *= 2;
+            offset.y *= 2;
+            bmInfo.setOffset(offset);
+        }
+
         for (ProcessedBitmapViewInfo bmInfo : processedBitmaps) {
-            bmInfo.drawOn(fullCanvas, 1); // zoom factor is given 1 since we are getting the full image
+            bmInfo.drawOn(fullCanvas, bmInfo.getCreationZoomFactor()/2.0);
+            // zoom factor is divided to 2 since now the original image is scaled by 2
         }
         return resizedBitmap;
     }

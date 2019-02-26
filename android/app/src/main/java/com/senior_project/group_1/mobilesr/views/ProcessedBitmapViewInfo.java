@@ -72,4 +72,8 @@ public class ProcessedBitmapViewInfo {
         dest_rect.top = creation_dest_rect.top + (int) currentOffset.y;
         dest_rect.bottom = creation_dest_rect.bottom + (int) currentOffset.y;
     }
+
+    public double getCreationZoomFactor() {
+        return creationZoomFactor;
+    }
 }
