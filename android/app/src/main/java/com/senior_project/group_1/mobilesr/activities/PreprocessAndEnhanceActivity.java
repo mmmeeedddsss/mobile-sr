@@ -24,6 +24,8 @@ import com.senior_project.group_1.mobilesr.configurations.SRModelConfiguration;
 import com.senior_project.group_1.mobilesr.configurations.SRModelConfigurationManager;
 import com.senior_project.group_1.mobilesr.views.ZoomableImageView;
 
+import java.util.ArrayList;
+
 public class PreprocessAndEnhanceActivity extends AppCompatActivity {
 
     private Bitmap bitmap;
@@ -34,7 +36,7 @@ public class PreprocessAndEnhanceActivity extends AppCompatActivity {
     private Uri mImageUri;
     private ImageProcessingDialog dialog;
     private ImageProcessingTask imageProcessingTask;
-    private ClipData imageClipData;
+    private ArrayList<Uri> imageUris;
     private int imgIndex;
 
     @Override
@@ -61,10 +63,14 @@ public class PreprocessAndEnhanceActivity extends AppCompatActivity {
         prevButton = findViewById(R.id.prev_image_button);
         prevButton.setOnClickListener(v -> prevImage());
 
-        // Set content of Zoomable image view
         Intent intent = getIntent();
-        imageClipData = intent.getParcelableExtra("imageClipData");
+        // fill image URIs
+        ClipData imageClipData = intent.getParcelableExtra("imageClipData");
+        imageUris = new ArrayList<>();
+        for(int i = 0, len = imageClipData.getItemCount(); i < len; ++i)
+            imageUris.add(imageClipData.getItemAt(i).getUri());
 
+        // Set content of Zoomable image view
         refreshImage();
     }
 
@@ -83,7 +89,7 @@ public class PreprocessAndEnhanceActivity extends AppCompatActivity {
     }
 
     private void nextImage() {
-        if(imgIndex < imageClipData.getItemCount() - 1) {
+        if(imgIndex < imageUris.size() - 1) {
             imgIndex++;
             refreshImage();
         }
@@ -118,7 +124,7 @@ public class PreprocessAndEnhanceActivity extends AppCompatActivity {
     private void refreshImage() {
         try {
             bitmap = MediaStore.Images.Media.getBitmap(this.getContentResolver(),
-                    imageClipData.getItemAt(imgIndex).getUri());
+                    imageUris.get(imgIndex));
             imageView.setImageBitmap(bitmap);
         } catch (Exception ex) {
             Log.e("PreprocessAndEnhanceActivity.onActivityResult", "Error while loading image bitmap from URI", ex);
