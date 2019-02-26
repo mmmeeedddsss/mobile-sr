@@ -18,6 +18,12 @@ import com.senior_project.group_1.mobilesr.R;
 import com.senior_project.group_1.mobilesr.configurations.SRModelConfigurationManager;
 
 import java.io.File;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.nio.channels.FileChannel;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -81,8 +87,25 @@ public class MainActivity extends AppCompatActivity {
         });
 
         try { // Load configuration xml
+            File root = android.os.Environment.getExternalStorageDirectory();
+            File file = new File(root.getAbsolutePath(), "sr_model_configurations.xml");
+            if (!file.exists())
+            {
+                InputStream inConfig = getAssets().open(ApplicationConstants.CONFIGURATION_FILE_NAME);
+                OutputStream outConfig = new FileOutputStream(file);
+                byte[] buf = new byte[1024];
+                int read;
+                while ((read = inConfig.read(buf)) != -1)
+                    outConfig.write(buf, 0, read);
+                outConfig.flush();
+                outConfig.close();
+                inConfig.close();
+            }
             SRModelConfigurationManager
-                    .initilizeConfigurations( getAssets().open(ApplicationConstants.CONFIGURATION_FILE_NAME));
+                    .initilizeConfigurations( new FileInputStream(file));
+
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
         } catch (IOException e) {
             e.printStackTrace();
         }
