@@ -12,6 +12,22 @@ import java.io.InputStream;
 import java.util.HashMap;
 import java.util.Map;
 
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.parsers.ParserConfigurationException;
+import javax.xml.transform.Transformer;
+import javax.xml.transform.TransformerException;
+import javax.xml.transform.TransformerFactory;
+import javax.xml.transform.dom.DOMSource;
+import javax.xml.transform.stream.StreamResult;
+import org.w3c.dom.Document;
+import org.w3c.dom.Element;
+import org.w3c.dom.NamedNodeMap;
+import org.w3c.dom.Node;
+import org.w3c.dom.NodeList;
+import org.xml.sax.SAXException;
+
+
 public class SRModelConfigurationManager {
     private SRModelConfigurationManager() {
     }
@@ -105,9 +121,11 @@ public class SRModelConfigurationManager {
         switch (type) {
             case "nnapi":
                 currentConfiguration.setNNAPISetting(Boolean.parseBoolean(value));
+                editXmlFile("use_nnapi", value);
                 break;
             case "batch":
                 currentConfiguration.setNumParallelBatch(Integer.parseInt(value));
+                editXmlFile("num_parallel_batch", value);
                 break;
             default:
                 throw new IllegalArgumentException("not supported. cannot change in xml");
@@ -119,4 +137,50 @@ public class SRModelConfigurationManager {
         return configurationMap.keySet().toArray(new String[0]);
     }
 
+    // Operates on the current configuration, updates the value in the given XML tag.
+    private static void editXmlFile(String key, String value) {
+      try {
+        String modelName = currentConfiguration.getModelName();
+        File root = android.os.Environment.getExternalStorageDirectory();
+        String filePath =
+                "file://"+root.getAbsolutePath()+"/"+ApplicationConstants.CONFIGURATION_FILE_NAME;
+        DocumentBuilderFactory docFactory = DocumentBuilderFactory.newInstance();
+        docFactory.setIgnoringElementContentWhitespace(true);
+        DocumentBuilder docBuilder = docFactory.newDocumentBuilder();
+        Document doc = docBuilder.parse(filePath);
+
+        // Get the root element
+        NodeList configs = doc.getElementsByTagName("configuration");
+        // Find the node
+        Node n = null;
+        for (int i = 0; i < configs.getLength(); i++) {
+          n = configs.item(i);
+          if (n.getChildNodes().item(0).getTextContent().equals(modelName))
+            break;
+        }
+        
+        NodeList nl = n.getChildNodes();
+        for (int i = 0; i < nl.getLength(); i++) {
+          n = nl.item(i);
+          if (n.getNodeName().equals(key))
+            break;
+        }
+        // Update the value
+        n.setTextContent(value);
+        // write the content into xml file
+        TransformerFactory transformerFactory = TransformerFactory.newInstance();
+        Transformer transformer = transformerFactory.newTransformer();
+        DOMSource source = new DOMSource(doc);
+        StreamResult result = new StreamResult(new File(filePath.substring(7)));
+        transformer.transform(source, result);
+      } catch (ParserConfigurationException pce) {
+        pce.printStackTrace();
+      } catch (TransformerException tfe) {
+        tfe.printStackTrace();
+      } catch (IOException ioe) {
+        ioe.printStackTrace();
+      } catch (SAXException sae) {
+        sae.printStackTrace();
+      }
+    }
 }
