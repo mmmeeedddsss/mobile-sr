@@ -3,7 +3,9 @@ package com.senior_project.group_1.mobilesr.img_processing;
 import android.app.Notification;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
+import android.net.Uri;
 import android.os.AsyncTask;
+import android.provider.MediaStore;
 import android.support.v4.app.NotificationCompat;
 import android.support.v4.app.NotificationManagerCompat;
 import android.util.Log;
@@ -24,7 +26,7 @@ import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Locale;
 
-public class ImageProcessingTask extends AsyncTask<Bitmap, Integer, Bitmap> {
+public class ImageProcessingTask extends AsyncTask<ArrayList<Uri>, Integer, ArrayList<Uri>> {
 
     private ArrayList<Bitmap> chunkImages; // TODO: Only for debugging purpose (DELETE later.)
     private int columns;
@@ -36,6 +38,7 @@ public class ImageProcessingTask extends AsyncTask<Bitmap, Integer, Bitmap> {
     private boolean notifActive = false;
     private NotificationCompat.Builder notifBuilder;
     private NotificationManagerCompat notifManager;
+    private int numImages;
 
     private static final int NOTIF_ID = 0;
 
@@ -77,82 +80,155 @@ public class ImageProcessingTask extends AsyncTask<Bitmap, Integer, Bitmap> {
         startTime = System.nanoTime();
     }
 
-    protected Bitmap doInBackground(Bitmap... bitmapObjs) {
+    protected ArrayList<Uri> doInBackground(ArrayList<Uri>... bitmapUrisArr) {
         // apparently this replaces assert in Android
-        if(BuildConfig.DEBUG && bitmapObjs.length != 1)
+        if(BuildConfig.DEBUG && bitmapUrisArr.length != 1)
             throw new AssertionError();
-        Bitmap bitmap = bitmapObjs[0];
-        divideImage(bitmap);
-        // processImages copy & paste
+        // generate and store result
         int batchSize = modelConfiguration.getNumParallelBatch();
-        Bitmap[] bitmaps = new Bitmap [batchSize]; // buffer to hold input bitmaps
-        BitmapProcessor bitmapProcessor = new TFLiteSuperResolver(requestingActivity, batchSize, modelConfiguration);
-        int i = 0, nchunks = chunkImages.size();
-        while(i < nchunks) {
-            // load bitmaps into the array
-            int j = 0;
-            while(j < batchSize && i < nchunks) {
-                Bitmap chunk = chunkImages.get(i++);
-                // Log.i("Divided Image Sizes","Image sizes for image "+ (i++) +"  "+chunk.getWidth()+"x"+chunk.getHeight());
-                bitmaps[j++] = chunk;
+        BitmapProcessor bitmapProcessor = new TFLiteSuperResolver(requestingActivity,
+                batchSize, modelConfiguration);
+        ArrayList<Uri> resultUris = new ArrayList<>();
+        ArrayList<Uri> bitmapUris = bitmapUrisArr[0];
+        numImages = bitmapUris.size();
+        for(int imgIndex = 0, len = bitmapUris.size(); imgIndex < len; imgIndex++) {
+            // try to load the bitmap first
+            Bitmap bitmap = loadBitmap(bitmapUris.get(imgIndex));
+            if(bitmap != null) {
+                // the bitmap was loaded successfully
+                divideImage(reflectpadBitmap(bitmap));
+                // processImages copy & paste
+                Bitmap[] bitmaps = new Bitmap[batchSize]; // buffer to hold input bitmaps
+                int i = 0, nchunks = chunkImages.size();
+                while (i < nchunks) {
+                    // load bitmaps into the array
+                    int j = 0;
+                    while (j < batchSize && i < nchunks) {
+                        Bitmap chunk = chunkImages.get(i++);
+                        // Log.i("Divided Image Sizes","Image sizes for image "+ (i++) +"  "+chunk.getWidth()+"x"+chunk.getHeight());
+                        bitmaps[j++] = chunk;
+                    }
+                    // process the bitmaps
+                    Bitmap[] outputBitmaps = bitmapProcessor.processBitmaps(bitmaps);
+                    // unload the bitmaps back into the list
+                    int k = i;
+                    while (j > 0)
+                        chunkImages.set(--k, outputBitmaps[--j]);
+                    // AsyncTask things
+                    publishProgress(100 * imgIndex + (int) ((i / (float) nchunks) * 100));
+                    if (isCancelled())
+                        break;
+                }
+                // reconstruct the image and save it
+                Bitmap result = reconstructImage();
+                String path = MediaStore.Images.Media.insertImage(
+                        requestingActivity.getContentResolver(), result, "", "");
+                Uri resultUri = Uri.parse(path);
+                resultUris.add(resultUri);
             }
-            // process the bitmaps
-            Bitmap[] outputBitmaps = bitmapProcessor.processBitmaps(bitmaps);
-            // unload the bitmaps back into the list
-            int k = i;
-            while(j > 0)
-                chunkImages.set(--k, outputBitmaps[--j]);
-            // AsyncTask things
-            publishProgress((int) ((i / (float) nchunks) * 100));
-            if(isCancelled())
-                break;
         }
         bitmapProcessor.close();
-        return reconstructImage();
+        return resultUris;
     }
 
     protected void onProgressUpdate(Integer... progress) {
+        int imgsDone = progress[0] / 100, imgProgress = progress[0] % 100;
+
+        // set a proper title string for the dialog/notification
+        // cannot 'cache' the string, since I do not want to call
+        // format('superres in progress', imgsDone, numImages)
+        String titleString = numImages > 0 ?
+                "Superresolution in progress..." :
+                String.format("Superresolving image %d/%d", imgsDone, numImages);
+
         if(requestingActivity.inBackground()) {
             // activate the notification bar
             notifActive = true;
             notifBuilder = new NotificationCompat.Builder(requestingActivity, ApplicationConstants.NOTIFICATION_CHANNEL_ID)
-                    .setSmallIcon(R.drawable.notification_icon)
-                    .setContentTitle("Superresolution in progress...");
+                    .setSmallIcon(R.drawable.notification_icon);
         }
         else {
             // update the visible progress bar
-            dialog.updateProgressBar(progress[0]);
+            dialog.updateProgressBar(titleString, imgProgress);
         }
 
         // update the notification progress bar if the app was put in the background at least once
         if(notifActive) {
-            notifBuilder.setProgress(100, progress[0], false);
+            notifBuilder.setContentTitle(titleString)
+                    .setProgress(100, imgProgress, false);
             notifManager.notify(NOTIF_ID, notifBuilder.build());
         }
     }
 
-    protected void onPostExecute(Bitmap result) {
+    protected void onPostExecute(ArrayList<Uri> result) {
         // log results
         long estimatedTime = System.nanoTime() - startTime;
         Toast.makeText(requestingActivity, "Elapsed time: " + estimatedTime / 1000000 + " ms", Toast.LENGTH_LONG).show();
         requestingActivity.endImageProcessing(result);
-        writeToSDFile(
-                String.format(Locale.ENGLISH, "Time: %s | Conf: %s | dT: %d | I: %dx%d",
-                        Calendar.getInstance().getTime(),
-                        modelConfiguration.toString(),
-                        estimatedTime,
-                        result.getWidth() / modelConfiguration.getRescalingFactor(),
-                        result.getHeight() / modelConfiguration.getRescalingFactor()));
+        for(Uri uri : result) {
+            Bitmap bitmap = loadBitmap(uri);
+            if(bitmap != null) {
+                writeToSDFile(
+                        String.format(Locale.ENGLISH, "Time: %s | Conf: %s | dT: %d | I: %dx%d",
+                                Calendar.getInstance().getTime(),
+                                modelConfiguration.toString(),
+                                estimatedTime,
+                                bitmap.getWidth() / modelConfiguration.getRescalingFactor(),
+                                bitmap.getHeight() / modelConfiguration.getRescalingFactor()));
+            }
+        }
         // complete the notification if it was active
         if(notifActive) {
             notifBuilder.setProgress(0, 0, false)
                     .setContentTitle("Superresolution Complete")
-                    .setContentText("The superresolution of your image was completed in the background.");
+                    .setContentText("The superresolution of your images was completed in the background.");
             notifManager.notify(NOTIF_ID, notifBuilder.build());
         }
     }
 
-    public Bitmap reconstructImage(){
+    private Bitmap loadBitmap(Uri uri) {
+        Bitmap bitmap = null;
+        try {
+            bitmap = MediaStore.Images.Media.getBitmap(
+                    requestingActivity.getContentResolver(), uri);
+        }
+        catch(Exception ex) {
+            Log.e("ImageProcessingTask",
+                    "Error while loading image bitmap from URI, skipped image", ex);
+        }
+        return bitmap;
+    }
+
+    private Bitmap reflectpadBitmap(Bitmap bitmap) {
+        int h = bitmap.getHeight(), w = bitmap.getWidth();
+        int ih = modelConfiguration.getInputImageHeight(),
+            iw = modelConfiguration.getInputImageWidth();
+        int ox = ApplicationConstants.IMAGE_OVERLAP_X,
+            oy = ApplicationConstants.IMAGE_OVERLAP_Y;
+
+        int up = 0, bp = 0;
+        int hrem = h % (ih - oy);
+        if(hrem != 0) {
+            up = hrem / 2;
+            bp = hrem - up;
+        }
+
+        int lp = 0, rp = 0;
+        int wrem = w % (iw - ox);
+        if(wrem != 0) {
+            lp = wrem / 2;
+            rp = wrem - lp;
+        }
+
+        int nh = up + h + bp, nw = lp + w + rp;
+        int nsize = nh * nw;
+        Log.i("ImageProcessingTask",
+              String.format("Calculated padded size as: %dX%d", nw, nh));
+
+        return bitmap;
+    }
+
+    private Bitmap reconstructImage(){
         return reconstructImage(
                 modelConfiguration.getInputImageHeight(),
                 modelConfiguration.getInputImageWidth(),
@@ -160,7 +236,7 @@ public class ImageProcessingTask extends AsyncTask<Bitmap, Integer, Bitmap> {
                 ApplicationConstants.IMAGE_OVERLAP_Y);
     }
 
-    public void divideImage( final Bitmap scaledBitmap ) {
+    private void divideImage( final Bitmap scaledBitmap ) {
         divideImage(
                 scaledBitmap,
                 modelConfiguration.getInputImageHeight(),

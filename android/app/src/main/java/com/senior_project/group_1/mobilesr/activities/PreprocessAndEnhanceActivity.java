@@ -6,6 +6,7 @@ import android.content.Intent;
 import android.graphics.Bitmap;
 import android.net.Uri;
 import android.os.Bundle;
+import android.os.Environment;
 import android.provider.MediaStore;
 import android.support.v4.app.NotificationCompat;
 import android.support.v4.app.NotificationManagerCompat;
@@ -24,7 +25,12 @@ import com.senior_project.group_1.mobilesr.configurations.SRModelConfiguration;
 import com.senior_project.group_1.mobilesr.configurations.SRModelConfigurationManager;
 import com.senior_project.group_1.mobilesr.views.ZoomableImageView;
 
+import java.io.File;
+import java.io.IOException;
+import java.lang.reflect.Array;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 
 public class PreprocessAndEnhanceActivity extends AppCompatActivity {
 
@@ -37,6 +43,7 @@ public class PreprocessAndEnhanceActivity extends AppCompatActivity {
     private ImageProcessingDialog dialog;
     private ImageProcessingTask imageProcessingTask;
     private ArrayList<Uri> imageUris;
+    private int numImages;
     private int imgIndex;
 
     @Override
@@ -57,6 +64,9 @@ public class PreprocessAndEnhanceActivity extends AppCompatActivity {
         processButton = findViewById(R.id.process_image_button);
         processButton.setOnClickListener(v -> processImage());
 
+        processAllButton = findViewById(R.id.process_all_button);
+        processAllButton.setOnClickListener(v -> processAllImages());
+
         nextButton = findViewById(R.id.next_image_button);
         nextButton.setOnClickListener(v -> nextImage());
 
@@ -69,27 +79,41 @@ public class PreprocessAndEnhanceActivity extends AppCompatActivity {
         imageUris = new ArrayList<>();
         for(int i = 0, len = imageClipData.getItemCount(); i < len; ++i)
             imageUris.add(imageClipData.getItemAt(i).getUri());
+        numImages = imageUris.size();
 
         // Set content of Zoomable image view
         refreshImage();
     }
 
+    private void processImages(ArrayList<Uri> inputUris) {
+        SRModelConfiguration modelConfiguration = SRModelConfigurationManager.getCurrentConfiguration();
+        dialog = new ImageProcessingDialog(this);
+        dialog.show();
+        imageProcessingTask = new ImageProcessingTask(this, dialog, modelConfiguration);
+        imageProcessingTask.execute(inputUris);
+    }
+
+    // TODO: reuse arraylists?
     public void processImage() {
-        if (bitmap != null) {
-            Log.i("processImage", String.format("Bitmap size: %d %d", bitmap.getWidth(), bitmap.getHeight()));
+        // add only the current image's URI
+        ArrayList<Uri> uris = new ArrayList<>();
+        uris.add(imageUris.get(imgIndex));
+        processImages(uris);
+    }
 
-            SRModelConfiguration modelConfiguration = SRModelConfigurationManager.getConfiguration("SRCNN_NR_128");
-
-            Bitmap inputBitmap = imageView.getCurrentBitmap();
-            dialog = new ImageProcessingDialog(this);
-            dialog.show();
-            imageProcessingTask = new ImageProcessingTask(this, dialog, modelConfiguration);
-            imageProcessingTask.execute(inputBitmap);
-        }
+    private void processAllImages() {
+        // add all URIs with the current view order
+        ArrayList<Uri> uris = new ArrayList<>();
+        int i = imgIndex;
+        do {
+            uris.add(imageUris.get(i));
+            i = (i + 1) % numImages;
+        } while(i != imgIndex);
+        processImages(uris);
     }
 
     private void nextImage() {
-        if(imgIndex < imageUris.size() - 1) {
+        if(imgIndex < numImages - 1) {
             imgIndex++;
             refreshImage();
         }
@@ -114,11 +138,17 @@ public class PreprocessAndEnhanceActivity extends AppCompatActivity {
     }
 
     // called by imageprocessingtask
-    public void endImageProcessing(Bitmap outputBitmap) {
-        imageView.setImageBitmap(outputBitmap);
+    public void endImageProcessing(ArrayList<Uri> outputBitmapUris) {
+        // insert new URIs where required
+        for(int i = 0, len = outputBitmapUris.size(); i < len; ++i) {
+            int j = (imgIndex + i) % numImages;
+            imageUris.set(j, outputBitmapUris.get(i));
+        }
+        // clean up and refresh
         imageProcessingTask = null;
         dialog.dismiss();
         dialog = null;
+        refreshImage();
     }
 
     private void refreshImage() {
