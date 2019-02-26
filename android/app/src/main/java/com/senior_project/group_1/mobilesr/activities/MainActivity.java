@@ -3,6 +3,7 @@ package com.senior_project.group_1.mobilesr.activities;
 import android.Manifest;
 import android.app.NotificationChannel;
 import android.app.NotificationManager;
+import android.content.ClipData;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Build;
@@ -101,6 +102,7 @@ public class MainActivity extends AppCompatActivity {
     public void pickImageFromGallery() {
         Intent gallery_intent = new Intent(Intent.ACTION_PICK,
                 MediaStore.Images.Media.INTERNAL_CONTENT_URI);
+        gallery_intent.putExtra(Intent.EXTRA_ALLOW_MULTIPLE, true);
         startActivityForResult(gallery_intent, REQUEST_IMAGE_SELECT);
     }
 
@@ -130,18 +132,17 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         if( resultCode == RESULT_OK ) {
+            Intent pickPhotoIntent = new Intent(MainActivity.this, PreprocessAndEnhanceActivity.class);
             if (requestCode == REQUEST_IMAGE_CAPTURE) {
                 // Below, we are adding the captured image to gallery
                 Intent mediaScanIntent = new Intent(Intent.ACTION_MEDIA_SCANNER_SCAN_FILE);
                 mediaScanIntent.setData(mImageUri);
                 this.sendBroadcast(mediaScanIntent);
+                pickPhotoIntent.putExtra("imageUri", mImageUri); // uri implements Parsable
             }
             else if (requestCode == REQUEST_IMAGE_SELECT) {
-                mImageUri = data.getData();
+                pickPhotoIntent.putExtra("imageClipData", data.getClipData());
             }
-            // Call opration activity
-            Intent pickPhotoIntent = new Intent(MainActivity.this, PreprocessAndEnhanceActivity.class);
-            pickPhotoIntent.putExtra("imageUri", mImageUri); // uri implements Parsable
             startActivity(pickPhotoIntent);
         }
     }

@@ -1,6 +1,7 @@
 package com.senior_project.group_1.mobilesr.activities;
 
 import android.app.PendingIntent;
+import android.content.ClipData;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.net.Uri;
@@ -25,48 +26,46 @@ import com.senior_project.group_1.mobilesr.views.ZoomableImageView;
 
 public class PreprocessAndEnhanceActivity extends AppCompatActivity {
 
-    public static Bitmap bitmap;
+    private Bitmap bitmap;
     private boolean isPaused;
     private ZoomableImageView imageView;
-    private Button rotateButton;
-    private Button processButton;
-    private Button splitButton;
-    private BitmapProcessor bitmapProcessor;
+    private Button rotateButton, processButton, processAllButton,
+                   nextButton, prevButton;
     private Uri mImageUri;
     private ImageProcessingDialog dialog;
     private ImageProcessingTask imageProcessingTask;
+    private ClipData imageClipData;
+    private int imgIndex;
 
     @Override
     public void onCreate(Bundle savedInstance) {
         super.onCreate(savedInstance);
-        // TODO: fix the helper to use this instance of BitmapProcessor
+
         isPaused = false;
-        bitmapProcessor = null; // new TFLiteSuperResolver(this, ApplicationConstants.BATCH_SIZE);
+        imgIndex = 0;
+
         //Get the view From pick_photo_activity
         setContentView(R.layout.pick_photo_activity);
 
         imageView = findViewById(R.id.pick_photo_image_view);
 
         rotateButton = findViewById(R.id.rotate_image_button);
-        rotateButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                imageView.rotate();
-            }
-        });
+        rotateButton.setOnClickListener(v -> imageView.rotate());
 
         processButton = findViewById(R.id.process_image_button);
-        processButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                processImage();
-            }
-        });
+        processButton.setOnClickListener(v -> processImage());
+
+        nextButton = findViewById(R.id.next_image_button);
+        nextButton.setOnClickListener(v -> nextImage());
+
+        prevButton = findViewById(R.id.prev_image_button);
+        prevButton.setOnClickListener(v -> prevImage());
 
         // Set content of Zoomable image view
         Intent intent = getIntent();
-        mImageUri = intent.getParcelableExtra("imageUri");
-        setImage();
+        imageClipData = intent.getParcelableExtra("imageClipData");
+
+        refreshImage();
     }
 
     public void processImage() {
@@ -80,6 +79,20 @@ public class PreprocessAndEnhanceActivity extends AppCompatActivity {
             dialog.show();
             imageProcessingTask = new ImageProcessingTask(this, dialog, modelConfiguration);
             imageProcessingTask.execute(inputBitmap);
+        }
+    }
+
+    private void nextImage() {
+        if(imgIndex < imageClipData.getItemCount() - 1) {
+            imgIndex++;
+            refreshImage();
+        }
+    }
+
+    private void prevImage() {
+        if(imgIndex > 0) {
+            imgIndex--;
+            refreshImage();
         }
     }
 
@@ -100,23 +113,16 @@ public class PreprocessAndEnhanceActivity extends AppCompatActivity {
         imageProcessingTask = null;
         dialog.dismiss();
         dialog = null;
-        // sendNotification();
     }
 
-    protected void setImage() {
+    private void refreshImage() {
         try {
-            bitmap = MediaStore.Images.Media.getBitmap(this.getContentResolver(), mImageUri);
+            bitmap = MediaStore.Images.Media.getBitmap(this.getContentResolver(),
+                    imageClipData.getItemAt(imgIndex).getUri());
             imageView.setImageBitmap(bitmap);
         } catch (Exception ex) {
             Log.e("PreprocessAndEnhanceActivity.onActivityResult", "Error while loading image bitmap from URI", ex);
         }
-    }
-
-    @Override
-    protected void onDestroy() {
-        super.onDestroy();
-        if(bitmapProcessor != null)
-            bitmapProcessor.close();
     }
 
     @Override
