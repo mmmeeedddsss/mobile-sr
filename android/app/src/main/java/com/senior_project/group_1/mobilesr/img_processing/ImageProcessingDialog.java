@@ -26,17 +26,12 @@ public class ImageProcessingDialog extends Dialog {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        textView = findViewById(R.id.editText);
         requestWindowFeature(Window.FEATURE_NO_TITLE);
         setContentView(R.layout.image_processing_dialog);
         cancel = findViewById(R.id.buttonImageProcessingCancel);
         pbar = findViewById(R.id.progressBarImageProcessing);
-        cancel.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                creator.cancelImageProcessing();
-            }
-        });
+        textView = findViewById(R.id.editTextImageProcessing);
+        cancel.setOnClickListener(view -> creator.cancelImageProcessing());
     }
 
     // callback hell continues, called by the ImageProcessingTask

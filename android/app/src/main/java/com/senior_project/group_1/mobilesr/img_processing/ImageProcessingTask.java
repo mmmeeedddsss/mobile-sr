@@ -16,6 +16,7 @@ import com.senior_project.group_1.mobilesr.configurations.ApplicationConstants;
 import com.senior_project.group_1.mobilesr.BuildConfig;
 import com.senior_project.group_1.mobilesr.configurations.SRModelConfiguration;
 import com.senior_project.group_1.mobilesr.activities.PreprocessAndEnhanceActivity;
+import com.senior_project.group_1.mobilesr.views.ZoomableImageView;
 
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -137,9 +138,9 @@ public class ImageProcessingTask extends AsyncTask<ArrayList<Uri>, Integer, Arra
         // set a proper title string for the dialog/notification
         // cannot 'cache' the string, since I do not want to call
         // format('superres in progress', imgsDone, numImages)
-        String titleString = numImages > 0 ?
+        String titleString = numImages == 0 ?
                 "Superresolution in progress..." :
-                String.format("Superresolving image %d/%d", imgsDone, numImages);
+                String.format("Superresolving image %d/%d", imgsDone + 1, numImages);
 
         if(requestingActivity.inBackground()) {
             // activate the notification bar
@@ -164,6 +165,13 @@ public class ImageProcessingTask extends AsyncTask<ArrayList<Uri>, Integer, Arra
         // log results
         long estimatedTime = System.nanoTime() - startTime;
         Toast.makeText(requestingActivity, "Elapsed time: " + estimatedTime / 1000000 + " ms", Toast.LENGTH_LONG).show();
+        // complete the notification if it was active
+        if(notifActive) {
+            notifBuilder.setProgress(0, 0, false)
+                    .setContentTitle("Superresolution Complete")
+                    .setContentText("The superresolution of your images was completed in the background.");
+            notifManager.notify(NOTIF_ID, notifBuilder.build());
+        }
         requestingActivity.endImageProcessing(result);
         for(Uri uri : result) {
             Bitmap bitmap = loadBitmap(uri);
@@ -176,13 +184,6 @@ public class ImageProcessingTask extends AsyncTask<ArrayList<Uri>, Integer, Arra
                                 bitmap.getWidth() / modelConfiguration.getRescalingFactor(),
                                 bitmap.getHeight() / modelConfiguration.getRescalingFactor()));
             }
-        }
-        // complete the notification if it was active
-        if(notifActive) {
-            notifBuilder.setProgress(0, 0, false)
-                    .setContentTitle("Superresolution Complete")
-                    .setContentText("The superresolution of your images was completed in the background.");
-            notifManager.notify(NOTIF_ID, notifBuilder.build());
         }
     }
 
@@ -200,32 +201,9 @@ public class ImageProcessingTask extends AsyncTask<ArrayList<Uri>, Integer, Arra
     }
 
     private Bitmap reflectpadBitmap(Bitmap bitmap) {
-        int h = bitmap.getHeight(), w = bitmap.getWidth();
-        int ih = modelConfiguration.getInputImageHeight(),
-            iw = modelConfiguration.getInputImageWidth();
-        int ox = ApplicationConstants.IMAGE_OVERLAP_X,
-            oy = ApplicationConstants.IMAGE_OVERLAP_Y;
-
-        int up = 0, bp = 0;
-        int hrem = h % (ih - oy);
-        if(hrem != 0) {
-            up = hrem / 2;
-            bp = hrem - up;
-        }
-
-        int lp = 0, rp = 0;
-        int wrem = w % (iw - ox);
-        if(wrem != 0) {
-            lp = wrem / 2;
-            rp = wrem - lp;
-        }
-
-        int nh = up + h + bp, nw = lp + w + rp;
-        int nsize = nh * nw;
-        Log.i("ImageProcessingTask",
-              String.format("Calculated padded size as: %dX%d", nw, nh));
-
-        return bitmap;
+        ZoomableImageView view = requestingActivity.findViewById(R.id.pick_photo_image_view);
+        view.setImageBitmap(bitmap);
+        return view.getCurrentBitmap();
     }
 
     private Bitmap reconstructImage(){
