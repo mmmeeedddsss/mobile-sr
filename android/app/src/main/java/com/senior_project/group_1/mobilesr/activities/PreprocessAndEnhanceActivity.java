@@ -45,6 +45,7 @@ public class PreprocessAndEnhanceActivity extends AppCompatActivity {
         imageView = findViewById(R.id.pick_photo_image_view);
 
         rotateButton = findViewById(R.id.rotate_image_button);
+        rotateButton.setEnabled(true);
         rotateButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -57,6 +58,7 @@ public class PreprocessAndEnhanceActivity extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 processImage();
+                rotateButton.setEnabled(false);
             }
         });
 

@@ -92,7 +92,8 @@ public class ZoomableImageView extends AppCompatImageView {
         Log.i("ZoomableImageView", String.format("Received a bitmap with sizes are w:%d h:%d ", processedBitmap.getWidth(), processedBitmap.getHeight()));
         ProcessedBitmapViewInfo bmInfo = new ProcessedBitmapViewInfo(
                 Bitmap.createBitmap(processedBitmap, addedPaddingX, addedPaddingY,BitmapHelpers.getWidth(src_rect)*2, BitmapHelpers.getHeight(src_rect)*2),
-                new PointF(src_rect.left, src_rect.top), zoom_factor, dest_rect);
+                new PointF(src_rect.centerX(), src_rect.centerY()),
+                zoom_factor, dest_rect);
         processedBitmaps.add( bmInfo );
         invalidate();
         // TODO delete processedBitmap?
@@ -236,7 +237,7 @@ public class ZoomableImageView extends AppCompatImageView {
             // After drawing the original one, draw the processed bm to top of that if present
 
             for( ProcessedBitmapViewInfo bmInfo : processedBitmaps )
-                bmInfo.setOffset( getDestCoordinatesOfPixel(bmInfo.creationOffset) );
+                bmInfo.setOffset( getDestCoordinatesOfPixelwrpCenter(bmInfo.creationMiddlePoint) );
 
             previous_center_x = center_of_zoom_x;
             previous_center_y = center_of_zoom_y;
@@ -249,14 +250,14 @@ public class ZoomableImageView extends AppCompatImageView {
         }
     }
 
-    public PointF getDestCoordinatesOfPixel(PointF pixel){
-        return getDestCoordinatesOfPixel(pixel,src_rect, dest_rect);
+    public PointF getDestCoordinatesOfPixelwrpCenter(PointF pixel){
+        return getDestCoordinatesOfPixelwrpCenter(pixel,src_rect, dest_rect);
     }
 
-    public PointF getDestCoordinatesOfPixel(PointF pixel, Rect src_rect, Rect dest_rect){
+    public PointF getDestCoordinatesOfPixelwrpCenter(PointF pixel, Rect src_rect, Rect dest_rect){
         PointF coords = new PointF();
-        coords.x = ( pixel.x - src_rect.left )/BitmapHelpers.getWidth(src_rect)*BitmapHelpers.getWidth(dest_rect) + dest_rect.left;
-        coords.y = ( pixel.y - src_rect.top )/BitmapHelpers.getHeight(src_rect)*BitmapHelpers.getHeight(dest_rect) + dest_rect.top;
+        coords.x = ( pixel.x - ( src_rect.right/2 + src_rect.left/2  ) )/BitmapHelpers.getWidth(src_rect)*BitmapHelpers.getWidth(dest_rect);
+        coords.y = ( pixel.y - ( src_rect.bottom/2 + src_rect.top/2 ) )/BitmapHelpers.getHeight(src_rect)*BitmapHelpers.getHeight(dest_rect);
         return coords;
     }
 
@@ -385,16 +386,16 @@ public class ZoomableImageView extends AppCompatImageView {
         Canvas fullCanvas = new Canvas(resizedBitmap);
 
         for( ProcessedBitmapViewInfo bmInfo : processedBitmaps ) {
-            PointF offset = getDestCoordinatesOfPixel(bmInfo.creationOffset,
+            PointF offset = getDestCoordinatesOfPixelwrpCenter(
+                    new PointF(bmInfo.creationMiddlePoint.x*2, bmInfo.creationMiddlePoint.y*2),
                     BitmapHelpers.getBitmapRect(resizedBitmap),
-                    BitmapHelpers.getBitmapRect(resizedBitmap) );
-            offset.x *= 2;
-            offset.y *= 2;
-            bmInfo.setOffset(offset);
+                    BitmapHelpers.getBitmapRect(resizedBitmap)
+                    );
+            bmInfo.setOffset(new PointF(bmInfo.creationMiddlePoint.x*2, bmInfo.creationMiddlePoint.y*2));
         }
 
         for (ProcessedBitmapViewInfo bmInfo : processedBitmaps) {
-            bmInfo.drawOn(fullCanvas, bmInfo.getCreationZoomFactor()/2.0);
+            bmInfo.drawOn(fullCanvas, bmInfo.creationZoomFactor);
             // zoom factor is divided to 2 since now the original image is scaled by 2
         }
         return resizedBitmap;

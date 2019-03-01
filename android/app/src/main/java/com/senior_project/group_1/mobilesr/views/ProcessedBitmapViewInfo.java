@@ -19,7 +19,7 @@ public class ProcessedBitmapViewInfo {
     PointF corresponding_center;
     Paint paint;
 
-    final PointF creationOffset;
+    final PointF creationMiddlePoint;
 
     float zoom_constant = ApplicationConstants.ZOOM_CONSTANT;
     float movement_constant = ApplicationConstants.MOVEMENT_CONSTANT;
@@ -34,7 +34,7 @@ public class ProcessedBitmapViewInfo {
         paint.setStrokeWidth(10);
         paint.setStyle(Paint.Style.STROKE);
 
-        this.creationOffset = new PointF(offset.x, offset.y);
+        this.creationMiddlePoint = new PointF(offset.x, offset.y);
         this.creation_dest_rect = new Rect(dest_rect);
     }
 
@@ -45,25 +45,15 @@ public class ProcessedBitmapViewInfo {
     }
 
     private Rect calculateSrcRect(double currentZoomFactor) {
-        if( creationZoomFactor < currentZoomFactor )
-            return BitmapHelpers.scale(src_rect, creationZoomFactor/currentZoomFactor);
+        //if( creationZoomFactor < currentZoomFactor )
+        //    return BitmapHelpers.scale(src_rect, creationZoomFactor/currentZoomFactor);
         return src_rect;
     }
 
     private Rect calculateDstRect(double currentZoomFactor) {
-        if( creationZoomFactor > currentZoomFactor )
-            return BitmapHelpers.scale(dest_rect, currentZoomFactor/creationZoomFactor, true);
-        return dest_rect;
-        /*return new Rect(
-                (int)corresponding_center.x - BitmapHelpers.getWidth(dest_rect)/2,
-                (int)corresponding_center.y - BitmapHelpers.getHeight(dest_rect)/2,
-                (int)corresponding_center.x + BitmapHelpers.getWidth(dest_rect)/2,
-                (int)corresponding_center.y + BitmapHelpers.getHeight(dest_rect)/2);*/
-    }
-
-    public void translate(float translation_x, float translation_y) {
-        Log.i("ProcessedBitmapViewInfo", String.format("x : %f, y: %f", translation_x, translation_y));
-        dest_rect.offset((int)translation_x, (int)translation_y);
+        //if( creationZoomFactor > currentZoomFactor )
+            return BitmapHelpers.scale(dest_rect, currentZoomFactor/creationZoomFactor, false);
+        //return dest_rect;
     }
 
     public void setOffset(PointF currentOffset) {
