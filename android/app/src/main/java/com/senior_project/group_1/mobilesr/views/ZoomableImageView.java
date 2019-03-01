@@ -89,12 +89,13 @@ public class ZoomableImageView extends AppCompatImageView {
     public void attachProcessedBitmap(Bitmap processedBitmap){
         int addedPaddingX = processedBitmap.getWidth()/2 - BitmapHelpers.getWidth(src_rect);
         int addedPaddingY = processedBitmap.getHeight()/2 - BitmapHelpers.getHeight(src_rect);
-        Log.i("ZoomableImageView", String.format("processedBitmap sizes are w:%d h:%d ", processedBitmap.getWidth(), processedBitmap.getHeight()));
+        Log.i("ZoomableImageView", String.format("Received a bitmap with sizes are w:%d h:%d ", processedBitmap.getWidth(), processedBitmap.getHeight()));
         ProcessedBitmapViewInfo bmInfo = new ProcessedBitmapViewInfo(
-                Bitmap.createBitmap(processedBitmap, addedPaddingX,addedPaddingY,BitmapHelpers.getWidth(src_rect)*2, BitmapHelpers.getHeight(src_rect)*2),
+                Bitmap.createBitmap(processedBitmap, addedPaddingX, addedPaddingY,BitmapHelpers.getWidth(src_rect)*2, BitmapHelpers.getHeight(src_rect)*2),
                 new PointF(src_rect.left, src_rect.top), zoom_factor, dest_rect);
         processedBitmaps.add( bmInfo );
         invalidate();
+        // TODO delete processedBitmap?
     }
 
     public void toggleSrDrawal()
@@ -416,10 +417,10 @@ public class ZoomableImageView extends AppCompatImageView {
             int modelInputSizeX = SRModelConfigurationManager.getCurrentConfiguration().getInputImageWidth();
             int modelInputSizeY = SRModelConfigurationManager.getCurrentConfiguration().getInputImageWidth();
 
-            int chunkCountForX = (BitmapHelpers.getWidth(src_rect)-ApplicationConstants.IMAGE_OVERLAP_X*2)
-                    / (modelInputSizeX-ApplicationConstants.IMAGE_OVERLAP_X*2) + 1;
-            int chunkCountForY = (BitmapHelpers.getHeight(src_rect)-ApplicationConstants.IMAGE_OVERLAP_Y*2)
-                    / (modelInputSizeY-ApplicationConstants.IMAGE_OVERLAP_Y*2) + 1;
+            int chunkCountForX = max((BitmapHelpers.getWidth(src_rect))
+                    / (modelInputSizeX-ApplicationConstants.IMAGE_OVERLAP_X*2) + 1, 1);
+            int chunkCountForY = max((BitmapHelpers.getHeight(src_rect))
+                    / (modelInputSizeY-ApplicationConstants.IMAGE_OVERLAP_Y*2) + 1, 1);
 
             Log.i("ZoomableImageView", chunkCountForX + " - " + chunkCountForY);
 
@@ -437,7 +438,7 @@ public class ZoomableImageView extends AppCompatImageView {
                         (subselectionMiddleY-subselectionHeight/2),
                         (subselectionMiddleX+( subselectionWidth%2 == 0 ? subselectionWidth/2 : subselectionWidth/2 + 1)),
                         (subselectionMiddleY+( subselectionHeight%2 == 0 ? subselectionHeight/2 : subselectionHeight/2 + 1)));
-                Log.i("ZoomableImageView","Selected a subrectangle with sizes: "+ BitmapHelpers.getWidth(subselectionRect)+"x"+ BitmapHelpers.getHeight(subselectionRect) );
+                //Log.i("ZoomableImageView","Selected a subrectangle with sizes: "+ BitmapHelpers.getWidth(subselectionRect)+"x"+ BitmapHelpers.getHeight(subselectionRect) );
                 return createSubBitmapWithPadding( subselectionRect );
             }
         }
@@ -446,9 +447,11 @@ public class ZoomableImageView extends AppCompatImageView {
 
     private Bitmap createSubBitmapWithPadding(Rect subselectionRect) {
         Rect originalBmRect = BitmapHelpers.getBitmapRect(bm);
-        if( originalBmRect.contains(subselectionRect) )
+        if( originalBmRect.contains(subselectionRect) ) {
+            Log.i("ZoomableImageView","Submitting a bitmap with sizes: "+ BitmapHelpers.getWidth(subselectionRect)+"x"+ BitmapHelpers.getHeight(subselectionRect));
             return Bitmap.createBitmap(bm, subselectionRect.left, subselectionRect.top,
                     BitmapHelpers.getWidth(subselectionRect), BitmapHelpers.getHeight(subselectionRect));
+        }
         else {
 
             long startTime = System.nanoTime();
@@ -480,7 +483,7 @@ public class ZoomableImageView extends AppCompatImageView {
                 }
             }
             Bitmap new_bm = Bitmap.createBitmap(newPixelArray, BitmapHelpers.getWidth(subselectionRect), BitmapHelpers.getHeight(subselectionRect), Bitmap.Config.ARGB_8888);
-
+            Log.i("ZoomableImageView","Submitting a bitmap with sizes: "+ new_bm.getWidth()+"x"+ new_bm.getHeight());
             long estimatedTime = System.nanoTime() - startTime;
             //Toast.makeText(getContext(), "Elapsed Time in ms for reflection: " + estimatedTime / 1000000, Toast.LENGTH_LONG).show();
             return new_bm;
