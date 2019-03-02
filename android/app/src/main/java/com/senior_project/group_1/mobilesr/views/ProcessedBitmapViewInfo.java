@@ -45,15 +45,11 @@ public class ProcessedBitmapViewInfo {
     }
 
     private Rect calculateSrcRect(double currentZoomFactor) {
-        //if( creationZoomFactor < currentZoomFactor )
-        //    return BitmapHelpers.scale(src_rect, creationZoomFactor/currentZoomFactor);
         return src_rect;
     }
 
     private Rect calculateDstRect(double currentZoomFactor) {
-        //if( creationZoomFactor > currentZoomFactor )
-            return BitmapHelpers.scale(dest_rect, currentZoomFactor/creationZoomFactor, false);
-        //return dest_rect;
+        return BitmapHelpers.scale(dest_rect, currentZoomFactor/creationZoomFactor, false);
     }
 
     public void setOffset(PointF currentOffset) {
@@ -61,9 +57,5 @@ public class ProcessedBitmapViewInfo {
         dest_rect.right = creation_dest_rect.right + (int) currentOffset.x;
         dest_rect.top = creation_dest_rect.top + (int) currentOffset.y;
         dest_rect.bottom = creation_dest_rect.bottom + (int) currentOffset.y;
-    }
-
-    public double getCreationZoomFactor() {
-        return creationZoomFactor;
     }
 }
