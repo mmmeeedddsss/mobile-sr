@@ -14,6 +14,6 @@ public class MergeImageActivity extends Activity {
         super.onCreate(savedInstance);
         setContentView(R.layout.merge_image_activity);
         imageView = findViewById(R.id.merged_image_view);
-        imageView.setImageBitmap(DivideImageActivity.bitmap);
+        imageView.attachProcessedBitmap(DivideImageActivity.bitmap);
     }
 }

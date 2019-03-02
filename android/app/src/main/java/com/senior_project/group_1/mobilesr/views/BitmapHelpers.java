@@ -1,0 +1,183 @@
+package com.senior_project.group_1.mobilesr.views;
+
+import android.content.Context;
+import android.content.Intent;
+import android.graphics.Bitmap;
+import android.graphics.Rect;
+import android.net.Uri;
+import android.os.Environment;
+import android.util.Log;
+
+import com.senior_project.group_1.mobilesr.configurations.ApplicationConstants;
+import com.senior_project.group_1.mobilesr.configurations.SRModelConfigurationManager;
+
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.util.Calendar;
+import java.util.Locale;
+
+import static java.lang.Math.max;
+
+public class BitmapHelpers {
+
+    public static Rect getBitmapRect(Bitmap bm) {
+        return new Rect(0,0,bm.getWidth(), bm.getHeight());
+    }
+
+    public static int getWidth( Rect r )
+    {
+        return r.right - r.left;
+    }
+
+    public static int getHeight(Rect r )
+    {
+        return r.bottom - r.top;
+    }
+
+    public static Rect scale( Rect r, double factor ){
+        return scale( r, factor, false );
+    }
+
+    public static Rect scale( Rect r, double factor, boolean use_top_left ){
+        if( use_top_left )
+        {
+            return new Rect(r.left,r.top,
+                    (int) (r.left + getWidth(r) * factor), (int) (r.top + getHeight(r) * factor));
+        }
+        else {
+            double center_x = getWidth(r) / 2 + r.left;
+            double center_y = getHeight(r) / 2 + r.top;
+            factor /= 2;
+            return new Rect((int) (center_x - getWidth(r) * factor), (int) (center_y - getHeight(r) * factor),
+                    (int) (center_x + getWidth(r) * factor), (int) (center_y + getHeight(r) * factor));
+        }
+    }
+
+    public static Uri saveImageExternal(Bitmap image, Context context) {
+        //TODO - Should be processed in another thread
+        Uri uri = null;
+        try {
+            String root = Environment.getExternalStorageDirectory().getAbsolutePath();
+            File myDir = new File(root + "/MOBILE_SR_IMAGES");
+            Log.i("BitmapHelpers", "Saving image on "+myDir);
+            myDir.mkdirs();
+
+            String fname = "SR_IMAGE_" + Calendar.getInstance().getTimeInMillis() + ".png";
+            File file = new File(myDir, fname);
+
+            FileOutputStream stream = new FileOutputStream(file);
+            image.compress(Bitmap.CompressFormat.PNG, 99, stream);
+            stream.close();
+            Log.i("BitmapHelpers","Auth : "+context.getApplicationContext().getPackageName());
+            uri = GenericFileProvider.getUriForFile(context, context.getApplicationContext().getPackageName() + "", file);
+        } catch (IOException e) {
+            Log.d("BitmapHelpers", "IOException while trying to write file for sharing: " + e.getMessage());
+        }
+        return uri;
+    }
+
+    public static Intent createShareIntentByUri(Uri uri){
+        Intent intent = new Intent(android.content.Intent.ACTION_SEND);
+        intent.putExtra(Intent.EXTRA_STREAM, uri);
+        intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
+        intent.setType("image/png");
+        return intent;
+    }
+
+
+    /**
+     * Whenever you want to use this method from outside of the ImageView, pass getBitmapRect(bm)
+     * as its second argument
+     *
+     * CALL RECYCLE AFTER YOUR JOB IS DONE WITH THE RETURNED BITMAP
+     */
+    public static Bitmap cropBitmapUsingSubselection(Bitmap bm, Rect src_rect) {
+        if( bm != null ) {
+            // Main challenge here is selecting a sub-bitmap that fits the model constraints
+
+            // -> Integer division causes cropping, maybe increasing those divisions
+            // with proper handling might be work( also handle setImage, crop the reconstructed one )
+            // Overlap*(n+1)+(chunk_size-2*overlap)*n = size_y
+            // overlap + (chunk_size-overlap)*n = size_y
+            // (size_y-overlap)/(chunk_size-overlap) = n
+            // + 1 is selecting a bigger area
+
+            int modelInputSizeX = SRModelConfigurationManager.getCurrentConfiguration().getInputImageWidth();
+            int modelInputSizeY = SRModelConfigurationManager.getCurrentConfiguration().getInputImageWidth();
+
+            int chunkCountForX = max((BitmapHelpers.getWidth(src_rect))
+                    / (modelInputSizeX-ApplicationConstants.IMAGE_OVERLAP_X*2) + 1, 1);
+            int chunkCountForY = max((BitmapHelpers.getHeight(src_rect))
+                    / (modelInputSizeY-ApplicationConstants.IMAGE_OVERLAP_Y*2) + 1, 1);
+
+            Log.i("ZoomableImageView", chunkCountForX + " - " + chunkCountForY);
+
+            if( chunkCountForX > 0 && chunkCountForY > 0 ){
+                int subselectionMiddleX = BitmapHelpers.getWidth(src_rect)/2 + src_rect.left;
+                int subselectionMiddleY = BitmapHelpers.getHeight(src_rect)/2 + src_rect.top;
+                int subselectionWidth = chunkCountForX*(modelInputSizeX-ApplicationConstants.IMAGE_OVERLAP_X*2)
+                        + ApplicationConstants.IMAGE_OVERLAP_X*2;
+                int subselectionHeight = chunkCountForY*(modelInputSizeY-ApplicationConstants.IMAGE_OVERLAP_Y*2)
+                        + ApplicationConstants.IMAGE_OVERLAP_Y*2;
+                Log.i("ZoomableImageView", String.format(" subselection w:%d h:%d ", subselectionWidth, subselectionHeight));
+                Log.i("ZoomableImageView", String.format(" while src_size is w:%d h:%d ", BitmapHelpers.getWidth(src_rect), BitmapHelpers.getHeight(src_rect)));
+                Rect subselectionRect = new Rect(
+                        (subselectionMiddleX-subselectionWidth/2),
+                        (subselectionMiddleY-subselectionHeight/2),
+                        (subselectionMiddleX+( subselectionWidth%2 == 0 ? subselectionWidth/2 : subselectionWidth/2 + 1)),
+                        (subselectionMiddleY+( subselectionHeight%2 == 0 ? subselectionHeight/2 : subselectionHeight/2 + 1)));
+                //Log.i("ZoomableImageView","Selected a subrectangle with sizes: "+ BitmapHelpers.getWidth(subselectionRect)+"x"+ BitmapHelpers.getHeight(subselectionRect) );
+                return createSubBitmapWithPadding( bm, subselectionRect );
+            }
+        }
+        return null;
+    }
+
+
+    private static Bitmap createSubBitmapWithPadding(Bitmap bm, Rect subselectionRect) {
+        Rect originalBmRect = BitmapHelpers.getBitmapRect(bm);
+        if( originalBmRect.contains(subselectionRect) ) {
+            Log.i("ZoomableImageView","Submitting a bitmap with sizes: "+ BitmapHelpers.getWidth(subselectionRect)+"x"+ BitmapHelpers.getHeight(subselectionRect));
+            return Bitmap.createBitmap(bm, subselectionRect.left, subselectionRect.top,
+                    BitmapHelpers.getWidth(subselectionRect), BitmapHelpers.getHeight(subselectionRect));
+        }
+        else {
+
+            long startTime = System.nanoTime();
+
+            int originalWidth = bm.getWidth();
+            int originalHeight = bm.getHeight();
+            int[] pixelArray = new int[ originalHeight*originalWidth ];
+            bm.getPixels(pixelArray, 0, bm.getWidth(), 0, 0, bm.getWidth(), bm.getHeight());
+            int[] newPixelArray = new int[ BitmapHelpers.getWidth(subselectionRect)* BitmapHelpers.getHeight(subselectionRect) ];
+
+            for(int y = 0; y< BitmapHelpers.getHeight(subselectionRect); y++ )
+            {
+                for(int x = 0; x< BitmapHelpers.getWidth(subselectionRect); x++ )
+                {
+                    int px = x + subselectionRect.left;
+                    int py = y + subselectionRect.top;
+                    if( originalBmRect.contains( px, py) )
+                        newPixelArray[ x + y* BitmapHelpers.getWidth(subselectionRect) ] = pixelArray[ px + py*originalWidth ];
+                    else
+                    {
+                        // Reflecting
+                        if( px < 0 ) px = -px;
+                        else if( px >= originalWidth ) px = px - 2*( px - originalWidth ) - 1; // minus 1 for bounds
+                        if( py < 0 ) py = -py;
+                        else if( py >= originalBmRect.bottom  ) py = py - 2*( py - originalHeight ) - 1; // minus 1 for bounds
+                        //Log.i("ZoomableImageView", "x,y -> "+x+":"+y+"  px,py -> "+px+","+py);
+                        newPixelArray[ x + y* BitmapHelpers.getWidth(subselectionRect) ] = pixelArray[ px + py*originalWidth ];
+                    }
+                }
+            }
+            Bitmap new_bm = Bitmap.createBitmap(newPixelArray, BitmapHelpers.getWidth(subselectionRect), BitmapHelpers.getHeight(subselectionRect), Bitmap.Config.ARGB_8888);
+            Log.i("ZoomableImageView","Submitting a bitmap with sizes: "+ new_bm.getWidth()+"x"+ new_bm.getHeight());
+            long estimatedTime = System.nanoTime() - startTime;
+            //Toast.makeText(getContext(), "Elapsed Time in ms for reflection: " + estimatedTime / 1000000, Toast.LENGTH_LONG).show();
+            return new_bm;
+        }
+    }
+}
+

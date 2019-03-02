@@ -17,6 +17,7 @@ import com.senior_project.group_1.mobilesr.img_processing.ImageProcessingTask;
 import com.senior_project.group_1.mobilesr.R;
 import com.senior_project.group_1.mobilesr.configurations.SRModelConfiguration;
 import com.senior_project.group_1.mobilesr.configurations.SRModelConfigurationManager;
+import com.senior_project.group_1.mobilesr.views.BitmapHelpers;
 import com.senior_project.group_1.mobilesr.views.ZoomableImageView;
 
 public class PreprocessAndEnhanceActivity extends AppCompatActivity {
@@ -25,7 +26,9 @@ public class PreprocessAndEnhanceActivity extends AppCompatActivity {
     private ZoomableImageView imageView;
     private Button rotateButton;
     private Button processButton;
-    private Button splitButton;
+    private Button toggleButton;
+    private Button saveButton;
+    private Button shareButton;
     private BitmapProcessor bitmapProcessor;
     private Uri mImageUri;
     private ImageProcessingDialog dialog;
@@ -42,6 +45,7 @@ public class PreprocessAndEnhanceActivity extends AppCompatActivity {
         imageView = findViewById(R.id.pick_photo_image_view);
 
         rotateButton = findViewById(R.id.rotate_image_button);
+        rotateButton.setEnabled(true);
         rotateButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -54,6 +58,32 @@ public class PreprocessAndEnhanceActivity extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 processImage();
+                rotateButton.setEnabled(false);
+            }
+        });
+
+        toggleButton = findViewById(R.id.toggle_sr_button);
+        toggleButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                imageView.toggleSrDrawal();
+            }
+        });
+
+        shareButton = findViewById(R.id.share_image_button);
+        shareButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Uri savedImageUri = BitmapHelpers.saveImageExternal(imageView.getFullBitmap(), getApplicationContext());
+                startActivity(Intent.createChooser(BitmapHelpers.createShareIntentByUri(savedImageUri),"Share Image"));
+            }
+        });
+
+        saveButton = findViewById(R.id.save_image_button);
+        saveButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                BitmapHelpers.saveImageExternal(imageView.getFullBitmap(), getApplicationContext());
             }
         });
 
@@ -90,7 +120,7 @@ public class PreprocessAndEnhanceActivity extends AppCompatActivity {
 
     // called by imageprocessingtask
     public void endImageProcessing(Bitmap outputBitmap) {
-        imageView.setImageBitmap(outputBitmap);
+        imageView.attachProcessedBitmap(outputBitmap);
         imageProcessingTask = null;
         dialog.dismiss();
         dialog = null;

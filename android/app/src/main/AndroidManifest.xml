@@ -25,14 +25,15 @@
         <activity android:name="com.senior_project.group_1.mobilesr.activities.MergeImageActivity"></activity>
         <activity android:name="com.senior_project.group_1.mobilesr.activities.SettingsActivity"></activity>
         <provider
-            android:name="android.support.v4.content.FileProvider"
-            android:authorities="com.senior_project.group_1.mobilesr.activities.MainActivity"
+            android:name=".views.GenericFileProvider"
+            android:authorities="com.senior_project.group_1.mobilesr"
             android:exported="false"
             android:grantUriPermissions="true">
             <meta-data
                 android:name="android.support.FILE_PROVIDER_PATHS"
-                android:resource="@xml/file_paths"></meta-data>
+                android:resource="@xml/file_paths"/>
         </provider>
+
 
     </application>
 
