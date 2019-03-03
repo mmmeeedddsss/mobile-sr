@@ -128,16 +128,6 @@ public class ImageProcessingTask extends AsyncTask<ArrayList<Uri>, Integer, Arra
                 Uri resultUri = Uri.parse(path);
                 resultUris.add(resultUri);
             }
-            // process the bitmaps
-            Bitmap[] outputBitmaps = bitmapProcessor.processBitmaps(bitmaps);
-            // unload the bitmaps back into the list
-            int k = i;
-            while(j > 0)
-                chunkImages.set(--k, outputBitmaps[--j]);
-            // AsyncTask things
-            publishProgress((int) ((i / (float) nchunks) * 100));
-            if(isCancelled())
-                break;
         }
         bitmapProcessor.close();
         return resultUris;
@@ -204,6 +194,25 @@ public class ImageProcessingTask extends AsyncTask<ArrayList<Uri>, Integer, Arra
                 modelConfiguration.getInputImageWidth(),
                 ApplicationConstants.IMAGE_OVERLAP_X,
                 ApplicationConstants.IMAGE_OVERLAP_Y);
+    }
+
+    private Bitmap reflectpadBitmap(Bitmap bitmap) {
+        ZoomableImageView view = requestingActivity.findViewById(R.id.pick_photo_image_view);
+        view.setImageBitmap(bitmap);
+        return view.getCurrentBitmap();
+    }
+
+    private Bitmap loadBitmap(Uri uri) {
+        Bitmap bitmap = null;
+        try {
+            bitmap = MediaStore.Images.Media.getBitmap(
+                    requestingActivity.getContentResolver(), uri);
+        }
+        catch(Exception ex) {
+            Log.e("ImageProcessingTask",
+                    "Error while loading image bitmap from URI, skipped image", ex);
+        }
+        return bitmap;
     }
 
     private void divideImage( final Bitmap scaledBitmap ) {
@@ -309,8 +318,6 @@ public class ImageProcessingTask extends AsyncTask<ArrayList<Uri>, Integer, Arra
         Log.i("ReconstructImage", String.format("%d chunks with size %dx%d is created",chunkImages.size(), chunkImages.get(0).getWidth(), chunkImages.get(0).getHeight()));
         Canvas canvas = new Canvas(bitmap); // this constructor causes canvas operations to write on provided bitmap
 
-        ArrayList<Bitmap> result = prepareChunks(chunkHeight, chunkWidth,overlapX, overlapY); // Prepare the chunks to reassemble the image.
-
         Log.i("ReconstructImage ", String.format("Chunks : %d", rows*columns));
         for (int r = 0 ; r<rows; r++) // y
             for (int c =0 ; c<columns ; c++) // x
@@ -322,15 +329,6 @@ public class ImageProcessingTask extends AsyncTask<ArrayList<Uri>, Integer, Arra
 
         Log.i("ImageCheck(): ", String.format("Bitmap size: %d %d", bitmap.getWidth(), bitmap.getHeight()));
         return bitmap;
-    }
-
-    public void divideImage( final Bitmap scaledBitmap ) {
-        divideImage(
-                scaledBitmap,
-                modelConfiguration.getInputImageHeight(),
-                modelConfiguration.getInputImageWidth(),
-                ApplicationConstants.IMAGE_OVERLAP_X,
-                ApplicationConstants.IMAGE_OVERLAP_Y);
     }
 
     /**

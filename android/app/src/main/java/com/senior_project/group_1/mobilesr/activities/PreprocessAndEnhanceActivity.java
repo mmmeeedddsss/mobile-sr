@@ -44,6 +44,10 @@ public class PreprocessAndEnhanceActivity extends AppCompatActivity {
     private Uri mImageUri;
     private ImageProcessingDialog dialog;
     private ImageProcessingTask imageProcessingTask;
+    private ArrayList<Uri> imageUris; // TODO: wrap uri + processing state in a class?
+    private ArrayList<Boolean> isProcessed;
+    private int numImages;
+    private int imgIndex;
 
     @Override
     public void onCreate(Bundle savedInstance) {
@@ -62,12 +66,9 @@ public class PreprocessAndEnhanceActivity extends AppCompatActivity {
         rotateButton.setOnClickListener(v -> imageView.rotate());
 
         processButton = findViewById(R.id.process_image_button);
-        processButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                processImage();
-                rotateButton.setEnabled(false);
-            }
+        processButton.setOnClickListener(v -> {
+            processImage();
+            rotateButton.setEnabled(false);
         });
 
         processAllButton = findViewById(R.id.process_all_button);
@@ -80,36 +81,26 @@ public class PreprocessAndEnhanceActivity extends AppCompatActivity {
         prevButton.setOnClickListener(v -> prevImage());
 
         toggleButton = findViewById(R.id.toggle_sr_button);
-        toggleButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                imageView.toggleSrDrawal();
-            }
-        });
+        toggleButton.setOnClickListener(v -> imageView.toggleSrDrawal());
 
         shareButton = findViewById(R.id.share_image_button);
-        shareButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                Uri savedImageUri = BitmapHelpers.saveImageExternal(imageView.getFullBitmap(), getApplicationContext());
-                startActivity(Intent.createChooser(BitmapHelpers.createShareIntentByUri(savedImageUri),"Share Image"));
-            }
+        shareButton.setOnClickListener(v -> {
+            Uri savedImageUri = BitmapHelpers.saveImageExternal(imageView.getFullBitmap(), getApplicationContext());
+            startActivity(Intent.createChooser(BitmapHelpers.createShareIntentByUri(savedImageUri),"Share Image"));
         });
 
         saveButton = findViewById(R.id.save_image_button);
-        saveButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                BitmapHelpers.saveImageExternal(imageView.getFullBitmap(), getApplicationContext());
-            }
-        });
+        saveButton.setOnClickListener(v -> BitmapHelpers.saveImageExternal(imageView.getFullBitmap(), getApplicationContext()));
 
         Intent intent = getIntent();
         // fill image URIs
         ClipData imageClipData = intent.getParcelableExtra("imageClipData");
         imageUris = new ArrayList<>();
-        for(int i = 0, len = imageClipData.getItemCount(); i < len; ++i)
+        isProcessed = new ArrayList<>();
+        for(int i = 0, len = imageClipData.getItemCount(); i < len; ++i) {
             imageUris.add(imageClipData.getItemAt(i).getUri());
+            isProcessed.add(false);
+        }
         numImages = imageUris.size();
 
         // Set content of Zoomable image view
@@ -175,6 +166,7 @@ public class PreprocessAndEnhanceActivity extends AppCompatActivity {
         for(int i = 0, len = outputBitmapUris.size(); i < len; ++i) {
             int j = (imgIndex + i) % numImages;
             imageUris.set(j, outputBitmapUris.get(i));
+            isProcessed.set(i, true);
         }
         // clean up and refresh
         imageProcessingTask = null;
@@ -187,7 +179,10 @@ public class PreprocessAndEnhanceActivity extends AppCompatActivity {
         try {
             bitmap = MediaStore.Images.Media.getBitmap(this.getContentResolver(),
                     imageUris.get(imgIndex));
-            imageView.setImageBitmap(bitmap);
+            if(isProcessed.get(imgIndex))
+                imageView.attachProcessedBitmap(bitmap);
+            else
+                imageView.setImageBitmap(bitmap);
         } catch (Exception ex) {
             Log.e("PreprocessAndEnhanceActivity.onActivityResult", "Error while loading image bitmap from URI", ex);
         }
