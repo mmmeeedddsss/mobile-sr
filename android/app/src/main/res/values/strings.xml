@@ -2,4 +2,6 @@
     <string name="app_name">MobileSR</string>
     <string name="image_processing_dialog_text">Superresolution in progress...</string>
     <string name="image_processing_dialog_button">CANCEL</string>
+    <string name="channel_name">Superresolution Notifications</string>
+    <string name="channel_description">Channel for delivering notifications to inform the user that superresolution is complete</string>
 </resources>

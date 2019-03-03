@@ -6,6 +6,7 @@ import android.view.View;
 import android.view.Window;
 import android.widget.Button;
 import android.widget.ProgressBar;
+import android.widget.TextView;
 
 import com.senior_project.group_1.mobilesr.R;
 import com.senior_project.group_1.mobilesr.activities.PreprocessAndEnhanceActivity;
@@ -15,6 +16,7 @@ public class ImageProcessingDialog extends Dialog {
     private PreprocessAndEnhanceActivity creator;
     private Button cancel;
     private ProgressBar pbar;
+    private TextView textView;
 
     public ImageProcessingDialog(PreprocessAndEnhanceActivity creator) {
         super(creator);
@@ -28,16 +30,13 @@ public class ImageProcessingDialog extends Dialog {
         setContentView(R.layout.image_processing_dialog);
         cancel = findViewById(R.id.buttonImageProcessingCancel);
         pbar = findViewById(R.id.progressBarImageProcessing);
-        cancel.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                creator.cancelImageProcessing();
-            }
-        });
+        textView = findViewById(R.id.editTextImageProcessing);
+        cancel.setOnClickListener(view -> creator.cancelImageProcessing());
     }
 
     // callback hell continues, called by the ImageProcessingTask
-    public void updateProgressBar(int i) {
+    public void updateProgressBar(String text, int i) {
+        textView.setText(text);
         pbar.setProgress(i);
     }
 }

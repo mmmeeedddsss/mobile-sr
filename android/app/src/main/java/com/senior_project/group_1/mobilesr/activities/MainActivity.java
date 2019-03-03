@@ -1,8 +1,12 @@
 package com.senior_project.group_1.mobilesr.activities;
 
 import android.Manifest;
+import android.app.NotificationChannel;
+import android.app.NotificationManager;
+import android.content.ClipData;
 import android.content.Intent;
 import android.net.Uri;
+import android.os.Build;
 import android.os.Environment;
 import android.provider.MediaStore;
 import android.support.v4.app.ActivityCompat;
@@ -39,6 +43,9 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
+        // create the notification channel for the application
+        createNotificationChannel();
 
         // Pick photo button activity
         pickPhotoButton = (Button) findViewById(R.id.buttonPickPhoto);
@@ -118,6 +125,7 @@ public class MainActivity extends AppCompatActivity {
     public void pickImageFromGallery() {
         Intent gallery_intent = new Intent(Intent.ACTION_PICK,
                 MediaStore.Images.Media.INTERNAL_CONTENT_URI);
+        gallery_intent.putExtra(Intent.EXTRA_ALLOW_MULTIPLE, true);
         startActivityForResult(gallery_intent, REQUEST_IMAGE_SELECT);
     }
 
@@ -147,18 +155,17 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         if( resultCode == RESULT_OK ) {
+            Intent pickPhotoIntent = new Intent(MainActivity.this, PreprocessAndEnhanceActivity.class);
             if (requestCode == REQUEST_IMAGE_CAPTURE) {
                 // Below, we are adding the captured image to gallery
                 Intent mediaScanIntent = new Intent(Intent.ACTION_MEDIA_SCANNER_SCAN_FILE);
                 mediaScanIntent.setData(mImageUri);
                 this.sendBroadcast(mediaScanIntent);
+                pickPhotoIntent.putExtra("imageUri", mImageUri); // uri implements Parsable
             }
             else if (requestCode == REQUEST_IMAGE_SELECT) {
-                mImageUri = data.getData();
+                pickPhotoIntent.putExtra("imageClipData", data.getClipData());
             }
-            // Call opration activity
-            Intent pickPhotoIntent = new Intent(MainActivity.this, PreprocessAndEnhanceActivity.class);
-            pickPhotoIntent.putExtra("imageUri", mImageUri); // uri implements Parsable
             startActivity(pickPhotoIntent);
         }
     }
@@ -171,5 +178,23 @@ public class MainActivity extends AppCompatActivity {
         File image = File.createTempFile(imageFileName,".jpg", storageDir );
 
         return image;
+    }
+
+    // have to create a notification channel in Android 8.0+
+    // copied verbatim from https://developer.android.com/training/notify-user/channels
+    private void createNotificationChannel() {
+        // Create the NotificationChannel, but only on API 26+ because
+        // the NotificationChannel class is new and not in the support library
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            CharSequence name = getString(R.string.channel_name);
+            String description = getString(R.string.channel_description);
+            int importance = NotificationManager.IMPORTANCE_DEFAULT;
+            NotificationChannel channel = new NotificationChannel(ApplicationConstants.NOTIFICATION_CHANNEL_ID, name, importance);
+            channel.setDescription(description);
+            // Register the channel with the system; you can't change the importance
+            // or other notification behaviors after this
+            NotificationManager notificationManager = getSystemService(NotificationManager.class);
+            notificationManager.createNotificationChannel(channel);
+        }
     }
 }
