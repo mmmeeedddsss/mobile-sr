@@ -4,6 +4,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.Rect;
+import android.graphics.RectF;
 import android.net.Uri;
 import android.os.Environment;
 import android.util.Log;
@@ -51,6 +52,21 @@ public class BitmapHelpers {
             factor /= 2;
             return new Rect((int) (center_x - getWidth(r) * factor), (int) (center_y - getHeight(r) * factor),
                     (int) (center_x + getWidth(r) * factor), (int) (center_y + getHeight(r) * factor));
+        }
+    }
+
+    public static RectF scale(RectF r, double factor, boolean use_top_left ){
+        if( use_top_left )
+        {
+            return new RectF(r.left,r.top,
+                    (float)(r.left + r.width() * factor), (float)(r.top + r.height() * factor));
+        }
+        else {
+            double center_x = r.width() / 2 + r.left;
+            double center_y = r.height() / 2 + r.top;
+            factor /= 2;
+            return new RectF((float) (center_x - r.width() * factor), (float) (center_y - r.height() * factor),
+                    (float) (center_x + r.width() * factor), (float) (center_y + r.height() * factor));
         }
     }
 

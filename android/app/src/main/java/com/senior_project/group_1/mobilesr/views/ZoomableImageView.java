@@ -241,7 +241,7 @@ public class ZoomableImageView extends AppCompatImageView {
 
             if( sr_draw_flag ) {
                 for (ProcessedBitmapViewInfo bmInfo : processedBitmaps) {
-                    bmInfo.drawOn(canvas, zoom_factor);
+                    bmInfo.renderOn(canvas, zoom_factor);
                 }
             }
         }
@@ -379,16 +379,14 @@ public class ZoomableImageView extends AppCompatImageView {
      * CALL RECYCLE AFTER YOUR JOB IS DONE WITH THE RETURNED BITMAP
      */
     public Bitmap getFullBitmap(){
+        Log.i("ZoomableImageView", String.format("Bm size: %dx%d",bm.getWidth(), bm.getHeight()));
         Bitmap resizedBitmap = Bitmap.createScaledBitmap(bm,bm.getWidth()*2, bm.getHeight()*2,false);
+        Log.i("ZoomableImageView", String.format("ResizedBm size: %dx%d",resizedBitmap.getWidth(), resizedBitmap.getHeight()));
         Canvas fullCanvas = new Canvas(resizedBitmap);
 
-        for( ProcessedBitmapViewInfo bmInfo : processedBitmaps ) {
-            bmInfo.setOffset(new PointF(bmInfo.creationMiddlePoint.x, bmInfo.creationMiddlePoint.y));
-        }
-
         for (ProcessedBitmapViewInfo bmInfo : processedBitmaps) {
-            bmInfo.drawOn(fullCanvas, bmInfo.creationZoomFactor/2);
-            // zoom factor is divided to 2 since now the original image is scaled by 2
+            Log.i("ZoomableImageView", String.format("Creation Offset: %f,%f", bmInfo.creationMiddlePoint.x, bmInfo.creationMiddlePoint.y));
+            bmInfo.overrideOn(fullCanvas, new PointF(bmInfo.creationMiddlePoint.x*2, bmInfo.creationMiddlePoint.y*2));
         }
         return resizedBitmap;
     }
