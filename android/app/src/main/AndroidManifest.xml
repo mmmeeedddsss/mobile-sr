@@ -19,7 +19,8 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity android:name="com.senior_project.group_1.mobilesr.activities.PreprocessAndEnhanceActivity"></activity>
+        <activity android:name="com.senior_project.group_1.mobilesr.activities.SingleImageEnhanceActivity"></activity>
+        <activity android:name="com.senior_project.group_1.mobilesr.activities.MultipleImageEnhanceActivity"></activity>
         <activity android:name="com.senior_project.group_1.mobilesr.activities.TutorialActivity"></activity>
         <activity android:name="com.senior_project.group_1.mobilesr.activities.DivideImageActivity"></activity>
         <activity android:name="com.senior_project.group_1.mobilesr.activities.MergeImageActivity"></activity>

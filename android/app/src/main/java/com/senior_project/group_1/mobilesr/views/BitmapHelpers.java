@@ -1,5 +1,6 @@
 package com.senior_project.group_1.mobilesr.views;
 
+import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.Bitmap;
@@ -7,6 +8,7 @@ import android.graphics.Rect;
 import android.graphics.RectF;
 import android.net.Uri;
 import android.os.Environment;
+import android.provider.MediaStore;
 import android.util.Log;
 
 import com.senior_project.group_1.mobilesr.configurations.ApplicationConstants;
@@ -16,7 +18,6 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.Calendar;
-import java.util.Locale;
 
 import static java.lang.Math.max;
 
@@ -106,6 +107,8 @@ public class BitmapHelpers {
      * Whenever you want to use this method from outside of the ImageView, pass getBitmapRect(bm)
      * as its second argument
      *
+     * Update by Deniz: added an overload for the single argument case, thanks for the comment
+     *
      * CALL RECYCLE AFTER YOUR JOB IS DONE WITH THE RETURNED BITMAP
      */
     public static Bitmap cropBitmapUsingSubselection(Bitmap bm, Rect src_rect) {
@@ -150,6 +153,12 @@ public class BitmapHelpers {
         return null;
     }
 
+    /**
+     * Overload for the case when we want to crop/pad a full bitmap without ZoomableImageView
+     */
+    public static Bitmap cropBitmapUsingSubselection(Bitmap bm) {
+        return cropBitmapUsingSubselection(bm, getBitmapRect(bm));
+    }
 
     private static Bitmap createSubBitmapWithPadding(Bitmap bm, Rect subselectionRect) {
         Rect originalBmRect = BitmapHelpers.getBitmapRect(bm);
@@ -194,6 +203,23 @@ public class BitmapHelpers {
             //Toast.makeText(getContext(), "Elapsed Time in ms for reflection: " + estimatedTime / 1000000, Toast.LENGTH_LONG).show();
             return new_bm;
         }
+    }
+
+    /**
+     * A method to provide quick loading of bitmaps from a given URI
+     * @param uri Uri of the bitmap that should be loaded into memory
+     * @param contentResolver the content resolver used while loading, usually gotten with
+     *                        context.getContentResolver()
+     * @return null if an IOException occurs, otherwise the requested Bitmap
+     */
+    public static Bitmap loadBitmapFromURI(Uri uri, ContentResolver contentResolver) {
+        Bitmap bitmap = null;
+        try {
+            bitmap = MediaStore.Images.Media.getBitmap(contentResolver, uri);
+        } catch (IOException ex) {
+            Log.e("BitmapHelpers::loadBitmapFromURI", "IOError while loading URI: " + uri.toString(), ex);
+        }
+        return bitmap;
     }
 }
 

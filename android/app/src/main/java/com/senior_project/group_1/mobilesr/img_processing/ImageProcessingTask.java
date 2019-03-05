@@ -1,11 +1,9 @@
 package com.senior_project.group_1.mobilesr.img_processing;
 
-import android.app.Notification;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.net.Uri;
 import android.os.AsyncTask;
-import android.provider.MediaStore;
 import android.support.v4.app.NotificationCompat;
 import android.support.v4.app.NotificationManagerCompat;
 import android.util.Log;
@@ -16,6 +14,7 @@ import com.senior_project.group_1.mobilesr.configurations.ApplicationConstants;
 import com.senior_project.group_1.mobilesr.BuildConfig;
 import com.senior_project.group_1.mobilesr.configurations.SRModelConfiguration;
 import com.senior_project.group_1.mobilesr.activities.PreprocessAndEnhanceActivity;
+import com.senior_project.group_1.mobilesr.views.BitmapHelpers;
 import com.senior_project.group_1.mobilesr.views.ZoomableImageView;
 
 import java.io.File;
@@ -95,10 +94,12 @@ public class ImageProcessingTask extends AsyncTask<ArrayList<Uri>, Integer, Arra
         numImages = bitmapUris.size();
         for(int imgIndex = 0, len = bitmapUris.size(); imgIndex < len; imgIndex++) {
             // try to load the bitmap first
-            Bitmap bitmap = loadBitmap(bitmapUris.get(imgIndex));
+            Bitmap bitmap = BitmapHelpers.loadBitmapFromURI(
+                    bitmapUris.get(imgIndex), requestingActivity.getContentResolver()
+            );
             if(bitmap != null) {
                 // the bitmap was loaded successfully
-                divideImage(reflectpadBitmap(bitmap));
+                divideImage(bitmap);
                 // processImages copy & paste
                 Bitmap[] bitmaps = new Bitmap[batchSize]; // buffer to hold input bitmaps
                 int i = 0, nchunks = chunkImages.size();
@@ -123,9 +124,13 @@ public class ImageProcessingTask extends AsyncTask<ArrayList<Uri>, Integer, Arra
                 }
                 // reconstruct the image and save it
                 Bitmap result = reconstructImage();
+                Uri resultUri = BitmapHelpers.saveImageExternal(result, requestingActivity);
+                // TODO: think about how gallery saving could still be useful
+                /*
                 String path = MediaStore.Images.Media.insertImage(
                         requestingActivity.getContentResolver(), result, "", "");
                 Uri resultUri = Uri.parse(path);
+                */
                 resultUris.add(resultUri);
             }
         }
@@ -175,7 +180,7 @@ public class ImageProcessingTask extends AsyncTask<ArrayList<Uri>, Integer, Arra
         }
         requestingActivity.endImageProcessing(result);
         for(Uri uri : result) {
-            Bitmap bitmap = loadBitmap(uri);
+            Bitmap bitmap = BitmapHelpers.loadBitmapFromURI(uri, requestingActivity.getContentResolver());
             if(bitmap != null) {
                 writeToSDFile(
                         String.format(Locale.ENGLISH, "Time: %s | Conf: %s | dT: %d | I: %dx%d",
@@ -197,22 +202,10 @@ public class ImageProcessingTask extends AsyncTask<ArrayList<Uri>, Integer, Arra
     }
 
     private Bitmap reflectpadBitmap(Bitmap bitmap) {
+        // TODO: this is a hack that uses view, there should be no need
         ZoomableImageView view = requestingActivity.findViewById(R.id.pick_photo_image_view);
         view.setImageBitmap(bitmap);
         return view.getCurrentBitmap();
-    }
-
-    private Bitmap loadBitmap(Uri uri) {
-        Bitmap bitmap = null;
-        try {
-            bitmap = MediaStore.Images.Media.getBitmap(
-                    requestingActivity.getContentResolver(), uri);
-        }
-        catch(Exception ex) {
-            Log.e("ImageProcessingTask",
-                    "Error while loading image bitmap from URI, skipped image", ex);
-        }
-        return bitmap;
     }
 
     private void divideImage( final Bitmap scaledBitmap ) {

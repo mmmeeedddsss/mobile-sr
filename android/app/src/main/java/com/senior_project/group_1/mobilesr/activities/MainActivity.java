@@ -155,8 +155,9 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         if( resultCode == RESULT_OK ) {
-            Intent pickPhotoIntent = new Intent(MainActivity.this, PreprocessAndEnhanceActivity.class);
+            Intent pickPhotoIntent = null;
             if (requestCode == REQUEST_IMAGE_CAPTURE) {
+                // TODO: fix this part, putExtra "imageUri" is deprecated
                 // Below, we are adding the captured image to gallery
                 Intent mediaScanIntent = new Intent(Intent.ACTION_MEDIA_SCANNER_SCAN_FILE);
                 mediaScanIntent.setData(mImageUri);
@@ -164,6 +165,16 @@ public class MainActivity extends AppCompatActivity {
                 pickPhotoIntent.putExtra("imageUri", mImageUri); // uri implements Parsable
             }
             else if (requestCode == REQUEST_IMAGE_SELECT) {
+                // start the proper activity depending on the number of selected photos
+                ClipData imageClipData = data.getClipData();
+                if(imageClipData.getItemCount() == 1) { // one photo was picked
+                    pickPhotoIntent = new Intent(MainActivity.this,
+                            SingleImageEnhanceActivity.class);
+                }
+                else { // more than one photo was picked
+                    pickPhotoIntent = new Intent(MainActivity.this,
+                            MultipleImageEnhanceActivity.class);
+                }
                 pickPhotoIntent.putExtra("imageClipData", data.getClipData());
             }
             startActivity(pickPhotoIntent);

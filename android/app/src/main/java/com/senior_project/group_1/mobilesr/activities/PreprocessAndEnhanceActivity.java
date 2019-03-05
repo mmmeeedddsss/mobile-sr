@@ -1,22 +1,14 @@
 package com.senior_project.group_1.mobilesr.activities;
 
-import android.app.PendingIntent;
 import android.content.ClipData;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.net.Uri;
 import android.os.Bundle;
-import android.os.Environment;
-import android.provider.MediaStore;
-import android.support.v4.app.NotificationCompat;
-import android.support.v4.app.NotificationManagerCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
-import android.view.View;
 import android.widget.Button;
 
-import com.senior_project.group_1.mobilesr.configurations.ApplicationConstants;
-import com.senior_project.group_1.mobilesr.img_processing.BitmapProcessor;
 import com.senior_project.group_1.mobilesr.BuildConfig;
 import com.senior_project.group_1.mobilesr.img_processing.ImageProcessingDialog;
 import com.senior_project.group_1.mobilesr.img_processing.ImageProcessingTask;
@@ -26,28 +18,28 @@ import com.senior_project.group_1.mobilesr.configurations.SRModelConfigurationMa
 import com.senior_project.group_1.mobilesr.views.BitmapHelpers;
 import com.senior_project.group_1.mobilesr.views.ZoomableImageView;
 
-import java.io.File;
-import java.io.IOException;
-import java.lang.reflect.Array;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Date;
 
-public class PreprocessAndEnhanceActivity extends AppCompatActivity {
+/* I changed PreprocessAndEnhanceActivity into an abstract base class since we want
+ * different actions for the single image/multi image case. This class implements all
+ * the required common functionality. Two concrete classes extend it, one for the single
+ * image and the other for the multiple image case. They have to provide their own constructors
+ * to disable/enable necessary buttons and their own version of endImageProcessing to decide
+ * on what to do when image processing ends.
+ */
 
-    private Bitmap bitmap;
+public abstract class PreprocessAndEnhanceActivity extends AppCompatActivity {
+
     private boolean isPaused;
-    private ZoomableImageView imageView;
-    private Button rotateButton, processButton, processAllButton,
-                   nextButton, prevButton, toggleButton,
-                   saveButton, shareButton;
-    private Uri mImageUri;
+    protected ZoomableImageView imageView;
+    protected Button rotateButton, processButton, processAllButton,
+                     nextButton, prevButton, toggleButton,
+                     saveButton, shareButton;
     private ImageProcessingDialog dialog;
     private ImageProcessingTask imageProcessingTask;
-    private ArrayList<Uri> imageUris; // TODO: wrap uri + processing state in a class?
-    private ArrayList<Boolean> isProcessed;
-    private int numImages;
-    private int imgIndex;
+    protected ArrayList<Uri> imageUris; // TODO: wrap uri + processing state in a class?
+    protected int numImages;
+    protected int imgIndex;
 
     @Override
     public void onCreate(Bundle savedInstance) {
@@ -96,11 +88,8 @@ public class PreprocessAndEnhanceActivity extends AppCompatActivity {
         // fill image URIs
         ClipData imageClipData = intent.getParcelableExtra("imageClipData");
         imageUris = new ArrayList<>();
-        isProcessed = new ArrayList<>();
-        for(int i = 0, len = imageClipData.getItemCount(); i < len; ++i) {
+        for(int i = 0, len = imageClipData.getItemCount(); i < len; ++i)
             imageUris.add(imageClipData.getItemAt(i).getUri());
-            isProcessed.add(false);
-        }
         numImages = imageUris.size();
 
         // Set content of Zoomable image view
@@ -115,20 +104,27 @@ public class PreprocessAndEnhanceActivity extends AppCompatActivity {
         imageProcessingTask.execute(inputUris);
     }
 
-    // TODO: reuse arraylists?
-    public void processImage() {
-        // add only the current image's URI
+    private void processImage() {
+        // create a new URI for the requested part of the image
+        Bitmap partialImg = imageView.getCurrentBitmap();
+        Uri partialUri = BitmapHelpers.saveImageExternal(partialImg, this);
         ArrayList<Uri> uris = new ArrayList<>();
-        uris.add(imageUris.get(imgIndex));
+        uris.add(partialUri);
         processImages(uris);
     }
 
     private void processAllImages() {
         // add all URIs with the current view order
+        // have to create new URIs for properly reflect-padded versions though
         ArrayList<Uri> uris = new ArrayList<>();
         int i = imgIndex;
         do {
-            uris.add(imageUris.get(i));
+            Bitmap origBitmap = BitmapHelpers.loadBitmapFromURI(
+                    imageUris.get(i), this.getContentResolver()
+            );
+            Bitmap paddedBitmap = BitmapHelpers.cropBitmapUsingSubselection(origBitmap);
+            Uri paddedUri = BitmapHelpers.saveImageExternal(paddedBitmap, this);
+            uris.add(paddedUri);
             i = (i + 1) % numImages;
         } while(i != imgIndex);
         processImages(uris);
@@ -150,42 +146,28 @@ public class PreprocessAndEnhanceActivity extends AppCompatActivity {
 
     // too many callbacks?!
 
-    // TODO: handle the difference between setBitmap & attach
     // called by imageprocessingdialog
     public void cancelImageProcessing() {
         if(BuildConfig.DEBUG && imageProcessingTask == null)
             throw new AssertionError();
         imageProcessingTask.cancel(true);
-        dialog.dismiss();
-        dialog = null;
+        cleanUpTask();
     }
 
-    // called by imageprocessingtask
-    public void endImageProcessing(ArrayList<Uri> outputBitmapUris) {
-        // insert new URIs where required
-        for(int i = 0, len = outputBitmapUris.size(); i < len; ++i) {
-            int j = (imgIndex + i) % numImages;
-            imageUris.set(j, outputBitmapUris.get(i));
-            isProcessed.set(i, true);
-        }
-        // clean up and refresh
+    // called by imageprocessingtask, should be properly overriden by extending classes
+    public abstract void endImageProcessing(ArrayList<Uri> outputBitmapUris);
+
+    // call after cancellation/end
+    protected void cleanUpTask() {
         imageProcessingTask = null;
         dialog.dismiss();
         dialog = null;
-        refreshImage();
     }
 
-    private void refreshImage() {
-        try {
-            bitmap = MediaStore.Images.Media.getBitmap(this.getContentResolver(),
-                    imageUris.get(imgIndex));
-            if(isProcessed.get(imgIndex))
-                imageView.attachProcessedBitmap(bitmap);
-            else
-                imageView.setImageBitmap(bitmap);
-        } catch (Exception ex) {
-            Log.e("PreprocessAndEnhanceActivity.onActivityResult", "Error while loading image bitmap from URI", ex);
-        }
+    protected void refreshImage() {
+        Bitmap bitmap = BitmapHelpers.loadBitmapFromURI(imageUris.get(imgIndex), this.getContentResolver());
+        if(bitmap != null)
+            imageView.setImageBitmap(bitmap);
     }
 
     @Override
