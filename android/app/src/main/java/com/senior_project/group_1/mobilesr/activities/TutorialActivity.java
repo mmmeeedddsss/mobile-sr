@@ -14,6 +14,7 @@ public class TutorialActivity extends AppCompatActivity {
     ImageView iv;
     Button nextBtn;
     Button skipBtn;
+    Button prevBtn;
     int current;
     int[] imgs;
 
@@ -27,8 +28,11 @@ public class TutorialActivity extends AppCompatActivity {
         imgs = new int[]{R.drawable.first, R.drawable.second, R.drawable.third};
         nextBtn = findViewById(R.id.next_btn);
         skipBtn = findViewById(R.id.skip_btn);
+        prevBtn = findViewById(R.id.prev_btn);
         nextBtn.setOnClickListener(v -> nextImage());
         skipBtn.setOnClickListener(v -> skipTutorial());
+        prevBtn.setOnClickListener(v -> prevImage());
+        prevBtn.setEnabled(false);
 
     }
 
@@ -37,6 +41,13 @@ public class TutorialActivity extends AppCompatActivity {
             finish();
         else
             iv.setImageResource(imgs[++current]);
+        prevBtn.setEnabled(true);
+    }
+
+    private void prevImage() {
+        iv.setImageResource(imgs[--current]);
+        if (current == 0)
+            prevBtn.setEnabled(false);
     }
 
     private void skipTutorial() {
