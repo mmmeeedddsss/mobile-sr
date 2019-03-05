@@ -4,6 +4,7 @@ import android.Manifest;
 import android.app.NotificationChannel;
 import android.app.NotificationManager;
 import android.content.ClipData;
+import android.content.ClipDescription;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Build;
@@ -13,6 +14,7 @@ import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.FileProvider;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.Toast;
@@ -143,7 +145,7 @@ public class MainActivity extends AppCompatActivity {
             // Continue only if the File was successfully created
             if (photoFile != null) {
                 Uri photoURI = FileProvider.getUriForFile(this,
-                        "com.senior_project.group_1.mobilesr.activities.MainActivity",
+                        "com.senior_project.group_1.mobilesr",
                         photoFile);
                 takePictureIntent.putExtra(MediaStore.EXTRA_OUTPUT, photoURI);
                 mImageUri = photoURI;
@@ -154,19 +156,26 @@ public class MainActivity extends AppCompatActivity {
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        ClipData imageClipData = null;
         if( resultCode == RESULT_OK ) {
             Intent pickPhotoIntent = null;
             if (requestCode == REQUEST_IMAGE_CAPTURE) {
-                // TODO: fix this part, putExtra "imageUri" is deprecated
                 // Below, we are adding the captured image to gallery
                 Intent mediaScanIntent = new Intent(Intent.ACTION_MEDIA_SCANNER_SCAN_FILE);
                 mediaScanIntent.setData(mImageUri);
                 this.sendBroadcast(mediaScanIntent);
-                pickPhotoIntent.putExtra("imageUri", mImageUri); // uri implements Parsable
+                // create a clipdata from the URI
+                ClipDescription description = new ClipDescription(null, new String[] {"text/uri-list"});
+                ClipData.Item item = new ClipData.Item(mImageUri);
+                imageClipData = new ClipData(description, item);
+                // create a single image intent
+                pickPhotoIntent = new Intent(MainActivity.this,
+                        SingleImageEnhanceActivity.class);
             }
             else if (requestCode == REQUEST_IMAGE_SELECT) {
                 // start the proper activity depending on the number of selected photos
-                ClipData imageClipData = data.getClipData();
+                imageClipData = data.getClipData();
+                Log.i("Clipdata info:", imageClipData.getDescription().getLabel() + "---" + imageClipData.getDescription().getMimeType(0));
                 if(imageClipData.getItemCount() == 1) { // one photo was picked
                     pickPhotoIntent = new Intent(MainActivity.this,
                             SingleImageEnhanceActivity.class);
@@ -175,8 +184,8 @@ public class MainActivity extends AppCompatActivity {
                     pickPhotoIntent = new Intent(MainActivity.this,
                             MultipleImageEnhanceActivity.class);
                 }
-                pickPhotoIntent.putExtra("imageClipData", data.getClipData());
             }
+            pickPhotoIntent.putExtra("imageClipData", imageClipData);
             startActivity(pickPhotoIntent);
         }
     }
