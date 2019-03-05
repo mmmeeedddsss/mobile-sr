@@ -37,7 +37,7 @@ public abstract class PreprocessAndEnhanceActivity extends AppCompatActivity {
                      saveButton, shareButton;
     private ImageProcessingDialog dialog;
     private ImageProcessingTask imageProcessingTask;
-    protected ArrayList<Uri> imageUris; // TODO: wrap uri + processing state in a class?
+    protected ArrayList<Uri> imageUris;
     protected int numImages;
     protected int imgIndex;
 
