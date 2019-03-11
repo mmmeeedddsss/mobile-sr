@@ -5,6 +5,7 @@ import android.net.Uri;
 import android.os.Bundle;
 
 import com.senior_project.group_1.mobilesr.BuildConfig;
+import com.senior_project.group_1.mobilesr.UserSelectedBitmapInfo;
 import com.senior_project.group_1.mobilesr.views.BitmapHelpers;
 
 import java.util.ArrayList;
@@ -21,14 +22,12 @@ public class SingleImageEnhanceActivity extends PreprocessAndEnhanceActivity {
         nextButton.setEnabled(false);
     }
 
-    public void endImageProcessing(ArrayList<Uri> outputBitmapUris) {
+    public void endImageProcessing(ArrayList<UserSelectedBitmapInfo> outputBitmapUris) {
         // an assertion to check for the returned length
         if (BuildConfig.DEBUG && outputBitmapUris.size() != 1)
             throw new AssertionError();
         // load the image and attach it to the current view
-        Uri resultUri = outputBitmapUris.get(0);
-        Bitmap bitmap = BitmapHelpers.loadBitmapFromURI(resultUri, this.getContentResolver());
-        imageView.attachProcessedBitmap(bitmap);
+        imageView.attachProcessedBitmap(outputBitmapUris.get(0).getBitmap());
         cleanUpTask();
     }
 

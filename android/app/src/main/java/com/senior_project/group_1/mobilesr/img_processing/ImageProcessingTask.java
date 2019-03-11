@@ -10,12 +10,12 @@ import android.util.Log;
 import android.widget.Toast;
 
 import com.senior_project.group_1.mobilesr.R;
+import com.senior_project.group_1.mobilesr.UserSelectedBitmapInfo;
 import com.senior_project.group_1.mobilesr.configurations.ApplicationConstants;
 import com.senior_project.group_1.mobilesr.BuildConfig;
 import com.senior_project.group_1.mobilesr.configurations.SRModelConfiguration;
 import com.senior_project.group_1.mobilesr.activities.PreprocessAndEnhanceActivity;
 import com.senior_project.group_1.mobilesr.views.BitmapHelpers;
-import com.senior_project.group_1.mobilesr.views.ZoomableImageView;
 
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -26,7 +26,7 @@ import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Locale;
 
-public class ImageProcessingTask extends AsyncTask<ArrayList<Uri>, Integer, ArrayList<Uri>> {
+public class ImageProcessingTask extends AsyncTask<ArrayList<UserSelectedBitmapInfo>, Integer, ArrayList<UserSelectedBitmapInfo>> {
 
     private ArrayList<Bitmap> chunkImages; // TODO: Only for debugging purpose (DELETE later.)
     private int columns;
@@ -81,7 +81,8 @@ public class ImageProcessingTask extends AsyncTask<ArrayList<Uri>, Integer, Arra
         startTime = System.nanoTime();
     }
 
-    protected ArrayList<Uri> doInBackground(ArrayList<Uri>... bitmapUrisArr) {
+    protected ArrayList<UserSelectedBitmapInfo> doInBackground(
+            ArrayList<UserSelectedBitmapInfo>... bitmapUrisArr) {
         // apparently this replaces assert in Android
         if(BuildConfig.DEBUG && bitmapUrisArr.length != 1)
             throw new AssertionError();
@@ -89,14 +90,15 @@ public class ImageProcessingTask extends AsyncTask<ArrayList<Uri>, Integer, Arra
         int batchSize = modelConfiguration.getNumParallelBatch();
         BitmapProcessor bitmapProcessor = new TFLiteSuperResolver(requestingActivity,
                 batchSize, modelConfiguration);
-        ArrayList<Uri> resultUris = new ArrayList<>();
-        ArrayList<Uri> bitmapUris = bitmapUrisArr[0];
-        numImages = bitmapUris.size();
-        for(int imgIndex = 0, len = bitmapUris.size(); imgIndex < len; imgIndex++) {
+        ArrayList<UserSelectedBitmapInfo> bitmapInfos = bitmapUrisArr[0];
+        numImages = bitmapInfos.size();
+        for(int imgIndex = 0, len = bitmapInfos.size(); imgIndex < len; imgIndex++) {
+
+            if( bitmapInfos.get(imgIndex).isProcessed() )
+                continue;
+
             // try to load the bitmap first
-            Bitmap bitmap = BitmapHelpers.loadBitmapFromURI(
-                    bitmapUris.get(imgIndex), requestingActivity.getContentResolver()
-            );
+            Bitmap bitmap = bitmapInfos.get(imgIndex).getBitmap();
             if(bitmap != null) {
                 // the bitmap was loaded successfully
                 divideImage(bitmap);
@@ -124,18 +126,18 @@ public class ImageProcessingTask extends AsyncTask<ArrayList<Uri>, Integer, Arra
                 }
                 // reconstruct the image and save it
                 Bitmap result = reconstructImage();
-                Uri resultUri = BitmapHelpers.saveImageExternal(result, requestingActivity);
+                bitmapInfos.get(imgIndex).setBitmap(result);
+                Uri resultUri = BitmapHelpers.saveImageToCache(bitmapInfos.get(imgIndex), requestingActivity);
                 // TODO: think about how gallery saving could still be useful
                 /*
                 String path = MediaStore.Images.Media.insertImage(
                         requestingActivity.getContentResolver(), result, "", "");
                 Uri resultUri = Uri.parse(path);
                 */
-                resultUris.add(resultUri);
             }
         }
         bitmapProcessor.close();
-        return resultUris;
+        return bitmapInfos;
     }
 
     protected void onProgressUpdate(Integer... progress) {
@@ -167,7 +169,7 @@ public class ImageProcessingTask extends AsyncTask<ArrayList<Uri>, Integer, Arra
         }
     }
 
-    protected void onPostExecute(ArrayList<Uri> result) {
+    protected void onPostExecute(ArrayList<UserSelectedBitmapInfo> results) {
         // log results
         long estimatedTime = System.nanoTime() - startTime;
         Toast.makeText(requestingActivity, "Elapsed time: " + estimatedTime / 1000000 + " ms", Toast.LENGTH_LONG).show();
@@ -178,9 +180,9 @@ public class ImageProcessingTask extends AsyncTask<ArrayList<Uri>, Integer, Arra
                     .setContentText("The superresolution of your images was completed in the background.");
             notifManager.notify(NOTIF_ID, notifBuilder.build());
         }
-        requestingActivity.endImageProcessing(result);
-        for(Uri uri : result) {
-            Bitmap bitmap = BitmapHelpers.loadBitmapFromURI(uri, requestingActivity.getContentResolver());
+        requestingActivity.endImageProcessing(results);
+        for(UserSelectedBitmapInfo bmInfo : results) {
+            Bitmap bitmap = bmInfo.getBitmap();
             if(bitmap != null) {
                 writeToSDFile(
                         String.format(Locale.ENGLISH, "Time: %s | Conf: %s | dT: %d | I: %dx%d",
@@ -201,13 +203,6 @@ public class ImageProcessingTask extends AsyncTask<ArrayList<Uri>, Integer, Arra
                 ApplicationConstants.IMAGE_OVERLAP_Y);
     }
 
-    private Bitmap reflectpadBitmap(Bitmap bitmap) {
-        // TODO: this is a hack that uses view, there should be no need
-        ZoomableImageView view = requestingActivity.findViewById(R.id.pick_photo_image_view);
-        view.setImageBitmap(bitmap);
-        return view.getCurrentBitmap();
-    }
-
     private void divideImage( final Bitmap scaledBitmap ) {
         divideImage(
                 scaledBitmap,
@@ -215,48 +210,6 @@ public class ImageProcessingTask extends AsyncTask<ArrayList<Uri>, Integer, Arra
                 modelConfiguration.getInputImageWidth(),
                 ApplicationConstants.IMAGE_OVERLAP_X,
                 ApplicationConstants.IMAGE_OVERLAP_Y);
-    }
-
-    /**
-     * This method arranges divided chunks so that the chunks are ready to reconstruction of the image
-     * Creates a new bitmap array and cuts every image chunk so that the overlapped sections are gone.
-     * Then returns the new bitmap array to be reconstructed.
-     * @param overlapX
-     * @param overlapY
-     * @return ArrayList<Bitmap>
-     */
-    public ArrayList<Bitmap> arrangeChunks(int overlapX, int overlapY){
-        int startX,startY,cutX,cutY;
-        ArrayList<Bitmap> result = new ArrayList<>();
-        int  index = 0;
-        for (int r =0; r<rows;r++){
-            for (int c =0 ; c<columns ; c++){
-
-                if(c == 0){
-                    startX = 0; startY=0;
-                    cutX = chunkImages.get(index).getWidth();
-                    if(r == rows-1){
-                        cutY = chunkImages.get(index).getHeight();
-                    }else {
-                        cutY = chunkImages.get(index).getHeight() - overlapY;
-                    }
-                }else {
-                    startX = overlapX;
-                    startY  = 0;
-                    cutX=chunkImages.get(index).getWidth() - overlapX;
-                    if(r == rows-1){
-                        cutY = chunkImages.get(index).getHeight();
-                    }else {
-                        cutY = chunkImages.get(index).getHeight() - overlapY;
-                    }
-                }
-
-                result.add(Bitmap.createBitmap(chunkImages.get(index),startX,startY,cutX,cutY));
-
-                index++;
-            }
-        }
-        return result;
     }
 
     /**

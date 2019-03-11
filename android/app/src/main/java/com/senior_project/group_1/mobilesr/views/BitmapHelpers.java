@@ -11,12 +11,16 @@ import android.os.Environment;
 import android.provider.MediaStore;
 import android.util.Log;
 
+import com.senior_project.group_1.mobilesr.UserSelectedBitmapInfo;
 import com.senior_project.group_1.mobilesr.configurations.ApplicationConstants;
 import com.senior_project.group_1.mobilesr.configurations.SRModelConfigurationManager;
 
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
+import java.security.MessageDigest;
 import java.util.Calendar;
 
 import static java.lang.Math.max;
@@ -69,29 +73,6 @@ public class BitmapHelpers {
             return new RectF((float) (center_x - r.width() * factor), (float) (center_y - r.height() * factor),
                     (float) (center_x + r.width() * factor), (float) (center_y + r.height() * factor));
         }
-    }
-
-    public static Uri saveImageExternal(Bitmap image, Context context) {
-        //TODO - Should be processed in another thread
-        Uri uri = null;
-        try {
-            String root = Environment.getExternalStorageDirectory().getAbsolutePath();
-            File myDir = new File(root + "/MOBILE_SR_IMAGES");
-            Log.i("BitmapHelpers", "Saving image on "+myDir);
-            myDir.mkdirs();
-
-            String fname = "SR_IMAGE_" + Calendar.getInstance().getTimeInMillis() + ".png";
-            File file = new File(myDir, fname);
-
-            FileOutputStream stream = new FileOutputStream(file);
-            image.compress(Bitmap.CompressFormat.PNG, 99, stream);
-            stream.close();
-            Log.i("BitmapHelpers","Auth : "+context.getApplicationContext().getPackageName());
-            uri = GenericFileProvider.getUriForFile(context, context.getApplicationContext().getPackageName() + "", file);
-        } catch (IOException e) {
-            Log.d("BitmapHelpers", "IOException while trying to write file for sharing: " + e.getMessage());
-        }
-        return uri;
     }
 
     public static Intent createShareIntentByUri(Uri uri){
@@ -220,6 +201,107 @@ public class BitmapHelpers {
             Log.e("BitmapHelpers::loadBitmapFromURI", "IOError while loading URI: " + uri.toString(), ex);
         }
         return bitmap;
+    }
+
+    public static boolean isBitmapCached(UserSelectedBitmapInfo bmInfo, Context context) {
+        String md5Digest = getMD5DigestOfFile(bmInfo.getNonProcessedUri());
+        File file = new File(getCacheFolder(),md5Digest);
+        if( file.exists() ) {
+            bmInfo.setProcessed(true);
+            bmInfo.setProcessedUri(Uri.parse(file.toURI().toString()));
+            bmInfo.setBitmap( loadBitmapFromURI( bmInfo.getProcessedUri(),
+                    context.getContentResolver() ) );
+            return true;
+        }
+        return false;
+    }
+
+    public static File getCacheFolder() {
+        String root = Environment.getExternalStorageDirectory().getAbsolutePath();
+        File cacheDir = new File(root + "/.MOBILE_SR_CACHE");
+        cacheDir.mkdirs();
+        return cacheDir;
+    }
+
+    public static File getExternalSavingFolder(){
+        String root = Environment.getExternalStorageDirectory().getAbsolutePath();
+        File externalSaveFolder = new File(root + "/MOBILE_SR_CACHE");
+        externalSaveFolder.mkdirs();
+        return externalSaveFolder;
+    }
+
+    private static Uri saveImage(Bitmap bm,  Context context,
+                                 File savingFolder, String filename) {
+        //TODO - Should be processed in another thread
+        Uri uri = null;
+        try {
+            Log.i("BitmapHelpers", "Saving image on "+savingFolder);
+
+            File file = new File(savingFolder, filename);
+
+            FileOutputStream stream = new FileOutputStream(file);
+            bm.compress(Bitmap.CompressFormat.PNG, 99, stream);
+            stream.close();
+            Log.i("BitmapHelpers","Auth : "+context.getApplicationContext().getPackageName());
+            uri = GenericFileProvider.getUriForFile(context, context.getApplicationContext().getPackageName() + "", file);
+        } catch (IOException e) {
+            Log.d("BitmapHelpers", "IOException while trying to write file for sharing: " + e.getMessage());
+        }
+        return uri;
+    }
+
+    public static Uri saveImageToCache(UserSelectedBitmapInfo bmInfo, Context context) {
+        Uri processedUri = saveImage(bmInfo.getBitmap(), context, getCacheFolder(),
+                getMD5DigestOfFile(bmInfo.getNonProcessedUri()));
+        bmInfo.setProcessedUri(processedUri);
+        return processedUri;
+    }
+
+    public static Uri saveImageToTemp(Bitmap bm, Context context) {
+        return saveImage(bm, context, getCacheFolder(), ""+Calendar.getInstance().getTimeInMillis());
+    }
+
+    public static Uri saveImageExternal( Bitmap bm, Context context ) {
+        String fname = "SR_IMAGE_" + Calendar.getInstance().getTimeInMillis() + ".png";
+        return saveImage(bm, context, getExternalSavingFolder(), fname);
+    }
+
+
+    /*
+        Code taken from an answer in :
+        https://stackoverflow.com/questions/13152736/how-to-generate-an-md5-checksum-for-a-file-in-android
+     */
+    public static String getMD5DigestOfFile(Uri uri) {
+        InputStream inputStream = null;
+        try {
+            inputStream = new FileInputStream(uri.getPath());
+            byte[] buffer = new byte[1024];
+            MessageDigest digest = MessageDigest.getInstance("MD5");
+            int numRead = 0;
+            while (numRead != -1) {
+                numRead = inputStream.read(buffer);
+                if (numRead > 0)
+                    digest.update(buffer, 0, numRead);
+            }
+            byte [] md5Bytes = digest.digest();
+            return convertHashToString(md5Bytes);
+        } catch (Exception e) {
+            return null;
+        } finally {
+            if (inputStream != null) {
+                try {
+                    inputStream.close();
+                } catch (Exception e) { }
+            }
+        }
+    }
+
+    private static String convertHashToString(byte[] md5Bytes) {
+        String returnVal = "";
+        for (int i = 0; i < md5Bytes.length; i++) {
+            returnVal += Integer.toString(( md5Bytes[i] & 0xff ) + 0x100, 16).substring(1);
+        }
+        return returnVal.toUpperCase();
     }
 }
 
