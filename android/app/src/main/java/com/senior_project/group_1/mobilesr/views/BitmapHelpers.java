@@ -270,7 +270,7 @@ public class BitmapHelpers {
         });
 
         int deletionIndex = 0;
-        while( getFolderSize( cacheDir ) > _128mbInBytes ) // TODO no method for getting oldest
+        while( getFolderSize( cacheDir ) > _128mbInBytes )
         {
             if( files[deletionIndex].isFile() )
                 files[deletionIndex].delete();
