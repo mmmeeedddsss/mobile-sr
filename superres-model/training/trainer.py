@@ -6,10 +6,9 @@ import tensorflow as tf
 import numpy as np
 
 from data import create_combined_data_loader
-from losses import mse_loss_layer
-from models import srcnn_x2_weak
+from losses import *
+from models import * 
 import train_opts as OPTS
-
 
 def parse_arguments():
     parser = ArgumentParser()
@@ -22,6 +21,11 @@ def parse_arguments():
     parser.add_argument(
         '--learning-rate', '-l',
         help='learning rate for the optimizer. Defaults to 1e-3',
+        type=float,
+        default=1e-3)
+    parser.add_argument(
+        '--discr-learning-rate', '-dl',
+        help='learning rate for the discriminator\'s optimizer. Defaults to 1e-3',
         type=float,
         default=1e-3)
     parser.add_argument(
@@ -38,7 +42,7 @@ def parse_arguments():
     return arguments
 
 
-def wrap_model(data_loader, model, loss, optimizer, opts):
+def wrap_model(data_loader, model, discr_model, img_loss, optimizer, discr_optimizer, opts):
     # create global step
     global_step = tf.train.create_global_step()
     # extract the data loader variables
@@ -47,14 +51,30 @@ def wrap_model(data_loader, model, loss, optimizer, opts):
     input_hr_batch, input_lr_batch = iterator 
     # extra for naming
     input_lr_batch = tf.identity(input_lr_batch, name='input_image')
-    # forward the lr batch through the model, also send the hr to infer ratio
-    output_hr_batch = model(input_lr_batch)
+    # forward the lr batch through the model
+    with tf.variable_scope(OPTS.MODEL_SCOPE):
+        output_hr_batch = model(input_lr_batch)
     # another extra for naming
     output_hr_batch = tf.identity(output_hr_batch, name='output_image')
-    # get the losses through the input & output HR images
-    losses = loss(input_hr_batch, output_hr_batch)
+    # forward through discriminator as well, pass as None if none
+    if discr_model:
+        # pass both original and generated HR images through the discriminator
+        with tf.variable_scope(OPTS.DISCR_SCOPE):
+            discr_real_output = discr_model(input_hr_batch)
+            discr_fake_output = discr_model(output_hr_batch)
+        # create the losses through the input & output HR images
+        model_loss, discr_loss = create_loss_layer(input_hr_batch, output_hr_batch, img_loss, 
+                                                   discr_real_output, discr_fake_output)
+        # add the discr loss to summaries
+        tf.summary.scalar('discriminator-loss', discr_loss)
+        # optimize the loss for the discr model
+        with tf.control_dependencies(tf.get_collection(OPTS.DISCR_LOSSES)):
+            discr_train_op = discr_optimizer.minimize(discr_loss)
+    else:
+        model_loss, discr_loss = create_loss_layer(input_hr_batch, output_hr_batch, img_loss)
+        discr_train_op = None
     # add summaries for interesting variables
-    tf.summary.scalar('loss', losses) # summary for the loss
+    tf.summary.scalar('loss', model_loss) # summary for the loss
     tf.summary.image('lr_patch', input_lr_batch) # summary for the input LR
     tf.summary.image('hr_batch', input_hr_batch) # summary for the input HR
     tf.summary.image('output_batch', output_hr_batch) # summary for the output HR batch
@@ -64,12 +84,11 @@ def wrap_model(data_loader, model, loss, optimizer, opts):
             tf.summary.histogram(f'{var.name}', var)
     # merge summaries
     merged_summary = tf.summary.merge_all()
-
     # insert control dependencies and optimize the loss
-    with tf.control_dependencies(tf.get_collection(tf.GraphKeys.UPDATE_OPS)):
-        train_op = optimizer.minimize(losses, global_step=global_step)
+    with tf.control_dependencies(tf.get_collection(OPTS.MODEL_LOSSES)):
+        train_op = optimizer.minimize(model_loss, global_step=global_step)
     # return some useful variables
-    return input_lr_batch, output_hr_batch, losses, train_op, merged_summary, training_initializer, validation_initializer
+    return input_lr_batch, output_hr_batch, model_loss, discr_loss, train_op, discr_train_op, merged_summary, training_initializer, validation_initializer
 
 
 def train(model_vars, num_epochs, opts):
@@ -77,8 +96,8 @@ def train(model_vars, num_epochs, opts):
     Train the given model on the given dataset.
     '''
     # unpack the model variables
-    (input_lr_sym, output_hr_sym, loss_sym, train_op, 
-        merged_summary, train_init, val_init) = model_vars
+    (input_lr_sym, output_hr_sym, loss_sym, discr_loss_sym, 
+        train_op, discr_train_op, merged_summary, train_init, val_init) = model_vars
     # create a saver & global step
     saver = tf.train.Saver()
     global_step = tf.train.get_global_step()
@@ -184,10 +203,12 @@ def main():
         args.batch_size, 
         OPTS.DATA_LOADER)
     model = srcnn_x2_weak
-    loss = mse_loss_layer
+    discr_model = None # srgan_discriminator
+    img_loss = mse_loss
     optimizer = tf.train.AdamOptimizer(args.learning_rate)
+    discr_optimizer = tf.train.AdamOptimizer(args.discr_learning_rate)
     # combine the parts to create the full model
-    model_vars = wrap_model(data_loader, model, loss, optimizer, OPTS.MODEL)
+    model_vars = wrap_model(data_loader, model, discr_model, img_loss, optimizer, discr_optimizer, OPTS.MODEL)
     # do the training
     train(model_vars, args.num_epochs, OPTS.TRAIN)
 

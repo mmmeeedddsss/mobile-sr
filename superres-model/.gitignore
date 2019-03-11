@@ -1,0 +1,11 @@
+*.swp
+*.ycm_extra*
+__pycache__
+ckpts
+train-log
+saved-model
+optlog
+tflites
+sr-images
+*.pb
+*.orig

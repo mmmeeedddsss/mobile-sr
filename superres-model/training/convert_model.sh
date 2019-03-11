@@ -1,5 +1,5 @@
 output_tflite=$1
-input_tensor="resized_image"
+input_tensor="model/resized_image"
 output_tensor="output_image"
 
 

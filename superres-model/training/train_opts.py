@@ -16,3 +16,18 @@ TRAIN = {
     'print_every': 1,
     'save_every': 100,
 }
+
+LOSS = {
+    'l2_mult': 1e-3,
+    'discr_l2_mult': 1e-3,
+    'adversarial_mult': 1e-3,
+}
+
+# scope names to separate related variables
+MODEL_SCOPE = 'model'
+DISCR_SCOPE = 'discriminator'
+
+# loss names to separate losses
+MODEL_LOSSES = 'model-losses'
+DISCR_LOSSES = 'discr-losses'
+
