@@ -21,7 +21,10 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.security.MessageDigest;
+import java.sql.Array;
+import java.util.Arrays;
 import java.util.Calendar;
+import java.util.Comparator;
 
 import static java.lang.Math.max;
 
@@ -225,7 +228,7 @@ public class BitmapHelpers {
 
     public static File getExternalSavingFolder(){
         String root = Environment.getExternalStorageDirectory().getAbsolutePath();
-        File externalSaveFolder = new File(root + "/MOBILE_SR_CACHE");
+        File externalSaveFolder = new File(root + "/MOBILE_SR_IMAGES");
         externalSaveFolder.mkdirs();
         return externalSaveFolder;
     }
@@ -244,10 +247,48 @@ public class BitmapHelpers {
             stream.close();
             Log.i("BitmapHelpers","Auth : "+context.getApplicationContext().getPackageName());
             uri = GenericFileProvider.getUriForFile(context, context.getApplicationContext().getPackageName() + "", file);
+
+            moderateCacheSize();
         } catch (IOException e) {
             Log.d("BitmapHelpers", "IOException while trying to write file for sharing: " + e.getMessage());
         }
         return uri;
+    }
+
+    private static void moderateCacheSize(){
+        final long _128mbInBytes = 128 * 1024 * 1024;
+        File cacheDir = getCacheFolder();
+        File[] files = cacheDir.listFiles();
+        Arrays.sort(files, new Comparator<File>() {
+            @Override
+            public int compare(File o1, File o2) {
+                long k = o1.lastModified() - o2.lastModified();
+                if( k > 0 ) return 1;
+                if( k < 0 ) return -1;
+                return 0;
+            }
+        });
+
+        int deletionIndex = 0;
+        while( getFolderSize( cacheDir ) > _128mbInBytes ) // TODO no method for getting oldest
+        {
+            if( files[deletionIndex].isFile() )
+                files[deletionIndex].delete();
+            deletionIndex++;
+        }
+    }
+
+    // in bytes
+    public static long getFolderSize(File directory) {
+        long folderSize = 0;
+        try {
+            for (File file : directory.listFiles()) {
+                if (file.isFile())
+                    folderSize += file.length();
+            }
+        } catch (Exception ex){}
+
+        return folderSize;
     }
 
     public static Uri saveImageToCache(UserSelectedBitmapInfo bmInfo, Context context) {
