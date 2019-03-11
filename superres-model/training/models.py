@@ -9,10 +9,13 @@ def srcnn_x2_weak(lr_batch):
     # add a summary for resized
     tf.summary.image('resized_image', lr_resized)
     # first conv. layer
-    c1 = tf.layers.conv2d(lr_resized, 64, 9, padding='SAME')
+    cl1 = tf.keras.layers.Conv2D(64, 9, padding='SAME')
+    c1 = cl1(lr_resized)
     # second conv. layer
-    c2 = tf.layers.conv2d(c1, 32, 1, padding='SAME')
+    cl2 = tf.keras.layers.Conv2D(32, 1, padding='SAME')
+    c2 = cl2(c1)
     # final conv. layer
-    hr_batch = tf.layers.conv2d(c2, 3, 5, padding='SAME')
+    cl3 = tf.layers.Conv2D(3, 5, padding='SAME')
+    hr_batch = cl3(c2)
     return hr_batch
 
