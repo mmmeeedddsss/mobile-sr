@@ -57,30 +57,29 @@ def apply_SR(path, set5_flag=True, set14_flag=True, bsd100_flag=True):
 # and also optional individual flags for separate datasets
 # returns a list including values
 def calc_psnr_values(path, mean=True, set5_flag=True, set14_flag=True, bsd100_flag=True):
-  set5_path, set14_path, bsd100_path = dataset_paths(path)
   result = []
   if set5_flag:
     set5_sum = []
     for i in range(*set5_range):
       set5_sum.append(\
-        psnr.calc_psnr_file_path(set5_path+'{}.png'.format(i),\
-                                 set5_path+'{}_LR'.format(i)+'{}.png'.format(extension)))
+        psnr.calc_psnr_file_path(path+'/Set5_{}.png'.format(i),\
+                                 path+'/Set5_{}_LR'.format(i)+'{}.png'.format(extension)))
     set5_mean = np.mean(set5_sum)
     result.append(set5_mean if mean else set5_sum)
   if set14_flag:
     set14_sum = []
     for i in range(*set14_range):
       set14_sum.append(\
-        psnr.calc_psnr_file_path(set14_path+'{}.png'.format(i),\
-                                 set14_path+'{}_LR'.format(i)+'{}.png'.format(extension)))
+        psnr.calc_psnr_file_path(path+'/Set14_{}.png'.format(i),\
+                                 path+'/Set14_{}_LR'.format(i)+'{}.png'.format(extension)))
     set14_mean = np.mean(set14_sum)
     result.append(set14_mean if mean else set14_sum)
   if bsd100_flag:
     bsd100_sum = []
     for i in range(*bsd100_range):
       bsd100_sum.append(\
-        psnr.calc_psnr_file_path(bsd100_path+'{}.png'.format(i),\
-                                 bsd100_path+'{}_LR'.format(i)+'{}.png'.format(extension)))
+        psnr.calc_psnr_file_path(path+'/BSD100_{}.png'.format(i),\
+                                 path+'/BSD100_{}_LR'.format(i)+'{}.png'.format(extension)))
     bsd100_mean = np.mean(bsd100_sum)
     result.append(bsd100_mean if mean else bsd100_sum)
   return result
