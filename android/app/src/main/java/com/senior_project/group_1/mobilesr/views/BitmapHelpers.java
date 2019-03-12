@@ -264,6 +264,9 @@ public class BitmapHelpers {
             Log.i("BitmapHelpers", "Saving image on "+savingFolder+" / "+filename);
 
             File file = new File(savingFolder, filename + ".png");
+            if( file.exists() )
+                return GenericFileProvider.getUriForFile(context, context.getApplicationContext().getPackageName() + "", file);
+
             file.createNewFile();
 
             FileOutputStream stream = new FileOutputStream(file);

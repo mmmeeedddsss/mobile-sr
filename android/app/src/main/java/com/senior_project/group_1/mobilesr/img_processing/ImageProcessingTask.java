@@ -127,7 +127,8 @@ public class ImageProcessingTask extends AsyncTask<ArrayList<UserSelectedBitmapI
                 // reconstruct the image and save it
                 Bitmap result = reconstructImage();
                 bitmapInfos.get(imgIndex).setBitmap(result);
-                Uri resultUri = BitmapHelpers.saveImageToCache(bitmapInfos.get(imgIndex), requestingActivity);
+                //Uri resultUri = BitmapHelpers.saveImageToTemp(bitmapInfos.get(imgIndex).getBitmap(), requestingActivity);
+                //bitmapInfos.get(imgIndex).setProcessedUri(resultUri);
                 // TODO: think about how gallery saving could still be useful
                 /*
                 String path = MediaStore.Images.Media.insertImage(
