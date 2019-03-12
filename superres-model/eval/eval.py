@@ -12,7 +12,7 @@ set5_range = (1, 6)
 set14_range = (1, 15)
 bsd100_range = (1, 101)
 extension = '-sr'
-model_path = '../saved-model/'
+model_path = './saved-model/'
 
 def cmd_for_downscale(file_path):
   new_path = file_path[:-4] + '_LR.png'
@@ -125,6 +125,9 @@ def parse_arguments():
         '-o',
         help='save the output to file')
     parser.add_argument(
+        '-s',
+        help='specify saved model path, default = current dir')
+    parser.add_argument(
         '-e',
         help='extension for enhanced images')
     parser.add_argument(
@@ -150,10 +153,13 @@ def parse_arguments():
 
 if __name__ == '__main__':
   args = parse_arguments()
-  #create_low_res(path)
-  #apply_SR(args.dataset_path)
+  if args.s:
+    model_path = args.s
   if args.e:
     extension = args.e
+  #create_low_res(path)
+  apply_SR(args.dataset_path)
+  sys.exit()
 
   header = '\t{}\t{}\t{}'.format('Set5', 'Set14', 'BSD100')
   if not args.m == 'ssim':
