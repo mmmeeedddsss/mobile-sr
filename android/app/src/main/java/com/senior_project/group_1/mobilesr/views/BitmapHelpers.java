@@ -221,11 +221,31 @@ public class BitmapHelpers {
         return false;
     }
 
+    private static void createNomediaFileOnDir( File dir )
+    {
+        try {
+            File nomedia = new File( dir, ".nomedia" );
+            nomedia.createNewFile();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
     public static File getCacheFolder() {
         String root = Environment.getExternalStorageDirectory().getAbsolutePath();
         Log.i("BitmapHelpers.getCacheFolder", "Folder : "+root+ "/.MOBILE_SR_CACHE");
         File cacheDir = new File(root + "/.MOBILE_SR_CACHE");
         cacheDir.mkdirs();
+        createNomediaFileOnDir(cacheDir);
+        return cacheDir;
+    }
+
+    public static File getTempFolder() {
+        String root = Environment.getExternalStorageDirectory().getAbsolutePath();
+        Log.i("BitmapHelpers.getCacheFolder", "Folder : "+root+ "/.MOBILE_SR_TEMP");
+        File cacheDir = new File(root + "/.MOBILE_SR_TEMP");
+        cacheDir.mkdirs();
+        createNomediaFileOnDir(cacheDir);
         return cacheDir;
     }
 
@@ -251,15 +271,13 @@ public class BitmapHelpers {
             stream.close();
             Log.i("BitmapHelpers","Auth : "+context.getApplicationContext().getPackageName());
             uri = GenericFileProvider.getUriForFile(context, context.getApplicationContext().getPackageName() + "", file);
-
-            moderateCacheSize();
         } catch (IOException e) {
             Log.d("BitmapHelpers", "IOException while trying to write file for sharing: " + e.getMessage());
         }
         return uri;
     }
 
-    private static void moderateCacheSize(){
+    public static void moderateCacheSize(){
         final long _128mbInBytes = 128 * 1024 * 1024;
         File cacheDir = getCacheFolder();
         File[] files = cacheDir.listFiles();
@@ -303,14 +321,13 @@ public class BitmapHelpers {
     }
 
     public static Uri saveImageToTemp(Bitmap bm, Context context) {
-        return saveImage(bm, context, getCacheFolder(), ""+Calendar.getInstance().getTimeInMillis());
+        return saveImage(bm, context, getTempFolder(), ""+Calendar.getInstance().getTimeInMillis());
     }
 
     public static Uri saveImageExternal( Bitmap bm, Context context ) {
-        String fname = "SR_IMAGE_" + Calendar.getInstance().getTimeInMillis() + ".png";
+        String fname = "SR_IMAGE_" + Calendar.getInstance().getTimeInMillis();
         return saveImage(bm, context, getExternalSavingFolder(), fname);
     }
-
 
     /*
         Code modified from an answer in :
@@ -337,6 +354,15 @@ public class BitmapHelpers {
             returnVal += Integer.toString(( md5Bytes[i] & 0xff ) + 0x100, 16).substring(1);
         }
         return returnVal.toUpperCase();
+    }
+
+    public static void clearTempFolder() {
+        try {
+            File tempdir = getTempFolder();
+            File[] children = tempdir.listFiles();
+            for (int i = 0; i < children.length; i++)
+                children[i].delete();
+        } catch (Exception ex){}
     }
 }
 

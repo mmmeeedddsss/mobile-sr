@@ -22,6 +22,7 @@ import android.widget.Toast;
 import com.senior_project.group_1.mobilesr.configurations.ApplicationConstants;
 import com.senior_project.group_1.mobilesr.R;
 import com.senior_project.group_1.mobilesr.configurations.SRModelConfigurationManager;
+import com.senior_project.group_1.mobilesr.views.BitmapHelpers;
 
 import java.io.File;
 import java.io.InputStream;
@@ -198,6 +199,14 @@ public class MainActivity extends AppCompatActivity {
         File image = File.createTempFile(imageFileName,".jpg", storageDir );
 
         return image;
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        Log.i("MainActivity", "ON DESTROY CALLED, clearing temp folder");
+        BitmapHelpers.clearTempFolder();
+        BitmapHelpers.moderateCacheSize();
     }
 
     // have to create a notification channel in Android 8.0+
