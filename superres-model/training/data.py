@@ -43,16 +43,25 @@ def create_png_pair_dataset(input_files, batch_size, opts):
 
 def create_combined_iterator(training_set, validation_set):
     ''' a function that creates an iterator that can be reinitialized over both datasets '''
-    # create an iterator through defining the structure
-    itr = tf.data.Iterator.from_structure(training_set.output_types, 
-                                          training_set.output_shapes)
+    # create a handle for iterator feeding
+    handle = tf.placeholder(tf.string, shape=[])
+    # create an iterator through the handle & defined structure
+    itr = tf.data.Iterator.from_string_handle(handle, training_set.output_types, 
+                                              training_set.output_shapes)
     # create the tensor to get the next element (the actual iterator)
     itr_next = itr.get_next()
-    # create a reinitialization op for the training & validation set
-    training_initializer = itr.make_initializer(training_set)
-    validation_initializer = itr.make_initializer(validation_set)
+    # create reinitializable iterators, don't forget to get handles for both later!
+    training_itr = training_set.make_initializable_iterator()
+    validation_itr = validation_set.make_initializable_iterator()
+    # add two extra infinite training iterators for the discriminator
+    # the reason we require two iterators is that we want to get the same
+    # data twice: once for training with the original data, and then
+    # training with the superresolved data
+    discr_set = training_set.repeat()
+    discr_itr1 = discr_set.make_one_shot_iterator()
+    discr_itr2 = discr_set.make_one_shot_iterator()
     # return everything
-    return itr_next, training_initializer, validation_initializer
+    return handle, itr_next, training_itr, validation_itr, discr_itr1, discr_itr2
 
 
 def create_combined_data_loader(training_data_file, validation_data_file, 
@@ -68,3 +77,4 @@ def create_combined_data_loader(training_data_file, validation_data_file,
     validation_dataset = create_png_pair_dataset((validation_data_file,), batch_size, opts)
     combined_loader = create_combined_iterator(training_dataset, validation_dataset)
     return combined_loader
+

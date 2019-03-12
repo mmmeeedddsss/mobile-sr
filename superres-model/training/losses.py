@@ -3,24 +3,24 @@ import train_opts as OPTS
 
 ## general losses 
 def create_loss_layer(input_hr_batch, output_hr_batch, img_loss_fn, 
-                      discr_real_output=None, discr_fake_output=None):
+                      use_original=None, discr_output=None, discr_labels=None):
     # add the image comparison loss
     cmp_loss = img_loss_fn(input_hr_batch, output_hr_batch)
     tf.add_to_collection(OPTS.MODEL_LOSSES, cmp_loss)
-
+    
+    # sanity check
+    all_none = use_original is None and discr_output is None and discr_labels is None
+    all_sth = not (use_original is None or discr_output is None or discr_labels is None)
+    assert all_none or all_sth, 'GAN parameters should either all be None or should all exist!'
     # add GAN losses
-    assert (discr_real_output is not None and discr_fake_output is not None) or \
-           (discr_real_output is None and discr_fake_output is None), \
-           'Discr outputs should both exist together or not exist at all!'
-    discr_exists = discr_real_output is not None
+    discr_exists = discr_output is not None
     if discr_exists:
         # add adversarial loss
-        adv_loss = adversarial_loss(discr_fake_output)
+        adv_loss = adversarial_loss(use_original, discr_output)
         tf.add_to_collection(OPTS.MODEL_LOSSES, adv_loss)
         # add discriminator losses
-        real_loss, fake_loss = discriminator_losses(discr_real_output, discr_fake_output)
-        tf.add_to_collection(OPTS.DISCR_LOSSES, real_loss)
-        tf.add_to_collection(OPTS.DISCR_LOSSES, fake_loss)
+        discr_loss = discriminator_losses(discr_output, discr_labels)
+        tf.add_to_collection(OPTS.DISCR_LOSSES, discr_loss)
 
     # add regularization losses
     for loss in tf.losses.get_regularization_losses(OPTS.MODEL_SCOPE):
@@ -56,25 +56,26 @@ def mse_loss(input_hr_batch, output_hr_batch):
 
 
 ## discriminator losses
-def discriminator_losses(discr_real_output, discr_fake_output):
-    # the discriminator should detect real HR images as real
-    real_loss = tf.reduce_mean(tf.nn.sigmoid_cross_entropy_with_logits(
-        labels=tf.ones_like(discr_real_output),
-        logits=discr_real_output),
-        name='discr-real-loss')
-    # ... and fake HR images as fake
-    fake_loss = tf.reduce_mean(tf.nn.sigmoid_cross_entropy_with_logits(
-        labels=tf.zeros_like(discr_fake_output),
-        logits=discr_fake_output),
-        name='discr-fake-loss')
-    return real_loss, fake_loss 
+def discriminator_losses(discr_output, discr_labels):
+    # use sigmoid cross entropy loss
+    loss = tf.reduce_mean(
+        tf.nn.sigmoid_cross_entropy_with_logits(
+            labels=discr_labels,
+            logits=discr_output),
+        name='discr-loss')
+    return loss
 
-def adversarial_loss(discr_fake_output):
+def adversarial_loss(use_original, discr_output):
     # the generator network wants the discriminator to detect
-    # the generated (fake) HR images as real
-    adv_loss = tf.reduce_mean(tf.nn.sigmoid_cross_entropy_with_logits(
-        labels=tf.ones_like(discr_fake_output),
-        logits=discr_fake_output))
+    # the generated (fake) HR images as real, but only if
+    # the generator was used as input and not the original dataset
+    adv_loss = tf.cond(
+        use_original, 
+        lambda: 0.0,
+        lambda: tf.reduce_mean(
+                    tf.nn.sigmoid_cross_entropy_with_logits(
+                        labels=tf.ones_like(discr_output),
+                        logits=discr_output)))
     scaled_adv_loss = tf.multiply(OPTS.LOSS['adversarial_mult'], adv_loss,
                                   name='adversarial-loss')
     return scaled_adv_loss

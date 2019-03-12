@@ -24,7 +24,8 @@ def srcnn_x2_weak(lr_batch):
 def srgan_discr_block(input_batch, num_filters, kernel_size, strides):
     conv_out = tf.layers.conv2d(input_batch, num_filters, kernel_size, strides, padding='SAME',
                                 kernel_regularizer=get_discr_regularizer())
-    bn_out = tf.layers.batch_normalization(conv_out)
+    # bn_out = tf.layers.batch_normalization(conv_out)
+    bn_out = conv_out
     lr_out = tf.nn.leaky_relu(bn_out)
     return lr_out
 

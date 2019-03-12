@@ -18,8 +18,8 @@ TRAIN = {
 }
 
 LOSS = {
-    'l2_mult': 1e-3,
-    'discr_l2_mult': 1e-3,
+    'l2_mult': 0.0,
+    'discr_l2_mult': 0.0,
     'adversarial_mult': 1e-3,
 }
 
