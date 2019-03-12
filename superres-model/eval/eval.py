@@ -23,16 +23,15 @@ def cmd_for_downscale(file_path):
 # and individual flags for separate datasets
 # creates them by 2x downscaling
 def create_low_res(path, set5_flag=True, set14_flag=True, bsd100_flag=True):
-  set5_path, set14_path, bsd100_path = dataset_paths(path)
   if set5_flag:
     for i in range(*set5_range):
-      subprocess.call(cmd_for_downscale(set5_path+'{}.png'.format(i)), shell=True)
+      subprocess.call(cmd_for_downscale(path+'/Set5_{}.png'.format(i)), shell=True)
   if set14_flag:
     for i in range(*set14_range):
-      subprocess.call(cmd_for_downscale(set14_path+'{}.png'.format(i)), shell=True)
+      subprocess.call(cmd_for_downscale(path+'/Set14_{}.png'.format(i)), shell=True)
   if bsd100_flag:
     for i in range(*bsd100_range):
-      subprocess.call(cmd_for_downscale(bsd100_path+'{}.png'.format(i)), shell=True)
+      subprocess.call(cmd_for_downscale(path+'/BSD100_{}.png'.format(i)), shell=True)
 
 def cmd_for_SR(file_paths):
   cmd = 'python superresolve.py ' + model_path + ' ' + ' '.join(file_paths)
