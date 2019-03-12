@@ -1,6 +1,7 @@
 #! /usr/bin/python
 
 import numpy as np
+import os
 import sys
 import subprocess
 import psnr
@@ -159,7 +160,7 @@ if __name__ == '__main__':
     extension = args.e
   #create_low_res(path)
   apply_SR(args.dataset_path)
-  sys.exit()
+  os.system('mv sr-images/* ' + args.dataset_path + '; rmdir sr-images')
 
   header = '\t{}\t{}\t{}'.format('Set5', 'Set14', 'BSD100')
   if not args.m == 'ssim':
