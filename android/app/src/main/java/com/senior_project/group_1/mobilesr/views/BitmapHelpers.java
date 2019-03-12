@@ -208,7 +208,9 @@ public class BitmapHelpers {
 
     public static boolean isBitmapCached(UserSelectedBitmapInfo bmInfo, Context context) {
         String md5Digest = getMD5DigestOfFile(bmInfo.getNonProcessedUri());
-        File file = new File(getCacheFolder(),md5Digest);
+        if( md5Digest == null )
+            return false;
+        File file = new File(getCacheFolder(), md5Digest + ".png");
         if( file.exists() ) {
             bmInfo.setProcessed(true);
             bmInfo.setProcessedUri(Uri.parse(file.toURI().toString()));
@@ -221,6 +223,7 @@ public class BitmapHelpers {
 
     public static File getCacheFolder() {
         String root = Environment.getExternalStorageDirectory().getAbsolutePath();
+        Log.i("BitmapHelpers.getCacheFolder", "Folder : "+root+ "/.MOBILE_SR_CACHE");
         File cacheDir = new File(root + "/.MOBILE_SR_CACHE");
         cacheDir.mkdirs();
         return cacheDir;
@@ -238,9 +241,10 @@ public class BitmapHelpers {
         //TODO - Should be processed in another thread
         Uri uri = null;
         try {
-            Log.i("BitmapHelpers", "Saving image on "+savingFolder);
+            Log.i("BitmapHelpers", "Saving image on "+savingFolder+" / "+filename);
 
-            File file = new File(savingFolder, filename);
+            File file = new File(savingFolder, filename + ".png");
+            file.createNewFile();
 
             FileOutputStream stream = new FileOutputStream(file);
             bm.compress(Bitmap.CompressFormat.PNG, 99, stream);
@@ -309,31 +313,21 @@ public class BitmapHelpers {
 
 
     /*
-        Code taken from an answer in :
+        Code modified from an answer in :
         https://stackoverflow.com/questions/13152736/how-to-generate-an-md5-checksum-for-a-file-in-android
      */
     public static String getMD5DigestOfFile(Uri uri) {
-        InputStream inputStream = null;
+        Log.i("BitmapHelpers.getMd5Digest", "Requested file : "+ uri.getPath());
         try {
-            inputStream = new FileInputStream(uri.getPath());
-            byte[] buffer = new byte[1024];
             MessageDigest digest = MessageDigest.getInstance("MD5");
-            int numRead = 0;
-            while (numRead != -1) {
-                numRead = inputStream.read(buffer);
-                if (numRead > 0)
-                    digest.update(buffer, 0, numRead);
-            }
-            byte [] md5Bytes = digest.digest();
+            digest.update(uri.getPath().getBytes());
+            byte[] md5Bytes = digest.digest();
             return convertHashToString(md5Bytes);
         } catch (Exception e) {
+            Log.i("BitmapHelpers.getMd5Digest", "Got error");
+            e.printStackTrace();
             return null;
         } finally {
-            if (inputStream != null) {
-                try {
-                    inputStream.close();
-                } catch (Exception e) { }
-            }
         }
     }
 
