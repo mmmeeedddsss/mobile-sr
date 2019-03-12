@@ -14,12 +14,6 @@ bsd100_range = (1, 101)
 extension = '-sr'
 model_path = '../saved-model/'
 
-def dataset_paths(path):
-  set5_path = path + '/Set5/'
-  set14_path = path + '/Set14/'
-  bsd100_path = path + '/BSDS100/'
-  return set5_path, set14_path, bsd100_path
-
 def cmd_for_downscale(file_path):
   new_path = file_path[:-4] + '_LR.png'
   cmd = 'convert ' + file_path + ' -scale 50% ' + new_path
@@ -40,24 +34,25 @@ def create_low_res(path, set5_flag=True, set14_flag=True, bsd100_flag=True):
     for i in range(*bsd100_range):
       subprocess.call(cmd_for_downscale(bsd100_path+'{}.png'.format(i)), shell=True)
 
-def cmd_for_SR(file_path):
-  cmd = 'python superresolve.py ' + model_path + ' ' + file_path
+def cmd_for_SR(file_paths):
+  cmd = 'python superresolve.py ' + model_path + ' ' + ' '.join(file_paths)
   return cmd
 
 # apply super resolution to images in the Low-Resolution domain
 # takes the datasets root path as argument
 # and optional flags for individual datasets
 def apply_SR(path, set5_flag=True, set14_flag=True, bsd100_flag=True):
-  set5_path, set14_path, bsd100_path = dataset_paths(path)
+  filepaths = []
   if set5_flag:
     for i in range(*set5_range):
-      subprocess.call(cmd_for_SR(set5_path+'{}_LR.png'.format(i)), shell=True)
+      filepaths.append(path+'/Set5_{}_LR.png'.format(i))
   if set14_flag:
     for i in range(*set14_range):
-      subprocess.call(cmd_for_SR(set14_path+'{}_LR.png'.format(i)), shell=True)
+      filepaths.append(path+'/Set14_{}_LR.png'.format(i))
   if bsd100_flag:
     for i in range(*bsd100_range):
-      subprocess.call(cmd_for_SR(bsd100_path+'{}_LR.png'.format(i)), shell=True)
+      filepaths.append(path+'/BSD100_{}_LR.png'.format(i))
+  subprocess.call(cmd_for_SR(filepaths), shell=True)
   
 # calculates psnr values given the dataset root path
 # and also optional individual flags for separate datasets
@@ -159,7 +154,8 @@ def parse_arguments():
 if __name__ == '__main__':
   args = parse_arguments()
   #create_low_res(path)
-  #apply_SR(args.dataset_path)
+  apply_SR(args.dataset_path)
+  sys.exit(0)
   if args.e:
     extension = args.e
 
