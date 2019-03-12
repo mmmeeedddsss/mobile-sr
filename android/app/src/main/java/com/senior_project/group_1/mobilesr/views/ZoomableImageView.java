@@ -68,7 +68,7 @@ public class ZoomableImageView extends AppCompatImageView {
         zoom_factor = 1;
         current_pointer_count = 0;
 
-        this.bm = bm.copy(Bitmap.Config.ARGB_8888, true);;
+        this.bm = bm.copy(Bitmap.Config.ARGB_8888, true);
 
         center_of_zoom_x = bm.getWidth()/2;
         center_of_zoom_y = bm.getHeight()/2;
