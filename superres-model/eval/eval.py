@@ -151,8 +151,7 @@ def parse_arguments():
 if __name__ == '__main__':
   args = parse_arguments()
   #create_low_res(path)
-  apply_SR(args.dataset_path)
-  sys.exit(0)
+  #apply_SR(args.dataset_path)
   if args.e:
     extension = args.e
 
