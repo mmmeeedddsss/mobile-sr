@@ -14,7 +14,7 @@ def get_classifier_model():
         tf.keras.layers.Conv2D(64, 3, 1, 'same', activation=tf.nn.leaky_relu),
         tf.keras.layers.MaxPool2D(2, padding='same'),
         tf.keras.layers.Flatten(),
-        tf.keras.layers.Dense(1024, activation=tf.nn.leaky_relu),
+        tf.keras.layers.Dense(98, activation=tf.nn.leaky_relu),
         tf.keras.layers.Dense(10, activation=tf.nn.softmax)
     ])
     adam = tf.keras.optimizers.Adam(lr=0.001)
