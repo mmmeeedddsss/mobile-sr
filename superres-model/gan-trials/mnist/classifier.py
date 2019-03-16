@@ -3,7 +3,7 @@ import random
 import tensorflow as tf
 import numpy as np
 
-import idx
+from data import get_training_set, get_test_set
 
 
 # time to try out keras.layers which is to replace tf.layers in TF 2.0!
@@ -22,28 +22,6 @@ def get_classifier_model():
                   loss='sparse_categorical_crossentropy',
                   metrics=['accuracy'])
     return model
-
-def preprocess_set(data):
-    # data is nhwc
-    return data.astype('float32') / 255.0 - 0.5
-
-def get_training_set():
-    train_images = preprocess_set(np.expand_dims(
-        idx.readfile('dataset/train-images-idx3-ubyte', 3),
-        axis=-1))
-    train_labels = np.expand_dims(
-        idx.readfile('dataset/train-labels-idx1-ubyte', 1),
-        axis=-1)
-    return train_images, train_labels
-
-def get_test_set():
-    test_images = preprocess_set(np.expand_dims(
-        idx.readfile('dataset/t10k-images-idx3-ubyte', 3),
-        axis=-1))
-    test_labels = np.expand_dims(
-        idx.readfile('dataset/t10k-labels-idx1-ubyte', 1),
-        axis=-1)
-    return test_images, test_labels
 
 if __name__ == '__main__':
     # set constant seeds
