@@ -5,8 +5,10 @@ import android.content.Intent;
 import android.graphics.Bitmap;
 import android.net.Uri;
 import android.os.Bundle;
+import android.support.design.widget.FloatingActionButton;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
+import android.view.View;
 import android.widget.Button;
 
 import com.senior_project.group_1.mobilesr.BuildConfig;
@@ -33,14 +35,18 @@ public abstract class PreprocessAndEnhanceActivity extends AppCompatActivity {
 
     private boolean isPaused;
     protected ZoomableImageView imageView;
-    protected Button rotateButton, processButton, processAllButton,
-                     nextButton, prevButton, toggleButton,
-                     saveButton, shareButton;
+    protected Button nextButton, prevButton;
+    protected FloatingActionButton rotateButton, processButton,
+            processAllButton, toggleButton, saveButton, shareButton;
     private ImageProcessingDialog dialog;
     private ImageProcessingTask imageProcessingTask;
     protected  ArrayList<UserSelectedBitmapInfo> bitmapInfos;
     protected int numImages;
     protected int imgIndex;
+
+    private boolean isFABOpen = false;
+    FloatingActionButton fab1, fab2, fab3;
+
 
     @Override
     public void onCreate(Bundle savedInstance) {
@@ -84,6 +90,14 @@ public abstract class PreprocessAndEnhanceActivity extends AppCompatActivity {
 
         saveButton = findViewById(R.id.save_image_button);
         saveButton.setOnClickListener(v -> BitmapHelpers.saveImageExternal(imageView.getFullBitmap(), getApplicationContext()));
+
+        FloatingActionButton fab = findViewById(R.id.fab);
+        fab.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                toggleFabs();
+            }
+        });
 
         Intent intent = getIntent();
         // fill image URIs
@@ -196,5 +210,30 @@ public abstract class PreprocessAndEnhanceActivity extends AppCompatActivity {
         synchronized(this) {
             return isPaused;
         }
+    }
+
+    private void toggleFabs(){
+        if( isFABOpen ) {
+            processButton.animate().translationY(-getResources().getDimension(R.dimen.padding));
+            processAllButton.animate().translationY(-getResources().getDimension(R.dimen.padding)*2);
+            toggleButton.animate().translationY(-getResources().getDimension(R.dimen.padding)*3);
+            saveButton.animate().translationY(-getResources().getDimension(R.dimen.padding)*1);
+            shareButton.animate().translationY(-getResources().getDimension(R.dimen.padding)*2);
+            rotateButton.animate().translationY(-getResources().getDimension(R.dimen.padding)*3);
+            saveButton.animate().translationX(-getResources().getDimension(R.dimen.padding)*1.2F);
+            shareButton.animate().translationX(-getResources().getDimension(R.dimen.padding)*1.2F);
+            rotateButton.animate().translationX(-getResources().getDimension(R.dimen.padding)*1.2F);
+        } else {
+            processButton.animate().translationY(0);
+            processAllButton.animate().translationY(0);
+            saveButton.animate().translationY(0);
+            shareButton.animate().translationY(0);
+            toggleButton.animate().translationY(0);
+            rotateButton.animate().translationY(0);
+            saveButton.animate().translationX(0);
+            shareButton.animate().translationX(0);
+            rotateButton.animate().translationX(0);
+        }
+        isFABOpen = !isFABOpen;
     }
 }
