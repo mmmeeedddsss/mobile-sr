@@ -33,7 +33,7 @@ def build_discriminator_model():
     x = tf.keras.layers.Conv2D(64, 3, 1, 'same', activation=tf.nn.leaky_relu)(x)
     x = tf.keras.layers.MaxPool2D(2, padding='same')(x)
     x = tf.keras.layers.Flatten()(x)
-    x = tf.keras.layers.Dense(98, activation=tf.nn.leaky_relu)(x)
+    # x = tf.keras.layers.Dense(98, activation=tf.nn.leaky_relu)(x)
     predictions = tf.keras.layers.Dense(1, activation=tf.nn.sigmoid)(x)
     # create the model and compile it
     model = tf.keras.Model(inputs=inputs, outputs=predictions)
@@ -95,9 +95,9 @@ if __name__ == '__main__':
         N = train_images.shape[0]
         test_images, test_labels = get_discriminator_test_set()
         # pre-train the discriminator
-        discr.fit(train_images, train_labels, epochs=NUM_EPOCHS, batch_size=BATCH_SIZE)
+        discriminator.fit(train_images, train_labels, epochs=NUM_EPOCHS, batch_size=BATCH_SIZE)
         # evaluate test accuracy
-        loss, acc = discr.evaluate(test_images, test_labels)
+        loss, acc = discriminator.evaluate(test_images, test_labels)
         print(f'Discriminator Test accuracy: {acc}')
     
     # load the MNIST sets

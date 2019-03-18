@@ -24,7 +24,7 @@ def get_test_set():
     return get_set('dataset/t10k-images-idx3-ubyte', 'dataset/t10k-labels-idx1-ubyte')
 
 def get_noise_batch(batch_size):
-    return np.random.rand(batch_size, 28, 28, 1) - 0.5
+    return np.random.normal(scale=0.3, size=(batch_size, 28, 28, 1)) # roughly between -1 and 1
 
 def get_discriminator_training_set(batch_size):
     # get the training set and its size
