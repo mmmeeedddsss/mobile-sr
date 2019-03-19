@@ -2,6 +2,7 @@ package com.senior_project.group_1.mobilesr.activities;
 
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
+import android.util.Log;
 import android.view.View;
 import android.app.Activity;
 import android.widget.Button;
@@ -9,6 +10,7 @@ import android.widget.ImageView;
 
 
 import com.senior_project.group_1.mobilesr.R;
+import com.senior_project.group_1.mobilesr.views.DoubleClickListener;
 import com.senior_project.group_1.mobilesr.views.OnSwipeTouchListener;
 
 public class TutorialActivity extends AppCompatActivity {
@@ -37,7 +39,19 @@ public class TutorialActivity extends AppCompatActivity {
                 prevImage();
             }
         });
+        iv.setClickable(true);
+        iv.setOnClickListener(new DoubleClickListener() {
+            @Override
+            public void onSingleClick(View v) {
+                Log.d("MobileSR", "single tap");
+            }
 
+            @Override
+            public void onDoubleClick(View v) {
+                Log.d("MobileSR", "double tap");
+
+            }
+        });
     }
 
     private void nextImage() {

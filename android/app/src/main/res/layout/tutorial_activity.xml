@@ -10,6 +10,7 @@
         android:layout_width="match_parent"
         android:layout_height="878dp"
         android:layout_weight="1"
+        android:clickable="true"
         app:srcCompat="@drawable/first" />
 
     <Button
