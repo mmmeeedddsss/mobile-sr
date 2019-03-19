@@ -20,6 +20,7 @@ import com.senior_project.group_1.mobilesr.configurations.SRModelConfiguration;
 import com.senior_project.group_1.mobilesr.configurations.SRModelConfigurationManager;
 import com.senior_project.group_1.mobilesr.views.BitmapHelpers;
 import com.senior_project.group_1.mobilesr.views.ZoomableImageView;
+import ru.dimorinny.floatingtextbutton.FloatingTextButton;
 
 import java.util.ArrayList;
 
@@ -36,7 +37,7 @@ public abstract class PreprocessAndEnhanceActivity extends AppCompatActivity {
     private boolean isPaused;
     protected ZoomableImageView imageView;
     protected Button nextButton, prevButton;
-    protected FloatingActionButton rotateButton, processButton,
+    protected FloatingTextButton rotateButton, processButton,
             processAllButton, toggleButton, saveButton, shareButton;
     private ImageProcessingDialog dialog;
     private ImageProcessingTask imageProcessingTask;
@@ -45,8 +46,6 @@ public abstract class PreprocessAndEnhanceActivity extends AppCompatActivity {
     protected int imgIndex;
 
     private boolean isFABOpen = false;
-    FloatingActionButton fab1, fab2, fab3;
-
 
     @Override
     public void onCreate(Bundle savedInstance) {
@@ -95,7 +94,11 @@ public abstract class PreprocessAndEnhanceActivity extends AppCompatActivity {
         fab.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                toggleFabs();
+                try {
+                    toggleFabs();
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
             }
         });
 
@@ -109,6 +112,12 @@ public abstract class PreprocessAndEnhanceActivity extends AppCompatActivity {
 
         // Set content of Zoomable image view
         refreshImage();
+
+        try {
+            toggleFabs();
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
     }
 
     private void processImages( ArrayList<UserSelectedBitmapInfo> bmInfos ) {
@@ -212,27 +221,36 @@ public abstract class PreprocessAndEnhanceActivity extends AppCompatActivity {
         }
     }
 
-    private void toggleFabs(){
+    private void toggleFabs() throws InterruptedException {
+        int offsetFromBottom = 105;
         if( isFABOpen ) {
-            processButton.animate().translationY(-getResources().getDimension(R.dimen.padding));
-            processAllButton.animate().translationY(-getResources().getDimension(R.dimen.padding)*2);
-            toggleButton.animate().translationY(-getResources().getDimension(R.dimen.padding)*3);
-            saveButton.animate().translationY(-getResources().getDimension(R.dimen.padding)*1);
-            shareButton.animate().translationY(-getResources().getDimension(R.dimen.padding)*2);
-            rotateButton.animate().translationY(-getResources().getDimension(R.dimen.padding)*3);
-            saveButton.animate().translationX(-getResources().getDimension(R.dimen.padding)*1.2F);
-            shareButton.animate().translationX(-getResources().getDimension(R.dimen.padding)*1.2F);
-            rotateButton.animate().translationX(-getResources().getDimension(R.dimen.padding)*1.2F);
+            processButton.setVisibility(View.VISIBLE);
+            processAllButton.setVisibility(View.VISIBLE);
+            toggleButton.setVisibility(View.VISIBLE);
+            saveButton.setVisibility(View.VISIBLE);
+            shareButton.setVisibility(View.VISIBLE);
+            rotateButton.setVisibility(View.VISIBLE);
+
+            processButton.animate().translationY(-getResources().getDimension(R.dimen.padding)-offsetFromBottom);
+            processAllButton.animate().translationY(-getResources().getDimension(R.dimen.padding)*2-offsetFromBottom);
+            toggleButton.animate().translationY(-getResources().getDimension(R.dimen.padding)*3-offsetFromBottom);
+            saveButton.animate().translationY(-getResources().getDimension(R.dimen.padding)*4-offsetFromBottom);
+            shareButton.animate().translationY(-getResources().getDimension(R.dimen.padding)*5-offsetFromBottom);
+            rotateButton.animate().translationY(-getResources().getDimension(R.dimen.padding)*6-offsetFromBottom);
         } else {
-            processButton.animate().translationY(0);
-            processAllButton.animate().translationY(0);
-            saveButton.animate().translationY(0);
-            shareButton.animate().translationY(0);
-            toggleButton.animate().translationY(0);
-            rotateButton.animate().translationY(0);
-            saveButton.animate().translationX(0);
-            shareButton.animate().translationX(0);
-            rotateButton.animate().translationX(0);
+            processButton.animate().translationY(-offsetFromBottom);
+            processAllButton.animate().translationY(-offsetFromBottom);
+            saveButton.animate().translationY(-offsetFromBottom);
+            shareButton.animate().translationY(-offsetFromBottom);
+            toggleButton.animate().translationY(-offsetFromBottom);
+            rotateButton.animate().translationY(-offsetFromBottom);
+
+            processButton.setVisibility(View.INVISIBLE);
+            processAllButton.setVisibility(View.INVISIBLE);
+            toggleButton.setVisibility(View.INVISIBLE);
+            saveButton.setVisibility(View.INVISIBLE);
+            shareButton.setVisibility(View.INVISIBLE);
+            rotateButton.setVisibility(View.INVISIBLE);
         }
         isFABOpen = !isFABOpen;
     }

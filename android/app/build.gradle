@@ -36,4 +36,5 @@ dependencies {
     androidTestImplementation 'com.android.support.test.espresso:espresso-core:3.0.2'
     implementation 'org.tensorflow:tensorflow-lite:0.0.0-nightly'
     implementation 'com.android.support:design:28.0.0'
+    implementation 'com.github.dimorinny:floating-text-button:0.0.4'
 }

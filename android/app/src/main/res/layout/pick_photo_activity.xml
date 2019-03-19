@@ -13,8 +13,7 @@
 
     <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="27dp"
-        android:layout_weight="1"
+        android:layout_height="55dp"
         android:orientation="horizontal">
 
         <android.support.v7.widget.AppCompatButton
@@ -27,7 +26,7 @@
             android:textColor="@color/colorButtonText"
             android:textStyle="bold"
             android:typeface="sans"
-            app:backgroundTint="@color/colorButtonBackground" />
+            app:backgroundTint="#ff1da1f2" />
 
         <android.support.v7.widget.AppCompatButton
             android:id="@+id/next_image_button"
@@ -38,7 +37,7 @@
             android:textColor="@color/colorButtonText"
             android:textStyle="bold"
             android:typeface="sans"
-            app:backgroundTint="@color/colorButtonBackground" />
+            app:backgroundTint="#ff1da1f2" />
 
     </LinearLayout>
 
@@ -52,68 +51,75 @@
 
 </LinearLayout>
 
-    <android.support.design.widget.FloatingActionButton
+    <ru.dimorinny.floatingtextbutton.FloatingTextButton
         android:id="@+id/process_all_button"
-        android:layout_width="45dp"
-        android:layout_height="45dp"
-        android:layout_gravity="bottom|end"
-        android:layout_margin="37dp"
-        app:srcCompat="@android:drawable/ic_media_play" />
-    <android.support.design.widget.FloatingActionButton
-        android:id="@+id/process_image_button"
-        android:layout_width="45dp"
-        android:layout_height="45dp"
-        android:layout_gravity="bottom|end"
-        android:layout_margin="37dp"
-        app:srcCompat="@android:drawable/ic_menu_camera" />
-    <android.support.design.widget.FloatingActionButton
-        android:id="@+id/save_image_button"
-        android:layout_width="45dp"
-        android:layout_height="45dp"
-        android:layout_gravity="bottom|end"
-        android:layout_margin="37dp"
-        app:srcCompat="@android:drawable/ic_dialog_map" />
-    <android.support.design.widget.FloatingActionButton
-        android:id="@+id/share_image_button"
-        android:layout_width="45dp"
-        android:layout_height="45dp"
-        android:layout_gravity="bottom|end"
-        android:layout_margin="37dp"
-        app:srcCompat="@android:drawable/ic_dialog_map" />
-    <FrameLayout
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_gravity="bottom|right">
-        <android.support.design.widget.FloatingActionButton
-            android:id="@+id/rotate_image_button"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_gravity="bottom|end"
-            android:layout_margin="37dp"
-            app:srcCompat="@android:drawable/ic_dialog_map"
-            android:src="@android:color/transparent"/>
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_gravity="center"
-            android:text="@android:string/ok"
-            android:elevation="16dp"
-            android:textColor="@android:color/black"
-            android:textAppearance="?android:attr/textAppearanceMedium" />
-    </FrameLayout>>
-    <android.support.design.widget.FloatingActionButton
-        android:id="@+id/toggle_sr_button"
-        android:layout_width="45dp"
-        android:layout_height="45dp"
+        app:floating_background_color="#ff1da1f2"
+        android:layout_margin="12dp"
         android:layout_gravity="bottom|end"
-        android:layout_margin="37dp"
-        app:srcCompat="@android:drawable/ic_dialog_map" />
+        app:floating_title="Process All"
+        app:floating_title_color="@android:color/white"
+        />
+    <ru.dimorinny.floatingtextbutton.FloatingTextButton
+        android:id="@+id/process_image_button"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        app:floating_background_color="#ff1da1f2"
+        android:layout_margin="12dp"
+        android:layout_gravity="bottom|end"
+        app:floating_title="Process"
+        app:floating_title_color="@android:color/white"
+        />
+    <ru.dimorinny.floatingtextbutton.FloatingTextButton
+        android:id="@+id/save_image_button"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        app:floating_background_color="#ff1da1f2"
+        android:layout_margin="12dp"
+        android:layout_gravity="bottom|end"
+        app:floating_title="Save"
+        app:floating_title_color="@android:color/white"
+        />
+    <ru.dimorinny.floatingtextbutton.FloatingTextButton
+        android:id="@+id/share_image_button"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        app:floating_background_color="#ff1da1f2"
+        android:layout_margin="12dp"
+        android:layout_gravity="bottom|end"
+        app:floating_title="Share"
+        app:floating_title_color="@android:color/white"
+        />
+    <ru.dimorinny.floatingtextbutton.FloatingTextButton
+        android:id="@+id/rotate_image_button"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        app:floating_background_color="#ff1da1f2"
+        android:layout_margin="12dp"
+        android:layout_gravity="bottom|end"
+        app:floating_title="Rotate"
+        app:floating_title_color="@android:color/white"
+        />
+    <ru.dimorinny.floatingtextbutton.FloatingTextButton
+        android:id="@+id/toggle_sr_button"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        app:floating_background_color="#ff1da1f2"
+        android:layout_margin="12dp"
+        android:layout_gravity="bottom|end"
+        app:floating_title="Toggle"
+        app:floating_title_color="@android:color/white"
+        />
 
     <android.support.design.widget.FloatingActionButton
         android:id="@+id/fab"
-        android:layout_width="76dp"
-        android:layout_height="wrap_content"
+        android:layout_width="55dp"
+        android:layout_height="55dp"
         android:layout_gravity="bottom|end"
-        android:layout_margin="35dp"
+        android:layout_margin="25dp"
+        app:backgroundTint="#ff1da1f2"
         app:srcCompat="@android:drawable/ic_dialog_dialer" />
+
+
 </FrameLayout>
