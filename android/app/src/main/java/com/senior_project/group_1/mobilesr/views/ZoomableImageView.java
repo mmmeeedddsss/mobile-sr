@@ -48,6 +48,13 @@ public class ZoomableImageView extends AppCompatImageView {
     boolean tapped = false;
     long time = 0;
 
+    // double tap constants
+    //
+    // time delay between two consecutive tap events
+    int tap_delay = ApplicationConstants.DOUBLE_TAP_DELAY;
+    // distance between fingers to avoid taking pinch zoom as double tap mistakenly
+    int tap_distance = ApplicationConstants.DOUBLE_TAP_FINGER_DISTANCE;
+
     // Constructors
     public ZoomableImageView(Context context) {
         super(context);
@@ -114,9 +121,9 @@ public class ZoomableImageView extends AppCompatImageView {
             case MotionEvent.ACTION_DOWN: // this is the case where a new finger is introduced
                 current_pointer_count++;
                 if (tapped &&
-                        System.currentTimeMillis() - time <= 300
-                        && Math.abs(start_x-e.getX(0)) < 100
-                        && Math.abs(start_y-e.getY(0)) < 100
+                        System.currentTimeMillis() - time <= tap_delay
+                        && Math.abs(start_x-e.getX(0)) < tap_distance
+                        && Math.abs(start_y-e.getY(0)) < tap_distance
                         && current_pointer_count == 1) {
                     // double tap occurred
                     Log.d("MobileSR", "double tap");
