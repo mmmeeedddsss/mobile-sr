@@ -5,8 +5,10 @@ import android.content.Intent;
 import android.graphics.Bitmap;
 import android.net.Uri;
 import android.os.Bundle;
+import android.support.design.widget.FloatingActionButton;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
+import android.view.View;
 import android.widget.Button;
 import android.view.View;
 
@@ -20,6 +22,7 @@ import com.senior_project.group_1.mobilesr.configurations.SRModelConfigurationMa
 import com.senior_project.group_1.mobilesr.views.BitmapHelpers;
 import com.senior_project.group_1.mobilesr.views.DoubleClickListener;
 import com.senior_project.group_1.mobilesr.views.ZoomableImageView;
+import ru.dimorinny.floatingtextbutton.FloatingTextButton;
 
 import java.util.ArrayList;
 
@@ -35,14 +38,16 @@ public abstract class PreprocessAndEnhanceActivity extends AppCompatActivity {
 
     private boolean isPaused;
     protected ZoomableImageView imageView;
-    protected Button rotateButton, processButton, processAllButton,
-                     nextButton, prevButton, toggleButton,
-                     saveButton, shareButton;
+    protected Button nextButton, prevButton;
+    protected FloatingTextButton rotateButton, processButton,
+            processAllButton, toggleButton, saveButton, shareButton;
     private ImageProcessingDialog dialog;
     private ImageProcessingTask imageProcessingTask;
     protected  ArrayList<UserSelectedBitmapInfo> bitmapInfos;
     protected int numImages;
     protected int imgIndex;
+
+    private boolean isFABOpen = false;
 
     @Override
     public void onCreate(Bundle savedInstance) {
@@ -87,6 +92,18 @@ public abstract class PreprocessAndEnhanceActivity extends AppCompatActivity {
         saveButton = findViewById(R.id.save_image_button);
         saveButton.setOnClickListener(v -> BitmapHelpers.saveImageExternal(imageView.getFullBitmap(), getApplicationContext()));
 
+        FloatingActionButton fab = findViewById(R.id.fab);
+        fab.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                try {
+                    toggleFabs();
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+            }
+        });
+
         Intent intent = getIntent();
         // fill image URIs
         ClipData imageClipData = intent.getParcelableExtra("imageClipData");
@@ -97,6 +114,12 @@ public abstract class PreprocessAndEnhanceActivity extends AppCompatActivity {
 
         // Set content of Zoomable image view
         refreshImage();
+
+        try {
+            toggleFabs();
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
     }
 
     private void processImages( ArrayList<UserSelectedBitmapInfo> bmInfos ) {
@@ -198,5 +221,39 @@ public abstract class PreprocessAndEnhanceActivity extends AppCompatActivity {
         synchronized(this) {
             return isPaused;
         }
+    }
+
+    private void toggleFabs() throws InterruptedException {
+        int offsetFromBottom = 105;
+        if( isFABOpen ) {
+            processButton.setVisibility(View.VISIBLE);
+            processAllButton.setVisibility(View.VISIBLE);
+            toggleButton.setVisibility(View.VISIBLE);
+            saveButton.setVisibility(View.VISIBLE);
+            shareButton.setVisibility(View.VISIBLE);
+            rotateButton.setVisibility(View.VISIBLE);
+
+            processButton.animate().translationY(-getResources().getDimension(R.dimen.padding)-offsetFromBottom);
+            processAllButton.animate().translationY(-getResources().getDimension(R.dimen.padding)*2-offsetFromBottom);
+            toggleButton.animate().translationY(-getResources().getDimension(R.dimen.padding)*3-offsetFromBottom);
+            saveButton.animate().translationY(-getResources().getDimension(R.dimen.padding)*4-offsetFromBottom);
+            shareButton.animate().translationY(-getResources().getDimension(R.dimen.padding)*5-offsetFromBottom);
+            rotateButton.animate().translationY(-getResources().getDimension(R.dimen.padding)*6-offsetFromBottom);
+        } else {
+            processButton.animate().translationY(-offsetFromBottom);
+            processAllButton.animate().translationY(-offsetFromBottom);
+            saveButton.animate().translationY(-offsetFromBottom);
+            shareButton.animate().translationY(-offsetFromBottom);
+            toggleButton.animate().translationY(-offsetFromBottom);
+            rotateButton.animate().translationY(-offsetFromBottom);
+
+            processButton.setVisibility(View.INVISIBLE);
+            processAllButton.setVisibility(View.INVISIBLE);
+            toggleButton.setVisibility(View.INVISIBLE);
+            saveButton.setVisibility(View.INVISIBLE);
+            shareButton.setVisibility(View.INVISIBLE);
+            rotateButton.setVisibility(View.INVISIBLE);
+        }
+        isFABOpen = !isFABOpen;
     }
 }

@@ -1,4 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical">
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
@@ -8,8 +13,7 @@
 
     <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="27dp"
-        android:layout_weight="1"
+        android:layout_height="55dp"
         android:orientation="horizontal">
 
         <android.support.v7.widget.AppCompatButton
@@ -22,7 +26,7 @@
             android:textColor="@color/colorButtonText"
             android:textStyle="bold"
             android:typeface="sans"
-            app:backgroundTint="@color/colorButtonBackground" />
+            app:backgroundTint="#ff1da1f2" />
 
         <android.support.v7.widget.AppCompatButton
             android:id="@+id/next_image_button"
@@ -33,7 +37,7 @@
             android:textColor="@color/colorButtonText"
             android:textStyle="bold"
             android:typeface="sans"
-            app:backgroundTint="@color/colorButtonBackground" />
+            app:backgroundTint="#ff1da1f2" />
 
     </LinearLayout>
 
@@ -43,82 +47,79 @@
         android:layout_height="406dp"
         android:layout_weight="1" />
 
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="86dp"
-        android:orientation="horizontal">
-
-        <android.support.v7.widget.AppCompatButton
-            android:id="@+id/toggle_sr_button"
-            android:layout_width="wrap_content"
-            android:layout_height="match_parent"
-            android:layout_gravity="center_vertical|center_horizontal"
-            android:layout_weight="0.10"
-            android:text="Toggle"
-            android:textColor="@color/colorButtonText"
-            android:textStyle="bold"
-            android:typeface="sans"
-            app:backgroundTint="@color/colorButtonBackground" />
-
-        <android.support.v7.widget.AppCompatButton
-            android:id="@+id/rotate_image_button"
-            android:layout_width="wrap_content"
-            android:layout_height="match_parent"
-            android:layout_gravity="center_vertical|center_horizontal"
-            android:layout_weight="0.10"
-            android:text="Rotate"
-            android:textColor="@color/colorButtonText"
-            android:textStyle="bold"
-            android:typeface="sans"
-            app:backgroundTint="@color/colorButtonBackground" />
-
-        <android.support.v7.widget.AppCompatButton
-            android:id="@+id/share_image_button"
-            android:layout_width="wrap_content"
-            android:layout_height="match_parent"
-            android:layout_gravity="center_vertical|center_horizontal"
-            android:layout_weight="0.10"
-            android:text="Share"
-            android:textColor="@color/colorButtonText"
-            android:textStyle="bold"
-            android:typeface="sans"
-            app:backgroundTint="@color/colorButtonBackground" />
-
-        <android.support.v7.widget.AppCompatButton
-            android:id="@+id/save_image_button"
-            android:layout_width="wrap_content"
-            android:layout_height="match_parent"
-            android:layout_gravity="center_vertical|center_horizontal"
-            android:layout_weight="0.10"
-            android:text="Save"
-            android:textColor="@color/colorButtonText"
-            android:textStyle="bold"
-            android:typeface="sans"
-            app:backgroundTint="@color/colorButtonBackground" />
-
-        <android.support.v7.widget.AppCompatButton
-            android:id="@+id/process_image_button"
-            android:layout_width="79dp"
-            android:layout_height="match_parent"
-            android:layout_weight="0.10"
-            android:text="Process"
-            android:textColor="@color/colorButtonText"
-            android:textStyle="bold"
-            android:typeface="sans"
-            app:backgroundTint="@color/colorButtonBackground" />
-
-        <android.support.v7.widget.AppCompatButton
-            android:id="@+id/process_all_button"
-            android:layout_width="wrap_content"
-            android:layout_height="match_parent"
-            android:layout_weight="0.25"
-            android:text="Process All"
-            android:textColor="@color/colorButtonText"
-            android:textStyle="bold"
-            android:typeface="sans"
-            app:backgroundTint="@color/colorButtonBackground" />
-
-    </LinearLayout>
 
 
 </LinearLayout>
+
+    <ru.dimorinny.floatingtextbutton.FloatingTextButton
+        android:id="@+id/process_all_button"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        app:floating_background_color="#ff1da1f2"
+        android:layout_margin="12dp"
+        android:layout_gravity="bottom|end"
+        app:floating_title="Process All"
+        app:floating_title_color="@android:color/white"
+        />
+    <ru.dimorinny.floatingtextbutton.FloatingTextButton
+        android:id="@+id/process_image_button"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        app:floating_background_color="#ff1da1f2"
+        android:layout_margin="12dp"
+        android:layout_gravity="bottom|end"
+        app:floating_title="Process"
+        app:floating_title_color="@android:color/white"
+        />
+    <ru.dimorinny.floatingtextbutton.FloatingTextButton
+        android:id="@+id/save_image_button"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        app:floating_background_color="#ff1da1f2"
+        android:layout_margin="12dp"
+        android:layout_gravity="bottom|end"
+        app:floating_title="Save"
+        app:floating_title_color="@android:color/white"
+        />
+    <ru.dimorinny.floatingtextbutton.FloatingTextButton
+        android:id="@+id/share_image_button"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        app:floating_background_color="#ff1da1f2"
+        android:layout_margin="12dp"
+        android:layout_gravity="bottom|end"
+        app:floating_title="Share"
+        app:floating_title_color="@android:color/white"
+        />
+    <ru.dimorinny.floatingtextbutton.FloatingTextButton
+        android:id="@+id/rotate_image_button"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        app:floating_background_color="#ff1da1f2"
+        android:layout_margin="12dp"
+        android:layout_gravity="bottom|end"
+        app:floating_title="Rotate"
+        app:floating_title_color="@android:color/white"
+        />
+    <ru.dimorinny.floatingtextbutton.FloatingTextButton
+        android:id="@+id/toggle_sr_button"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        app:floating_background_color="#ff1da1f2"
+        android:layout_margin="12dp"
+        android:layout_gravity="bottom|end"
+        app:floating_title="Toggle"
+        app:floating_title_color="@android:color/white"
+        />
+
+    <android.support.design.widget.FloatingActionButton
+        android:id="@+id/fab"
+        android:layout_width="55dp"
+        android:layout_height="55dp"
+        android:layout_gravity="bottom|end"
+        android:layout_margin="25dp"
+        app:backgroundTint="#ff1da1f2"
+        app:srcCompat="@android:drawable/ic_dialog_dialer" />
+
+
+</FrameLayout>
