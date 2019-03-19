@@ -13,4 +13,9 @@ public final class ApplicationConstants {
 
     public static final float ZOOM_CONSTANT = 0.035F; // Constant numbers to adjust the sensitivity of user gestures
     public static final float MOVEMENT_CONSTANT = 5.5F;
+
+    // distance between fingers to avoid taking pinch zoom as double tap mistakenly
+    public static final int DOUBLE_TAP_FINGER_DISTANCE = 100; 
+    // time delay between two consecutive tap events
+    public static final int DOUBLE_TAP_DELAY = 300;
 }
