@@ -43,14 +43,11 @@ public class ZoomableImageView extends AppCompatImageView {
 
     float zoom_constant = ApplicationConstants.ZOOM_CONSTANT;
     float movement_constant = ApplicationConstants.MOVEMENT_CONSTANT;
-
-    // double tap
-    boolean tapped = false;
-    long time = 0;
+    long lastTapTime = 0;
 
     // double tap constants
     //
-    // time delay between two consecutive tap events
+    // tap delay between two consecutive tap events
     int tap_delay = ApplicationConstants.DOUBLE_TAP_DELAY;
     // distance between fingers to avoid taking pinch zoom as double tap mistakenly
     int tap_distance = ApplicationConstants.DOUBLE_TAP_FINGER_DISTANCE;
@@ -120,20 +117,17 @@ public class ZoomableImageView extends AppCompatImageView {
             case MotionEvent.ACTION_POINTER_DOWN:
             case MotionEvent.ACTION_DOWN: // this is the case where a new finger is introduced
                 current_pointer_count++;
-                if (tapped &&
-                        System.currentTimeMillis() - time <= tap_delay
-                        && Math.abs(start_x-e.getX(0)) < tap_distance
-                        && Math.abs(start_y-e.getY(0)) < tap_distance
-                        && current_pointer_count == 1) {
+                if (System.currentTimeMillis() - lastTapTime <= tap_delay
+                    && Math.abs(start_x-e.getX(0)) < tap_distance
+                    && Math.abs(start_y-e.getY(0)) < tap_distance
+                    && current_pointer_count == 1) {
                     // double tap occurred
                     Log.d("MobileSR", "double tap");
-                    reset_zoom();
-
-                    tapped = false;
-
+                    center_of_zoom_x_tba = start_x / viewWidth * BitmapHelpers.getWidth(src_rect) + src_rect.left;
+                    center_of_zoom_y_tba = start_y / viewHeight * BitmapHelpers.getHeight(src_rect) + src_rect.top;
+                    double_tap_action(center_of_zoom_x_tba, center_of_zoom_y_tba);
                 } else {
-                    tapped = true;
-                    time = System.currentTimeMillis();
+                    lastTapTime = System.currentTimeMillis();
                     if (current_pointer_count == 1) { // if new finger is the first one
                         float x = e.getX(0);
                         float y = e.getY(0);
@@ -394,12 +388,20 @@ public class ZoomableImageView extends AppCompatImageView {
     }
 
     // puts default values to pinch zoom variables and then redraws
-    private void reset_zoom() {
-        zoom_factor = 1;
-        center_of_zoom_x = bm.getWidth()/2;
-        center_of_zoom_y = bm.getHeight()/2;
-        previous_center_x = center_of_zoom_x;
-        previous_center_y = center_of_zoom_y;
+    private void double_tap_action( float new_center_of_zoom_x, float new_center_of_zoom_y ) {
+        if( zoom_factor > 1.2 ) {
+            zoom_factor = 1;
+            previous_center_x = center_of_zoom_x;
+            previous_center_y = center_of_zoom_y;
+            center_of_zoom_x = bm.getWidth() / 2;
+            center_of_zoom_y = bm.getHeight() / 2;
+        } else {
+            zoom_factor *= 3;
+            previous_center_x = center_of_zoom_x;
+            previous_center_y = center_of_zoom_y;
+            center_of_zoom_x = new_center_of_zoom_x;
+            center_of_zoom_y = new_center_of_zoom_y;
+        }
         invalidate();
     }
 
