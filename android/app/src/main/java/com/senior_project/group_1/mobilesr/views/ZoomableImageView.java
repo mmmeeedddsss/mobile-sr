@@ -44,6 +44,10 @@ public class ZoomableImageView extends AppCompatImageView {
     float zoom_constant = ApplicationConstants.ZOOM_CONSTANT;
     float movement_constant = ApplicationConstants.MOVEMENT_CONSTANT;
 
+    // double tap
+    boolean tapped = false;
+    long time = 0;
+
     // Constructors
     public ZoomableImageView(Context context) {
         super(context);
@@ -109,35 +113,50 @@ public class ZoomableImageView extends AppCompatImageView {
             case MotionEvent.ACTION_POINTER_DOWN:
             case MotionEvent.ACTION_DOWN: // this is the case where a new finger is introduced
                 current_pointer_count++;
-                if (current_pointer_count == 1) { // if new finger is the first one
-                    float x = e.getX(0);
-                    float y = e.getY(0);
-                    start_x = x;
-                    start_y = y; // refer to comments on top, saving first finger's x and y
-                    Log.d("TAG", String.format("1 finger started X = %.5f, Y = %.5f", x, y));
-                }
-                else if (current_pointer_count == 2) {
-                    // Starting distance between fingers
-                    float x = e.getX(1);
-                    float y = e.getY(1);
-                    pinched_x = x;
-                    pinched_y = y; // refer to comments on top, saving second finger's x and y
-                    // ----------------
-                    // Calculation of center of the zoom in src
-                    center_of_zoom_x_tba = (start_x + pinched_x)/2.0F;
-                    center_of_zoom_y_tba = (start_y + pinched_y)/2.0F;
-                    // Below, im converting the coordinates of the screen to the current subset of
-                    // Original image bitmap, to find the actual location of the zoom center on
-                    // original bitmap
-                    center_of_zoom_x_tba = center_of_zoom_x_tba/viewWidth* BitmapHelpers.getWidth(src_rect)+src_rect.left;
-                    center_of_zoom_y_tba = center_of_zoom_y_tba/viewHeight* BitmapHelpers.getHeight(src_rect)+src_rect.top;
-                    // Current distance between fingers, note that change on this distance means
-                    // User is trying to zoom in our out
-                    // -----------------
-                    start_distance = getDistance(start_x,start_y,pinched_x,pinched_y);
-                    Log.d("TAG", String.format("2 finger started X = %.5f, Y = %.5f", x, y));
+                if (tapped &&
+                        System.currentTimeMillis() - time <= 300
+                        && Math.abs(start_x-e.getX(0)) < 100
+                        && Math.abs(start_y-e.getY(0)) < 100
+                        && current_pointer_count == 1) {
+                    // double tap occurred
+                    Log.d("MobileSR", "double tap");
+                    reset_zoom();
+
+                    tapped = false;
+
+                } else {
+                    tapped = true;
+                    time = System.currentTimeMillis();
+                    if (current_pointer_count == 1) { // if new finger is the first one
+                        float x = e.getX(0);
+                        float y = e.getY(0);
+                        start_x = x;
+                        start_y = y; // refer to comments on top, saving first finger's x and y
+                        Log.d("TAG", String.format("1 finger started X = %.5f, Y = %.5f", x, y));
+                    } else if (current_pointer_count == 2) {
+                        // Starting distance between fingers
+                        float x = e.getX(1);
+                        float y = e.getY(1);
+                        pinched_x = x;
+                        pinched_y = y; // refer to comments on top, saving second finger's x and y
+                        // ----------------
+                        // Calculation of center of the zoom in src
+                        center_of_zoom_x_tba = (start_x + pinched_x) / 2.0F;
+                        center_of_zoom_y_tba = (start_y + pinched_y) / 2.0F;
+                        // Below, im converting the coordinates of the screen to the current subset of
+                        // Original image bitmap, to find the actual location of the zoom center on
+                        // original bitmap
+                        center_of_zoom_x_tba = center_of_zoom_x_tba / viewWidth * BitmapHelpers.getWidth(src_rect) + src_rect.left;
+                        center_of_zoom_y_tba = center_of_zoom_y_tba / viewHeight * BitmapHelpers.getHeight(src_rect) + src_rect.top;
+                        // Current distance between fingers, note that change on this distance means
+                        // User is trying to zoom in our out
+                        // -----------------
+                        start_distance = getDistance(start_x, start_y, pinched_x, pinched_y);
+                        Log.d("TAG", String.format("2 finger started X = %.5f, Y = %.5f", x, y));
+                    }
                 }
                 return true;
+
             case MotionEvent.ACTION_POINTER_UP:
             case MotionEvent.ACTION_UP: // User removed a finger from screen
                 current_pointer_count--;
@@ -365,6 +384,16 @@ public class ZoomableImageView extends AppCompatImageView {
         }
 
         return src_rect;
+    }
+
+    // puts default values to pinch zoom variables and then redraws
+    private void reset_zoom() {
+        zoom_factor = 1;
+        center_of_zoom_x = bm.getWidth()/2;
+        center_of_zoom_y = bm.getHeight()/2;
+        previous_center_x = center_of_zoom_x;
+        previous_center_y = center_of_zoom_y;
+        invalidate();
     }
 
     // Method for rotating the selected image
