@@ -8,6 +8,7 @@ import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.widget.Button;
+import android.view.View;
 
 import com.senior_project.group_1.mobilesr.BuildConfig;
 import com.senior_project.group_1.mobilesr.UserSelectedBitmapInfo;
@@ -17,6 +18,7 @@ import com.senior_project.group_1.mobilesr.R;
 import com.senior_project.group_1.mobilesr.configurations.SRModelConfiguration;
 import com.senior_project.group_1.mobilesr.configurations.SRModelConfigurationManager;
 import com.senior_project.group_1.mobilesr.views.BitmapHelpers;
+import com.senior_project.group_1.mobilesr.views.DoubleClickListener;
 import com.senior_project.group_1.mobilesr.views.ZoomableImageView;
 
 import java.util.ArrayList;
