@@ -39,7 +39,7 @@ public class MainActivity extends AppCompatActivity {
     static final int REQUEST_IMAGE_CAPTURE = 111;
     static final int REQUEST_IMAGE_SELECT = 112;
 
-    Button pickPhotoButton, takePhotoButton, settingsButton, tutorialButton;
+    Button pickPhotoButton, takePhotoButton, settingsButton, settingsButton2, tutorialButton;
     private Uri mImageUri;
 
     @Override
@@ -72,7 +72,7 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
-        // Settings button activity
+        // Settings button activitys
         settingsButton = (Button) findViewById(R.id.buttonSetttings);
 
         // Settings button clicks
@@ -80,6 +80,18 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 Intent settingsIntent = new Intent(MainActivity.this, SettingsActivity.class);
+                startActivity(settingsIntent);
+            }
+        });
+
+        // Settings button activitys
+        settingsButton2 = (Button) findViewById(R.id.buttonSetttings2);
+
+        // Settings button clicks
+        settingsButton2.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent settingsIntent = new Intent(MainActivity.this, SettingsActivity2.class);
                 startActivity(settingsIntent);
             }
         });

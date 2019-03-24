@@ -60,6 +60,16 @@
             app:backgroundTint="@color/colorButtonBackground" />
 
         <android.support.v7.widget.AppCompatButton
+            android:id="@+id/buttonSetttings2"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="settıngs2"
+            android:textColor="@color/colorButtonText"
+            android:textStyle="bold"
+            app:backgroundTint="@color/colorButtonBackground" />
+
+
+        <android.support.v7.widget.AppCompatButton
             android:id="@+id/buttonTutorial"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"

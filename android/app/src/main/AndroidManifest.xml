@@ -2,7 +2,10 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="com.senior_project.group_1.mobilesr">
 
-    <uses-feature android:name="android.hardware.camera" android:required="true" />
+    <uses-feature
+        android:name="android.hardware.camera"
+        android:required="true" />
+
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
 
     <application
@@ -12,19 +15,28 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
-        <activity android:name="com.senior_project.group_1.mobilesr.activities.MainActivity">
+        <activity
+            android:name=".activities.SettingsActivity2"
+            android:label="@string/title_activity_settings2"
+            android:parentActivityName=".activities.DivideImageActivity">
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value="com.senior_project.group_1.mobilesr.activities.DivideImageActivity" />
+        </activity>
+        <activity android:name=".activities.MainActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity android:name="com.senior_project.group_1.mobilesr.activities.SingleImageEnhanceActivity"></activity>
-        <activity android:name="com.senior_project.group_1.mobilesr.activities.MultipleImageEnhanceActivity"></activity>
-        <activity android:name="com.senior_project.group_1.mobilesr.activities.TutorialActivity"></activity>
-        <activity android:name="com.senior_project.group_1.mobilesr.activities.DivideImageActivity"></activity>
-        <activity android:name="com.senior_project.group_1.mobilesr.activities.MergeImageActivity"></activity>
-        <activity android:name="com.senior_project.group_1.mobilesr.activities.SettingsActivity"></activity>
+        <activity android:name=".activities.SingleImageEnhanceActivity" />
+        <activity android:name=".activities.MultipleImageEnhanceActivity" />
+        <activity android:name=".activities.TutorialActivity" />
+        <activity android:name=".activities.DivideImageActivity" />
+        <activity android:name=".activities.MergeImageActivity" />
+        <activity android:name=".activities.SettingsActivity" />
+
         <provider
             android:name=".views.GenericFileProvider"
             android:authorities="com.senior_project.group_1.mobilesr"
@@ -32,10 +44,8 @@
             android:grantUriPermissions="true">
             <meta-data
                 android:name="android.support.FILE_PROVIDER_PATHS"
-                android:resource="@xml/file_paths"/>
+                android:resource="@xml/file_paths" />
         </provider>
-
-
     </application>
 
 </manifest>

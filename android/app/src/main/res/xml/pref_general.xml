@@ -1,0 +1,66 @@
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <SwitchPreference
+        android:defaultValue="true"
+        android:key="use_nnapi_switch"
+        android:summary="@string/title_use_nnapi"
+        android:title="@string/pref_description_use_nnapi"/>
+
+    <SwitchPreference
+        android:defaultValue="false"
+        android:key="model_rescales_switch"
+        android:summary="@string/title_model_rescales"
+        android:title="@string/pref_description_model_rescales"/>
+
+    <!-- NOTE: EditTextPreference accepts EditText attributes. -->
+    <!-- NOTE: EditTextPreference's summary should be set to its value by the activity code. -->
+    <EditTextPreference
+        android:defaultValue="@string/pref_default_input_image_width"
+        android:inputType="number"
+        android:key="input_image_width"
+        android:maxLines="1"
+        android:selectAllOnFocus="true"
+        android:singleLine="true"
+        android:title="@string/title_input_image_width" />
+
+    <EditTextPreference
+        android:defaultValue="@string/pref_default_input_image_height"
+        android:inputType="number"
+        android:key="input_image_height"
+        android:maxLines="1"
+        android:selectAllOnFocus="true"
+        android:singleLine="true"
+        android:title="@string/title_input_image_height" />
+
+    <EditTextPreference
+        android:defaultValue="@string/pref_default_rescaling_factor"
+        android:inputType="number"
+        android:key="rescaling_factor"
+        android:maxLines="1"
+        android:selectAllOnFocus="true"
+        android:singleLine="true"
+        android:title="@string/title_rescaling_factor" />
+
+
+    <!-- NOTE: Hide buttons to simplify the UI. Users can touch outside the dialog to
+         dismiss it. -->
+    <!-- NOTE: ListPreference's summary should be set to its value by the activity code. -->
+    <ListPreference
+        android:defaultValue="@string/pref_default_model_name"
+        android:entries="@array/model_name_list_titles"
+        android:entryValues="@array/model_name_list_values"
+        android:key="model_name_list"
+        android:negativeButtonText="@null"
+        android:positiveButtonText="@null"
+        android:title="@string/title_model_name" />
+
+    <ListPreference
+        android:defaultValue="@string/pref_default_parallel_batch_number"
+        android:entries="@array/parallel_batch_number_list_titles"
+        android:entryValues="@array/parallel_batch_number_list_values"
+        android:key="parallel_batch_number_list"
+        android:negativeButtonText="@null"
+        android:positiveButtonText="@null"
+        android:title="@string/title_parallel_batch_number" />
+
+</PreferenceScreen>
