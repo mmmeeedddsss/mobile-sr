@@ -6,4 +6,5 @@
         android:fragment="com.senior_project.group_1.mobilesr.activities.SettingsActivity2$GeneralPreferenceFragment"
         android:icon="@drawable/ic_info_black_24dp"
         android:title="@string/pref_header_general" />
+
 </preference-headers>
