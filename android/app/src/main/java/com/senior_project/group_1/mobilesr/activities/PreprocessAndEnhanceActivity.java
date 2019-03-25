@@ -23,6 +23,7 @@ import com.senior_project.group_1.mobilesr.views.BitmapHelpers;
 import com.senior_project.group_1.mobilesr.views.DoubleClickListener;
 import com.senior_project.group_1.mobilesr.views.ZoomableImageView;
 import ru.dimorinny.floatingtextbutton.FloatingTextButton;
+import com.senior_project.group_1.mobilesr.views.OnSwipeTouchListener;
 
 import java.util.ArrayList;
 
@@ -38,7 +39,7 @@ public abstract class PreprocessAndEnhanceActivity extends AppCompatActivity {
 
     private boolean isPaused;
     protected ZoomableImageView imageView;
-    protected Button nextButton, prevButton;
+   // protected Button nextButton, prevButton;
     protected FloatingTextButton rotateButton, processButton,
             processAllButton, toggleButton, saveButton, shareButton;
     private ImageProcessingDialog dialog;
@@ -61,6 +62,17 @@ public abstract class PreprocessAndEnhanceActivity extends AppCompatActivity {
 
         imageView = findViewById(R.id.pick_photo_image_view);
 
+        imageView.setOnTouchListener(new OnSwipeTouchListener(this) {
+            @Override
+            public void onSwipeLeft() {
+                nextImage();
+            }
+            @Override
+            public void onSwipeRight() {
+                prevImage();
+            }
+        });
+
         rotateButton = findViewById(R.id.rotate_image_button);
         rotateButton.setEnabled(true);
         rotateButton.setOnClickListener(v -> imageView.rotate());
@@ -74,11 +86,11 @@ public abstract class PreprocessAndEnhanceActivity extends AppCompatActivity {
         processAllButton = findViewById(R.id.process_all_button);
         processAllButton.setOnClickListener(v -> processAllImages());
 
-        nextButton = findViewById(R.id.next_image_button);
+       /* nextButton = findViewById(R.id.next_image_button);
         nextButton.setOnClickListener(v -> nextImage());
 
         prevButton = findViewById(R.id.prev_image_button);
-        prevButton.setOnClickListener(v -> prevImage());
+        prevButton.setOnClickListener(v -> prevImage());*/
 
         toggleButton = findViewById(R.id.toggle_sr_button);
         toggleButton.setOnClickListener(v -> imageView.toggleSrDrawal());

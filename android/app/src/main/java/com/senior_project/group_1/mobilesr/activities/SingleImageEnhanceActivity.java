@@ -18,8 +18,8 @@ public class SingleImageEnhanceActivity extends PreprocessAndEnhanceActivity {
 
         // disable process all & prev & next
         processAllButton.setEnabled(false);
-        prevButton.setEnabled(false);
-        nextButton.setEnabled(false);
+        //prevButton.setEnabled(false);
+        //nextButton.setEnabled(false);
     }
 
     public void endImageProcessing(ArrayList<UserSelectedBitmapInfo> outputBitmapUris) {
