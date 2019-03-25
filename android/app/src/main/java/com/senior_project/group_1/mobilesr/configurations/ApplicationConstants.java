@@ -18,7 +18,4 @@ public final class ApplicationConstants {
     public static final int DOUBLE_TAP_FINGER_DISTANCE = 100; 
     // time delay between two consecutive tap events
     public static final int DOUBLE_TAP_DELAY = 300;
-
-    // Threshold distance for swipe event for x-axis
-    public static final float SWIPE_CONSTANT = 90.0f;
 }

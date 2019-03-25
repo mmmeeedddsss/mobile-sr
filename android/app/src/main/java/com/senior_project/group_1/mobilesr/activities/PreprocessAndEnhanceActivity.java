@@ -38,6 +38,7 @@ public abstract class PreprocessAndEnhanceActivity extends AppCompatActivity {
 
     private boolean isPaused;
     protected ZoomableImageView imageView;
+    protected Button nextButton, prevButton;
     protected FloatingTextButton rotateButton, processButton,
             processAllButton, toggleButton, saveButton, shareButton;
     private ImageProcessingDialog dialog;
@@ -73,18 +74,11 @@ public abstract class PreprocessAndEnhanceActivity extends AppCompatActivity {
         processAllButton = findViewById(R.id.process_all_button);
         processAllButton.setOnClickListener(v -> processAllImages());
 
+        nextButton = findViewById(R.id.next_image_button);
+        nextButton.setOnClickListener(v -> nextImage());
 
-        imageView.setSwipeListener(new ZoomableImageView.SwipeEventListener() {
-            @Override
-            public void swipeLeft() {
-              nextImage();
-            }
-
-            @Override
-            public void swipeRight() {
-              prevImage();
-            }
-        });
+        prevButton = findViewById(R.id.prev_image_button);
+        prevButton.setOnClickListener(v -> prevImage());
 
         toggleButton = findViewById(R.id.toggle_sr_button);
         toggleButton.setOnClickListener(v -> imageView.toggleSrDrawal());

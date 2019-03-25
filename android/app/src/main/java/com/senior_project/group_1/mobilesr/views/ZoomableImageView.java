@@ -52,12 +52,6 @@ public class ZoomableImageView extends AppCompatImageView {
     // distance between fingers to avoid taking pinch zoom as double tap mistakenly
     int tap_distance = ApplicationConstants.DOUBLE_TAP_FINGER_DISTANCE;
 
-    // Listener object
-    SwipeEventListener swipeListener;
-
-    // translation constant
-    float swipe_constant = ApplicationConstants.SWIPE_CONSTANT;
-
     // Constructors
     public ZoomableImageView(Context context) {
         super(context);
@@ -92,10 +86,6 @@ public class ZoomableImageView extends AppCompatImageView {
         generateSourceRectangle(bm.getWidth(), bm.getHeight());
 
         invalidate();
-    }
-
-    public void setSwipeListener(SwipeEventListener listener) {
-      this.swipeListener = listener;
     }
 
     /*
@@ -171,25 +161,6 @@ public class ZoomableImageView extends AppCompatImageView {
             case MotionEvent.ACTION_POINTER_UP:
             case MotionEvent.ACTION_UP: // User removed a finger from screen
                 current_pointer_count--;
-                // potentially trigger swipe event
-                if (zoom_factor == 1.0) {
-                    float last_x = e.getX(0);
-                    float x_translation = last_x-start_x;
-                    Log.d("MobileSR", "swipe with translation: "+x_translation);
-                    // a swipe will happen
-                    if (Math.abs(x_translation) >= swipe_constant) {
-                        if (x_translation > 0) {
-                            swipeListener.swipeRight();
-                            return true;
-                        }
-                        else {
-                            swipeListener.swipeLeft();
-                            return true;
-                        }
-                    }
-                    return true;
-
-                }
                 return true;
             case MotionEvent.ACTION_MOVE:
                 if( current_pointer_count == 1 ) { // If there is a one finger on screen, user is moving the image
@@ -200,7 +171,6 @@ public class ZoomableImageView extends AppCompatImageView {
                         // and current x,y
                         float x = e.getX(0);
                         float y = e.getY(0);
-
 
                         double translation_x = (x - px)*(BitmapHelpers.getWidth(src_rect)/(float) BitmapHelpers.getWidth(dest_rect))*movement_constant;
                         double translation_y = (y - py)*(BitmapHelpers.getWidth(src_rect)/(float) BitmapHelpers.getWidth(dest_rect))*movement_constant;
@@ -462,17 +432,5 @@ public class ZoomableImageView extends AppCompatImageView {
 
     public Bitmap getCurrentBitmap() {
         return BitmapHelpers.cropBitmapUsingSubselection(this.bm, src_rect);
-    }
-
-    // Listener for swipe events
-    // used for next and prev images
-    public interface SwipeEventListener {
-
-      // swipe left method
-      // for next image
-      public void swipeLeft();
-      // swipe right method
-      // for prev image
-      public void swipeRight();
     }
 }
