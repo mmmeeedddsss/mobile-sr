@@ -6,6 +6,7 @@ import tensorflow as tf
 from PIL import Image
 
 from data import *
+from schedulers import GoodfellowScheduler
 
 IMG_DIR = 'images'
 PRINT_EVERY = 25
@@ -66,7 +67,7 @@ if __name__ == '__main__':
     print('DISCRIMINATOR:')
     discriminator = build_discriminator_model()
     discriminator.compile(
-        optimizer=tf.keras.optimizers.Adam(lr=0.0005),
+        optimizer=tf.keras.optimizers.RMSprop(lr=0.0005),
         loss='binary_crossentropy',
         metrics=['accuracy'])
     discriminator.summary()
@@ -105,55 +106,56 @@ if __name__ == '__main__':
     N = train_images.shape[0]
     test_images, _ = get_test_set()
 
+    scheduler = GoodfellowScheduler(1) # train D k times, G once
     hb_size = BATCH_SIZE // 2
-    adv_loss, discr_loss = '?', '?'
+    adv_loss, discr_loss = np.NaN, np.NaN 
     step = 0
     saved_batch_count = 0
     discr_losses = []
     adv_losses = []
-    for ep in range(NUM_EPOCHS):
-        print('************************')
-        print('************************')
-        print(f'Epoch {ep}/{NUM_EPOCHS}')
-        i = 0
-        while i < N:
-            # create half a noise batch
-            noise_hbatch = get_noise_batch(hb_size)
-            # pass it through the generator to create a fake half-batch
-            fake_hbatch = generator.predict_on_batch(noise_hbatch)
-            fake_hlabels = np.zeros(hb_size)
-            # get a real mnist data half-batch
-            mnist_hbatch = train_images[i:i+hb_size, :, :, :]
-            mnist_hlabels = np.ones(hb_size)
-            # combine them and train the discriminator
-            discr_batch = np.concatenate((mnist_hbatch, fake_hbatch))
-            discr_labels = np.concatenate((mnist_hlabels, fake_hlabels))
-            # predict with the discriminator
-            _, discr_acc = discriminator.test_on_batch(discr_batch, discr_labels)
+    try:
+        for ep in range(NUM_EPOCHS):
+            print('************************')
+            print('************************')
+            print(f'Epoch {ep}/{NUM_EPOCHS}')
+            i = 0
+            while i < N:
+                if scheduler.train_discriminator():
+                    # create half a noise batch
+                    noise_hbatch = get_noise_batch(hb_size)
+                    # pass it through the generator to create a fake half-batch
+                    fake_hbatch = generator.predict_on_batch(noise_hbatch)
+                    fake_hlabels = np.zeros(hb_size)
+                    # get a real mnist data half-batch
+                    mnist_hbatch = train_images[i:i+hb_size, :, :, :]
+                    mnist_hlabels = np.ones(hb_size)
+                    # combine them and train the discriminator
+                    discr_batch = np.concatenate((mnist_hbatch, fake_hbatch))
+                    discr_labels = np.concatenate((mnist_hlabels, fake_hlabels))
+                    # train the discriminator
+                    discr_loss, discr_acc = discriminator.train_on_batch(discr_batch, discr_labels)
+                    # increment the batch counter
+                    i += hb_size 
+                else:
+                    # train the generator with a noise batch
+                    noise_batch = get_noise_batch(BATCH_SIZE)
+                    noise_labels = np.ones(BATCH_SIZE) # fake as real to train the generator
+                    adv_loss = combined.train_on_batch(noise_batch, noise_labels)
+               
+                if step % PRINT_EVERY == 0:
+                    print('-------------------------------------')
+                    print(f'Half-batch {i//hb_size}/{N//hb_size}')
+                    print(f'Discriminator loss: {discr_loss}')
+                    print(f'Discriminator accuracy: {discr_acc:.3f}')
+                    print(f'Adversarial loss: {adv_loss}')
+                    discr_losses.append(discr_loss)
+                    adv_losses.append(adv_loss)
 
-            # train either the discriminator or the generator
-            if discr_acc <= 0.5:
-                discr_loss, discr_acc = discriminator.train_on_batch(discr_batch, discr_labels)
-            else:
-                # train the generator with a noise batch
-                noise_batch = get_noise_batch(BATCH_SIZE)
-                noise_labels = np.ones(BATCH_SIZE) # fake as real to train the generator
-                adv_loss = combined.train_on_batch(noise_batch, noise_labels)
-           
-            if step % PRINT_EVERY == 0:
-                print('-------------------------------------')
-                print(f'Half-batch {i//hb_size}/{N//hb_size}')
-                print(f'Discriminator loss: {discr_loss}')
-                print(f'Discriminator accuracy: {discr_acc:.3f}')
-                print(f'Adversarial loss: {adv_loss}')
-                discr_losses.append(discr_loss)
-                adv_losses.append(adv_loss)
-
-            # increment the counters
-            i += hb_size 
-            step += 1
-        # save generator outputs after every epoch
-        save_imbatch(fake_hbatch, saved_batch_count, IMG_DIR)
-        saved_batch_count += 1
+                step += 1
+            # save generator outputs after every epoch
+            save_imbatch(fake_hbatch, saved_batch_count, IMG_DIR)
+            saved_batch_count += 1
+    except KeyboardInterrupt: # if training is interrupted, still save losses
+        pass
     # save the loss history to an npz file
     np.savez('losses.npz', discr_loss=np.array(discr_losses), adv_loss=np.array(adv_losses))
