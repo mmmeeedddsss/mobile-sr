@@ -47,7 +47,7 @@ public class ImageProcessingTask extends AsyncTask<ArrayList<UserSelectedBitmapI
         this.requestingActivity = requestingActivity;
         this.dialog = dialog;
         this.modelConfiguration = modelConfiguration;
-        this.notifManager = NotificationManagerCompat.from(requestingActivity);
+        //this.notifManager = NotificationManagerCompat.from(requestingActivity);
     }
 
 
@@ -101,7 +101,9 @@ public class ImageProcessingTask extends AsyncTask<ArrayList<UserSelectedBitmapI
             Bitmap bitmap = bitmapInfos.get(imgIndex).getBitmap();
             if(bitmap != null) {
                 // the bitmap was loaded successfully
+                Log.i("doInBackgrouund", "Image is send for division");
                 divideImage(bitmap);
+                Log.i("doInBackgrouund", "Division is done");
                 // processImages copy & paste
                 Bitmap[] bitmaps = new Bitmap[batchSize]; // buffer to hold input bitmaps
                 int i = 0, nchunks = chunkImages.size();
@@ -114,7 +116,10 @@ public class ImageProcessingTask extends AsyncTask<ArrayList<UserSelectedBitmapI
                         bitmaps[j++] = chunk;
                     }
                     // process the bitmaps
+                    Log.i("doInBackgrouund", "Process is called!");
+                    System.gc();
                     Bitmap[] outputBitmaps = bitmapProcessor.processBitmaps(bitmaps);
+                    Log.i("doInBackgrouund", "Process is end!");
                     // unload the bitmaps back into the list
                     int k = i;
                     while (j > 0)
@@ -168,6 +173,7 @@ public class ImageProcessingTask extends AsyncTask<ArrayList<UserSelectedBitmapI
                     .setProgress(100, imgProgress, false);
             notifManager.notify(NOTIF_ID, notifBuilder.build());
         }
+
     }
 
     protected void onPostExecute(ArrayList<UserSelectedBitmapInfo> results) {
