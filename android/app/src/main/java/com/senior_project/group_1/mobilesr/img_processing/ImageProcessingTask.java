@@ -47,7 +47,7 @@ public class ImageProcessingTask extends AsyncTask<ArrayList<UserSelectedBitmapI
         this.requestingActivity = requestingActivity;
         this.dialog = dialog;
         this.modelConfiguration = modelConfiguration;
-        //this.notifManager = NotificationManagerCompat.from(requestingActivity);
+        this.notifManager = NotificationManagerCompat.from(requestingActivity);
     }
 
 
