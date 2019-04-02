@@ -170,6 +170,12 @@ def parse_arguments():
         '-v',
         help='visualization for DATASET')
     parser.add_argument(
+        '--no-low-res', action='store_true',
+        help='use this if you already have LR images and don\'t want to create them again')
+    parser.add_argument(
+        '--no-sr', action='store_true',
+        help='use this if you already have SR\'ed images and don\'t want to create them again')
+    parser.add_argument(
         '-c',
         help='compare with file')
     args = parser.parse_args()
@@ -188,9 +194,12 @@ if __name__ == '__main__':
     model_path = args.s
   if args.e:
     extension = args.e
-  create_low_res(args.dataset_path)
-  apply_SR(args.dataset_path)
-  os.system('mv sr-images/* ' + args.dataset_path + '; rmdir sr-images')
+  if not args.no_low_res:
+    create_low_res(args.dataset_path)
+  if not args.no_sr:
+    apply_SR(args.dataset_path)
+  if not args.no_sr:
+    os.system('mv sr-images/* ' + args.dataset_path + '; rmdir sr-images')
 
   header = '\t{}\t{}\t{}'.format('Set5', 'Set14', 'BSD100')
   if not args.m == 'ssim':
