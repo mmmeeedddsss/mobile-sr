@@ -188,7 +188,7 @@ if __name__ == '__main__':
     model_path = args.s
   if args.e:
     extension = args.e
-  #create_low_res(path)
+  create_low_res(args.dataset_path)
   apply_SR(args.dataset_path)
   os.system('mv sr-images/* ' + args.dataset_path + '; rmdir sr-images')
 
