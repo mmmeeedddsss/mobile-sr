@@ -31,7 +31,10 @@
             </intent-filter>
         </activity>
         <activity android:name=".activities.SingleImageEnhanceActivity" />
-        <activity android:name=".activities.MultipleImageEnhanceActivity" />
+        <activity
+            android:name=".activities.MultipleImageEnhanceActivity"
+            android:launchMode="singleTask"
+            />
         <activity android:name=".activities.TutorialActivity" />
         <activity android:name=".activities.DivideImageActivity" />
         <activity android:name=".activities.MergeImageActivity" />

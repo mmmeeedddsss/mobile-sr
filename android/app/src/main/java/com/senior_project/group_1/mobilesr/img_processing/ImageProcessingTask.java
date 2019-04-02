@@ -2,7 +2,6 @@ package com.senior_project.group_1.mobilesr.img_processing;
 
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
-import android.net.Uri;
 import android.os.AsyncTask;
 import android.support.v4.app.NotificationCompat;
 import android.support.v4.app.NotificationManagerCompat;
@@ -10,12 +9,10 @@ import android.util.Log;
 import android.widget.Toast;
 
 import com.senior_project.group_1.mobilesr.R;
-import com.senior_project.group_1.mobilesr.UserSelectedBitmapInfo;
 import com.senior_project.group_1.mobilesr.configurations.ApplicationConstants;
 import com.senior_project.group_1.mobilesr.BuildConfig;
 import com.senior_project.group_1.mobilesr.configurations.SRModelConfiguration;
 import com.senior_project.group_1.mobilesr.activities.PreprocessAndEnhanceActivity;
-import com.senior_project.group_1.mobilesr.views.BitmapHelpers;
 
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -152,6 +149,7 @@ public class ImageProcessingTask extends AsyncTask<ArrayList<UserSelectedBitmapI
         // set a proper title string for the dialog/notification
         // cannot 'cache' the string, since I do not want to call
         // format('superres in progress', imgsDone, numImages)
+        Log.i("ImageProcessingTask.onProgressPudate", String.format("Progress : %d", imgProgress));
         String titleString = numImages == 0 ?
                 "Superresolution in progress..." :
                 String.format("Superresolving image %d/%d", imgsDone + 1, numImages);

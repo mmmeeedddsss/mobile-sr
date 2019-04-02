@@ -7,9 +7,8 @@ import android.graphics.Paint;
 import android.graphics.PointF;
 import android.graphics.Rect;
 import android.graphics.RectF;
-import android.util.Log;
 
-import com.senior_project.group_1.mobilesr.configurations.ApplicationConstants;
+import com.senior_project.group_1.mobilesr.img_processing.BitmapHelpers;
 
 public class ProcessedBitmapViewInfo {
     Bitmap processedBitmap; // processed picture bitmap

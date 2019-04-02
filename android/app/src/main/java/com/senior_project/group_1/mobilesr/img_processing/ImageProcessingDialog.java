@@ -1,7 +1,10 @@
 package com.senior_project.group_1.mobilesr.img_processing;
 
 import android.app.Dialog;
+import android.graphics.Rect;
 import android.os.Bundle;
+import android.util.Log;
+import android.view.MotionEvent;
 import android.view.View;
 import android.view.Window;
 import android.widget.Button;
@@ -38,5 +41,23 @@ public class ImageProcessingDialog extends Dialog {
     public void updateProgressBar(String text, int i) {
         textView.setText(text);
         pbar.setProgress(i);
+    }
+
+    @Override
+    public boolean onTouchEvent(MotionEvent event) {
+        Log.i("Dialog.onTouchEvent", ""+event.getAction());
+
+        if ( event.getAction () == MotionEvent.ACTION_DOWN ) {
+            Rect r = new Rect( 0, 0, 0, 0 );
+            this.getWindow ().getDecorView ().getHitRect ( r );
+            boolean intersects = r.contains ( (int) event.getX(), (int) event.getY() );
+            if ( !intersects ) {
+                this.creator.cancelImageProcessing();
+                this.dismiss();
+                return true;
+            }
+        }
+        // let the system handle the event
+        return super.onTouchEvent( event );
     }
 }
