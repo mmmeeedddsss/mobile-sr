@@ -14,6 +14,31 @@ set14_range = (1, 15)
 bsd100_range = (1, 101)
 extension = '-sr'
 model_path = './saved-model/'
+path = './'
+
+
+# normalizes the path
+# replaces the path variable, default = './'
+# with the path in which the script is being called
+def normalize_path():
+  this_file = sys.argv[0]
+
+  # find slash character
+  idx_delim = len(this_file)-1
+  for i in range(idx_delim, 0, -1):
+    if this_file[i] == '/':
+      idx_delim = i
+      break
+
+  # not found a slash character
+  # current directory case
+  if idx_delim == len(this_file)-1:
+    path = './'
+  else:
+  # replace path with the directory 
+  # in which the script is being called
+    path = this_file[:idx_delim+1]
+  return path
 
 def cmd_for_downscale(file_path):
   new_path = file_path[:-4] + '_LR.png'
@@ -35,7 +60,8 @@ def create_low_res(path, set5_flag=True, set14_flag=True, bsd100_flag=True):
       subprocess.call(cmd_for_downscale(path+'/BSD100_{}.png'.format(i)), shell=True)
 
 def cmd_for_SR(file_paths):
-  cmd = 'python superresolve.py ' + model_path + ' ' + ' '.join(file_paths)
+  sr_scr_path = path + 'superresolve.py'
+  cmd = 'python ' + sr_scr_path + ' ' + model_path + ' ' + ' '.join(file_paths)
   return cmd
 
 # apply super resolution to images in the Low-Resolution domain
@@ -153,6 +179,10 @@ def parse_arguments():
     return args
 
 if __name__ == '__main__':
+  # replace the path with the directory
+  # in which the script is being called
+  # if necessary
+  path = normalize_path()
   args = parse_arguments()
   if args.s:
     model_path = args.s
