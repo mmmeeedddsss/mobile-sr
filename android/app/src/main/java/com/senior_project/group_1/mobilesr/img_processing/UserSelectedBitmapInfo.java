@@ -1,10 +1,8 @@
-package com.senior_project.group_1.mobilesr;
+package com.senior_project.group_1.mobilesr.img_processing;
 
 import android.content.ContentResolver;
 import android.graphics.Bitmap;
 import android.net.Uri;
-
-import com.senior_project.group_1.mobilesr.views.BitmapHelpers;
 
 public class UserSelectedBitmapInfo {
     private Uri nonProcessedUri, processedUri;

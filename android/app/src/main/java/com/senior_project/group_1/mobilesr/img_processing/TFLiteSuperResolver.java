@@ -161,6 +161,8 @@ public class TFLiteSuperResolver implements BitmapProcessor {
         // reset the buffer
         inputTensorData.rewind();
         for(final Bitmap bitmap : bitmaps) {
+            if(bitmap == null)
+                continue;
             // read the bitmap into the integer array
             bitmap.getPixels(inputImagePixels, 0, bitmap.getWidth(), 0, 0, INPUT_IMAGE_WIDTH, INPUT_IMAGE_HEIGHT);
             // rescale the bitmap if necessary, else the two arrays are the same

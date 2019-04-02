@@ -22,12 +22,11 @@ import android.widget.Toast;
 import com.senior_project.group_1.mobilesr.configurations.ApplicationConstants;
 import com.senior_project.group_1.mobilesr.R;
 import com.senior_project.group_1.mobilesr.configurations.SRModelConfigurationManager;
-import com.senior_project.group_1.mobilesr.views.BitmapHelpers;
+import com.senior_project.group_1.mobilesr.img_processing.BitmapHelpers;
 
 import java.io.File;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.nio.channels.FileChannel;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.FileNotFoundException;
