@@ -1,4 +1,4 @@
-package com.senior_project.group_1.mobilesr.views;
+package com.senior_project.group_1.mobilesr.img_processing;
 
 import android.content.ContentResolver;
 import android.content.Context;
@@ -11,17 +11,14 @@ import android.os.Environment;
 import android.provider.MediaStore;
 import android.util.Log;
 
-import com.senior_project.group_1.mobilesr.UserSelectedBitmapInfo;
 import com.senior_project.group_1.mobilesr.configurations.ApplicationConstants;
 import com.senior_project.group_1.mobilesr.configurations.SRModelConfigurationManager;
+import com.senior_project.group_1.mobilesr.views.GenericFileProvider;
 
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.InputStream;
 import java.security.MessageDigest;
-import java.sql.Array;
 import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Comparator;
@@ -316,11 +313,15 @@ public class BitmapHelpers {
         return folderSize;
     }
 
-    public static Uri saveImageToCache(UserSelectedBitmapInfo bmInfo, Context context) {
-        Uri processedUri = saveImage(bmInfo.getBitmap(), context, getCacheFolder(),
-                getMD5DigestOfFile(bmInfo.getNonProcessedUri()));
-        bmInfo.setProcessedUri(processedUri);
-        return processedUri;
+    public static void saveImageToCache(UserSelectedBitmapInfo bmInfo, Context context) {
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                Uri processedUri = saveImage(bmInfo.getBitmap(), context, getCacheFolder(),
+                        getMD5DigestOfFile(bmInfo.getNonProcessedUri()));
+                bmInfo.setProcessedUri(processedUri);
+            }
+        }).start();
     }
 
     public static Uri saveImageToTemp(Bitmap bm, Context context) {

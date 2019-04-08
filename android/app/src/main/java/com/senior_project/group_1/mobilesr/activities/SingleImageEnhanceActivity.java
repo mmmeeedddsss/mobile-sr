@@ -1,12 +1,9 @@
 package com.senior_project.group_1.mobilesr.activities;
 
-import android.graphics.Bitmap;
-import android.net.Uri;
 import android.os.Bundle;
 
 import com.senior_project.group_1.mobilesr.BuildConfig;
-import com.senior_project.group_1.mobilesr.UserSelectedBitmapInfo;
-import com.senior_project.group_1.mobilesr.views.BitmapHelpers;
+import com.senior_project.group_1.mobilesr.img_processing.UserSelectedBitmapInfo;
 
 import java.util.ArrayList;
 

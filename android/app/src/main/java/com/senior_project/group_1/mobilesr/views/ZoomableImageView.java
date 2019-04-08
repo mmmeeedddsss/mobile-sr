@@ -14,6 +14,7 @@ import android.util.Log;
 import android.view.MotionEvent;
 
 import com.senior_project.group_1.mobilesr.configurations.ApplicationConstants;
+import com.senior_project.group_1.mobilesr.img_processing.BitmapHelpers;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -310,10 +311,10 @@ public class ZoomableImageView extends AppCompatImageView {
 
     private void iterateCenterOfZoom()
     {
-        center_of_zoom_x += (center_of_zoom_x_tba - center_of_zoom_x);
-        center_of_zoom_y += (center_of_zoom_y_tba - center_of_zoom_y);
-        center_of_zoom_x_tba -= (center_of_zoom_x_tba - center_of_zoom_x)/10;
-        center_of_zoom_y_tba -= (center_of_zoom_y_tba - center_of_zoom_y)/10;
+        center_of_zoom_x += (center_of_zoom_x_tba - center_of_zoom_x)/10.0;
+        center_of_zoom_y += (center_of_zoom_y_tba - center_of_zoom_y)/10.0;
+        center_of_zoom_x_tba -= (center_of_zoom_x_tba - center_of_zoom_x)/10.0;
+        center_of_zoom_y_tba -= (center_of_zoom_y_tba - center_of_zoom_y)/10.0;
     }
 
     private Rect generateSourceRectangle(int src_width, int src_height){

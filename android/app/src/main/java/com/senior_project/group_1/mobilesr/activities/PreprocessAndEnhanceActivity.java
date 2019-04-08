@@ -9,18 +9,15 @@ import android.support.design.widget.FloatingActionButton;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.View;
-import android.widget.Button;
-import android.view.View;
 
 import com.senior_project.group_1.mobilesr.BuildConfig;
-import com.senior_project.group_1.mobilesr.UserSelectedBitmapInfo;
+import com.senior_project.group_1.mobilesr.img_processing.UserSelectedBitmapInfo;
 import com.senior_project.group_1.mobilesr.img_processing.ImageProcessingDialog;
 import com.senior_project.group_1.mobilesr.img_processing.ImageProcessingTask;
 import com.senior_project.group_1.mobilesr.R;
 import com.senior_project.group_1.mobilesr.configurations.SRModelConfiguration;
 import com.senior_project.group_1.mobilesr.configurations.SRModelConfigurationManager;
-import com.senior_project.group_1.mobilesr.views.BitmapHelpers;
-import com.senior_project.group_1.mobilesr.views.DoubleClickListener;
+import com.senior_project.group_1.mobilesr.img_processing.BitmapHelpers;
 import com.senior_project.group_1.mobilesr.views.ZoomableImageView;
 import ru.dimorinny.floatingtextbutton.FloatingTextButton;
 
@@ -47,6 +44,7 @@ public abstract class PreprocessAndEnhanceActivity extends AppCompatActivity {
     protected int imgIndex;
 
     private boolean isFABOpen = false;
+    private boolean notProcessedYet = true;
 
     @Override
     public void onCreate(Bundle savedInstance) {
@@ -129,6 +127,13 @@ public abstract class PreprocessAndEnhanceActivity extends AppCompatActivity {
     }
 
     private void processImages( ArrayList<UserSelectedBitmapInfo> bmInfos ) {
+        try {
+            notProcessedYet = false;
+            toggleFabs();
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+
         SRModelConfiguration modelConfiguration = SRModelConfigurationManager.getCurrentConfiguration();
         dialog = new ImageProcessingDialog(this);
         dialog.show();
@@ -179,6 +184,7 @@ public abstract class PreprocessAndEnhanceActivity extends AppCompatActivity {
 
     // called by imageprocessingdialog
     public void cancelImageProcessing() {
+        Log.i("PreprocessAndEnhanceAct", "Cancel task is called !");
         if(BuildConfig.DEBUG && imageProcessingTask == null)
             throw new AssertionError();
         imageProcessingTask.cancel(true);
@@ -191,8 +197,13 @@ public abstract class PreprocessAndEnhanceActivity extends AppCompatActivity {
     // call after cancellation/end
     protected void cleanUpTask() {
         imageProcessingTask = null;
-        dialog.dismiss();
-        dialog = null;
+        try {
+            dialog.dismiss();
+            dialog = null;
+        } catch (Exception ex)
+        {
+            Log.i("PreprocessAndEnhanceAct.cleanup_task", ex.getMessage());
+        }
     }
 
     protected void refreshImage() {
@@ -237,7 +248,7 @@ public abstract class PreprocessAndEnhanceActivity extends AppCompatActivity {
             toggleButton.setVisibility(View.VISIBLE);
             saveButton.setVisibility(View.VISIBLE);
             shareButton.setVisibility(View.VISIBLE);
-            rotateButton.setVisibility(View.VISIBLE);
+            if( notProcessedYet ) rotateButton.setVisibility(View.VISIBLE);
 
             processButton.animate().translationY(-getResources().getDimension(R.dimen.padding)-offsetFromBottom);
             processAllButton.animate().translationY(-getResources().getDimension(R.dimen.padding)*2-offsetFromBottom);
