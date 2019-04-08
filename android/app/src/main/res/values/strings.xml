@@ -38,14 +38,4 @@
 
     <string name="title_parallel_batch_number">Parallel Batch Number</string>
     <string name="pref_default_parallel_batch_number">2</string>
-    <string-array name="parallel_batch_number_list_titles">
-        <item>2</item>
-        <item>7</item>
-        <item>30</item>
-    </string-array>
-    <string-array name="parallel_batch_number_list_values">
-        <item>2</item>
-        <item>7</item>
-        <item>30</item>
-    </string-array>
 </resources>

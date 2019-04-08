@@ -171,6 +171,7 @@ public class SettingsActivity2 extends AppCompatPreferenceActivity {
             bindPreferenceSummaryToValue(findPreference("input_image_width"));
             bindPreferenceSummaryToValue(findPreference("input_image_height"));
             bindPreferenceSummaryToValue(findPreference("rescaling_factor"));
+            bindPreferenceSummaryToValue(findPreference("parallel_batch_number"));
         }
 
         @Override
