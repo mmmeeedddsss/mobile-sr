@@ -39,6 +39,7 @@
         <activity android:name=".activities.DivideImageActivity" />
         <activity android:name=".activities.MergeImageActivity" />
         <activity android:name=".activities.SettingsActivity" />
+        <activity android:name=".activities.ExampleServerPage" />
 
         <provider
             android:name=".views.GenericFileProvider"

@@ -35,11 +35,13 @@ import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
+
 public class MainActivity extends AppCompatActivity {
     static final int REQUEST_IMAGE_CAPTURE = 111;
     static final int REQUEST_IMAGE_SELECT = 112;
 
     Button pickPhotoButton, takePhotoButton, settingsButton, settingsButton2, tutorialButton;
+    Button tcpTestButton;
     private Uri mImageUri;
 
     @Override
@@ -107,6 +109,18 @@ public class MainActivity extends AppCompatActivity {
                 startActivity(tutorialIntent);
             }
         });
+
+
+        tcpTestButton = (Button) findViewById(R.id.tcpTestButton);
+
+        tcpTestButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent serverStartIntent = new Intent(MainActivity.this, ExampleServerPage.class);
+                startActivity(serverStartIntent);
+            }
+        });
+
 
         try { // Load configuration xml
             File root = android.os.Environment.getExternalStorageDirectory();
