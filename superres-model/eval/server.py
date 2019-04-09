@@ -22,7 +22,9 @@ def parse_arguments():
   return args
 
 def process():
-  proc = subprocess.Popen(["python", 'superresolve.py', '../saved-model', 'low_res_image.png'], stdout=subprocess.PIPE,stderr=subprocess.PIPE)
+  proc = subprocess.Popen(["python", 'superresolve.py',
+    '../saved-model', 'low_res_image.png'],
+    stdout=subprocess.PIPE,stderr=subprocess.PIPE)
   (out, err) = proc.communicate()
   return err
 
@@ -59,6 +61,8 @@ try:
     print(err)
   with open('sr-images/low_res_image-sr.png', 'rb') as srData:
     buff = srData.read()
+    srSize = '%10s' % str(len(buff))
+    clientSock.send(srSize)
     clientSock.send(buff)
   os.system('rm -rf sr-images')
 finally:
