@@ -21,6 +21,7 @@ import android.widget.Toast;
 
 import com.senior_project.group_1.mobilesr.configurations.ApplicationConstants;
 import com.senior_project.group_1.mobilesr.R;
+import com.senior_project.group_1.mobilesr.configurations.SRModelConfiguration;
 import com.senior_project.group_1.mobilesr.configurations.SRModelConfigurationManager;
 import com.senior_project.group_1.mobilesr.img_processing.BitmapHelpers;
 
@@ -170,6 +171,7 @@ public class MainActivity extends AppCompatActivity {
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        Log.i("onActivityResult","SRModelConfigurationManager.getCurrentConfiguration().isRemote() = "+SRModelConfigurationManager.getCurrentConfiguration().isRemote());
         ClipData imageClipData = null;
         if( resultCode == RESULT_OK ) {
             Intent pickPhotoIntent = null;
@@ -183,20 +185,31 @@ public class MainActivity extends AppCompatActivity {
                 ClipData.Item item = new ClipData.Item(mImageUri);
                 imageClipData = new ClipData(description, item);
                 // create a single image intent
-                pickPhotoIntent = new Intent(MainActivity.this,
-                        SingleImageEnhanceActivity.class);
+                if(SRModelConfigurationManager.getCurrentConfiguration().isRemote()) {
+                    pickPhotoIntent = new Intent(MainActivity.this,
+                            RemoteImageEnhanceActivity.class);
+                }
+                else {
+                    pickPhotoIntent = new Intent(MainActivity.this,
+                            SingleImageEnhanceActivity.class);
+                }
             }
             else if (requestCode == REQUEST_IMAGE_SELECT) {
                 // start the proper activity depending on the number of selected photos
                 imageClipData = data.getClipData();
                 Log.i("Clipdata info:", imageClipData.getDescription().getLabel() + "---" + imageClipData.getDescription().getMimeType(0));
-                if(imageClipData.getItemCount() == 1) { // one photo was picked
+                if(SRModelConfigurationManager.getCurrentConfiguration().isRemote()) {
                     pickPhotoIntent = new Intent(MainActivity.this,
-                            SingleImageEnhanceActivity.class);
+                            RemoteImageEnhanceActivity.class);
                 }
-                else { // more than one photo was picked
-                    pickPhotoIntent = new Intent(MainActivity.this,
-                            MultipleImageEnhanceActivity.class);
+                else {
+                    if (imageClipData.getItemCount() == 1) { // one photo was picked
+                        pickPhotoIntent = new Intent(MainActivity.this,
+                                SingleImageEnhanceActivity.class);
+                    } else { // more than one photo was picked
+                        pickPhotoIntent = new Intent(MainActivity.this,
+                                MultipleImageEnhanceActivity.class);
+                    }
                 }
             }
             pickPhotoIntent.putExtra("imageClipData", imageClipData);

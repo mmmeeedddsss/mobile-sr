@@ -13,6 +13,7 @@ public class SRModelConfiguration{
     private int INPUT_IMAGE_WIDTH;
     private int INPUT_IMAGE_HEIGHT;
     private int NUM_PARALLEL_BATCH;
+    private boolean REMOTE;
 
     public String getModelName() { return MODEL_NAME; }
     public String getModelPath(){
@@ -83,5 +84,13 @@ public class SRModelConfiguration{
     @Override
     public String toString() {
         return String.format(Locale.ENGLISH, "Model: %s, parellel_batch: %d",getModelName(), getNumParallelBatch());
+    }
+
+    public boolean isRemote() {
+        return REMOTE;
+    }
+
+    public void setRemote(boolean remote) {
+        this.REMOTE = remote;
     }
 }

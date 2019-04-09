@@ -91,6 +91,9 @@ public class SRModelConfigurationManager {
                     case "num_parallel_batch":
                         newConfiguration.setNumParallelBatch(Integer.parseInt(parser.nextText()));
                         break;
+                    case "remote":
+                        newConfiguration.setRemote( Boolean.parseBoolean(parser.nextText()) );
+                        break;
                     case "default_selection":
                         if( Boolean.parseBoolean( parser.nextText() ) )
                             currentConfiguration = newConfiguration;
