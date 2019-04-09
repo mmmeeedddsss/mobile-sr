@@ -11,6 +11,7 @@ import android.util.Log;
 import android.view.View;
 
 import com.senior_project.group_1.mobilesr.BuildConfig;
+import com.senior_project.group_1.mobilesr.img_processing.ImageProcessingTask;
 import com.senior_project.group_1.mobilesr.img_processing.UserSelectedBitmapInfo;
 import com.senior_project.group_1.mobilesr.img_processing.ImageProcessingDialog;
 import com.senior_project.group_1.mobilesr.img_processing.LocalImageProcessingTask;
@@ -38,7 +39,7 @@ public abstract class PreprocessAndEnhanceActivity extends AppCompatActivity {
     protected FloatingTextButton rotateButton, processButton,
             processAllButton, toggleButton, saveButton, shareButton;
     protected ImageProcessingDialog dialog;
-    protected LocalImageProcessingTask localImageProcessingTask;
+    protected ImageProcessingTask imageProcessingTask;
     protected  ArrayList<UserSelectedBitmapInfo> bitmapInfos;
     protected int numImages;
     protected int imgIndex;
@@ -124,6 +125,7 @@ public abstract class PreprocessAndEnhanceActivity extends AppCompatActivity {
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
+        dialog = new ImageProcessingDialog(this);
     }
 
     protected void processImages( ArrayList<UserSelectedBitmapInfo> bmInfos ) {
@@ -133,12 +135,8 @@ public abstract class PreprocessAndEnhanceActivity extends AppCompatActivity {
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
-
-        SRModelConfiguration modelConfiguration = SRModelConfigurationManager.getCurrentConfiguration();
-        dialog = new ImageProcessingDialog(this);
         dialog.show();
-        localImageProcessingTask = new LocalImageProcessingTask(this, dialog, modelConfiguration);
-        localImageProcessingTask.execute(bmInfos);
+        imageProcessingTask.execute(bmInfos);
     }
 
     private void processImage() {
@@ -185,9 +183,9 @@ public abstract class PreprocessAndEnhanceActivity extends AppCompatActivity {
     // called by imageprocessingdialog
     public void cancelImageProcessing() {
         Log.i("PreprocessAndEnhanceAct", "Cancel task is called !");
-        if(BuildConfig.DEBUG && localImageProcessingTask == null)
+        if(BuildConfig.DEBUG && imageProcessingTask == null)
             throw new AssertionError();
-        localImageProcessingTask.cancel(true);
+        imageProcessingTask.cancel(true);
         cleanUpTask();
     }
 
@@ -196,7 +194,7 @@ public abstract class PreprocessAndEnhanceActivity extends AppCompatActivity {
 
     // call after cancellation/end
     protected void cleanUpTask() {
-        localImageProcessingTask = null;
+        imageProcessingTask = null;
         try {
             dialog.dismiss();
             dialog = null;

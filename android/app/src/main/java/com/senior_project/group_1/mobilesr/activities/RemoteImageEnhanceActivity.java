@@ -7,7 +7,7 @@ import com.senior_project.group_1.mobilesr.configurations.SRModelConfiguration;
 import com.senior_project.group_1.mobilesr.configurations.SRModelConfigurationManager;
 import com.senior_project.group_1.mobilesr.img_processing.BitmapHelpers;
 import com.senior_project.group_1.mobilesr.img_processing.ImageProcessingDialog;
-import com.senior_project.group_1.mobilesr.img_processing.LocalImageProcessingTask;
+import com.senior_project.group_1.mobilesr.img_processing.RemoteImageProcessingTask;
 import com.senior_project.group_1.mobilesr.img_processing.UserSelectedBitmapInfo;
 import java.util.ArrayList;
 
@@ -18,6 +18,8 @@ public class RemoteImageEnhanceActivity extends PreprocessAndEnhanceActivity {
         super.onCreate(savedInstance);
         // Overriding processAll Button, currently( also probably in future too )
         // Remote processing only a
+        SRModelConfiguration modelConfiguration = SRModelConfigurationManager.getCurrentConfiguration();
+        imageProcessingTask = new RemoteImageProcessingTask(this, dialog, modelConfiguration);
         processButton.setOnClickListener(v -> {
             processAllImages();
             rotateButton.setEnabled(false);
@@ -49,12 +51,11 @@ public class RemoteImageEnhanceActivity extends PreprocessAndEnhanceActivity {
             e.printStackTrace();
         }
 
-        SRModelConfiguration modelConfiguration = SRModelConfigurationManager.getCurrentConfiguration();
+
         dialog = new ImageProcessingDialog(this);
         dialog.show();
-        localImageProcessingTask = new LocalImageProcessingTask(this, dialog, modelConfiguration);
-        localImageProcessingTask.execute(bmInfos);
 
+        imageProcessingTask.execute(bmInfos);
 
         // TODO fill here with server communication
 
