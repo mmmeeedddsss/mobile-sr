@@ -8,6 +8,7 @@ from PIL import Image
 from data import *
 from schedulers import GoodfellowScheduler
 
+LATENT_SIZE = 100
 IMG_DIR = 'images'
 PRINT_EVERY = 25
 PRETRAIN_DISCR = False
@@ -40,19 +41,15 @@ def build_discriminator_model():
     model = tf.keras.Model(inputs=inputs, outputs=predictions)
     return model
 
-def build_generator_model():
+def build_generator_model(latent_size):
     # once again, use the Keras functional API
-    inputs = tf.keras.layers.Input(shape=(28, 28, 1))
-    x = tf.keras.layers.Conv2D(32, 3, 1, 'same', activation=tf.nn.leaky_relu)(inputs)
-    x = tf.keras.layers.MaxPool2D(2, padding='same')(x)
-    x = tf.keras.layers.Conv2D(64, 3, 1, 'same', activation=tf.nn.leaky_relu)(x)
-    x = tf.keras.layers.MaxPool2D(2, padding='same')(x)
-    x = tf.keras.layers.Conv2D(128, 3, 1, 'same', activation=tf.nn.leaky_relu)(x)
+    inputs = tf.keras.layers.Input(shape=(latent_size,))
+    x = tf.keras.layers.Dense(7 * 7 * 256, activation=tf.nn.leaky_relu)(inputs) # dense layer 
+    x = tf.keras.layers.Reshape((7, 7, 256))(x) # reshape to 3D
+    # upsample to 14x14x256
     x = tf.keras.layers.Conv2DTranspose(128, 3, 2, 'same', activation=tf.nn.leaky_relu)(x)
-    x = tf.keras.layers.Conv2D(64, 3, 1, 'same', activation=tf.nn.leaky_relu)(x)
-    x = tf.keras.layers.Conv2DTranspose(64, 3, 2, 'same', activation=tf.nn.leaky_relu)(x)
-    x = tf.keras.layers.Conv2D(32, 3, 1, 'same', activation=tf.nn.leaky_relu)(x)
-    output = tf.keras.layers.Conv2D(1, 3, 1, 'same', activation=tf.nn.leaky_relu)(x)
+    # upsample to 28x28x1
+    output = tf.keras.layers.Conv2DTranspose(1, 3, 2, 'same', activation=tf.nn.leaky_relu)(x)
     # create the model, no need to compile yet
     model = tf.keras.Model(inputs=inputs, outputs=output)
     return model
@@ -74,11 +71,11 @@ if __name__ == '__main__':
     
     # get the generator
     print('GENERATOR:')
-    generator = build_generator_model()
+    generator = build_generator_model(LATENT_SIZE)
     generator.summary()
 
     # create a gan by combining both
-    noise_input = tf.keras.layers.Input(shape=(28, 28, 1)) # create noise
+    noise_input = tf.keras.layers.Input(shape=(LATENT_SIZE,)) # input noise
     fake_img = generator(noise_input) # pass it through the generator
     discriminator.trainable = False # make the discriminator untrainable for the GAN
     discr_fake_pred = discriminator(fake_img) # pass the fake img through the discriminator
@@ -122,7 +119,7 @@ if __name__ == '__main__':
             while i < N:
                 if scheduler.train_discriminator():
                     # create half a noise batch
-                    noise_hbatch = get_noise_batch(hb_size)
+                    noise_hbatch = get_noise_batch(hb_size, LATENT_SIZE)
                     # pass it through the generator to create a fake half-batch
                     fake_hbatch = generator.predict_on_batch(noise_hbatch)
                     fake_hlabels = np.zeros(hb_size)
@@ -138,7 +135,7 @@ if __name__ == '__main__':
                     i += hb_size 
                 else:
                     # train the generator with a noise batch
-                    noise_batch = get_noise_batch(BATCH_SIZE)
+                    noise_batch = get_noise_batch(BATCH_SIZE, LATENT_SIZE)
                     noise_labels = np.ones(BATCH_SIZE) # fake as real to train the generator
                     adv_loss = combined.train_on_batch(noise_batch, noise_labels)
                
