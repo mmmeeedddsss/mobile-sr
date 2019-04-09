@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
     package="com.senior_project.group_1.mobilesr">
 
     <uses-feature
@@ -14,7 +15,8 @@
         android:label="@string/app_name"
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
-        android:theme="@style/AppTheme">
+        android:theme="@style/AppTheme"
+        tools:ignore="GoogleAppIndexingWarning">
         <activity
             android:name=".activities.SettingsActivity2"
             android:label="@string/title_activity_settings2"
@@ -31,6 +33,7 @@
             </intent-filter>
         </activity>
         <activity android:name=".activities.SingleImageEnhanceActivity" />
+        <activity android:name=".activities.RemoteImageEnhanceActivity" />
         <activity
             android:name=".activities.MultipleImageEnhanceActivity"
             android:launchMode="singleTask"
