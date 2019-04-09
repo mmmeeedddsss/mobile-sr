@@ -110,6 +110,8 @@ public class MainActivity extends AppCompatActivity {
         try { // Load configuration xml
             File root = android.os.Environment.getExternalStorageDirectory();
             File file = new File(root.getAbsolutePath(), "sr_model_configurations.xml");
+            if( file.exists() )
+                file.delete(); // TODO remove on production
             if (!file.exists())
             {
                 InputStream inConfig = getAssets().open(ApplicationConstants.CONFIGURATION_FILE_NAME);
