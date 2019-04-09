@@ -36,37 +36,37 @@ if __name__ == '__main__':
     port = int(args.port)
   addr = (ip, port)
 
-sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-sock.bind(addr)
-sock.listen(1)
+  sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+  sock.bind(addr)
+  sock.listen(1)
 
-print('Listening on: ' + str(addr))
+  print('Listening on: ' + str(addr))
 
-try:
-  clientSock, clientAddr = sock.accept()
-  imageSize = int(clientSock.recv(10))
-  print('Reading ' + str(imageSize) + ' bytes of data')
-  imageData = ""
-  readData = clientSock.recv(4096)
-  while True:
-    imageData += readData
-    if len(imageData) == imageSize:
-      break
+  try:
+    clientSock, clientAddr = sock.accept()
+    imageSize = int(clientSock.recv(10))
+    print('Reading ' + str(imageSize) + ' bytes of data')
+    imageData = ""
     readData = clientSock.recv(4096)
-  print(str(len(imageData)) + ' bytes read')
-  with open('low_res_image.png', 'wb') as f:
-    f.write(imageData)
-  err = process()
-  if err and args.verbose:
-    print(err)
-  with open('sr-images/low_res_image-sr.png', 'rb') as srData:
-    buff = srData.read()
-    srSize = '%10s' % str(len(buff))
-    clientSock.send(srSize)
-    clientSock.send(buff)
-  os.system('rm -rf sr-images')
-finally:
-  print('Closing connection...')
-  clientSock.close()
-  sock.close()
-  sys.exit()
+    while True:
+      imageData += readData
+      if len(imageData) == imageSize:
+        break
+      readData = clientSock.recv(4096)
+    print(str(len(imageData)) + ' bytes read')
+    with open('low_res_image.png', 'wb') as f:
+      f.write(imageData)
+    err = process()
+    if err and args.verbose:
+      print(err)
+    with open('sr-images/low_res_image-sr.png', 'rb') as srData:
+      buff = srData.read()
+      srSize = '%10s' % str(len(buff))
+      clientSock.send(srSize)
+      clientSock.send(buff)
+    os.system('rm -rf sr-images')
+  finally:
+    print('Closing connection...')
+    clientSock.close()
+    sock.close()
+    sys.exit()
