@@ -27,6 +27,10 @@ try:
   with open('low_res_image.png', 'wb') as f:
     f.write(imageData)
   os.system('python superresolve.py ../saved-model low_res_image.png')
-except:
+  with open('sr-images/low_res_image-sr.png', 'rb') as srData:
+    buff = srData.read()
+    clientSock.send(buff)
+  os.system('rm -rf sr-images')
+finally:
   clientSock.close()
   sock.close()
