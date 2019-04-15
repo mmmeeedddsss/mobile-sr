@@ -40,7 +40,7 @@
         <activity android:name=".activities.MergeImageActivity" />
         <activity android:name=".activities.SettingsActivity" />
         <activity android:name=".activities.ExampleServerPage" />
-
+sttus
         <provider
             android:name=".views.GenericFileProvider"
             android:authorities="com.senior_project.group_1.mobilesr"
