@@ -7,6 +7,9 @@
         android:name="android.hardware.camera"
         android:required="true" />
 
+
+    <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
 
     <application
@@ -42,7 +45,8 @@
         <activity android:name=".activities.DivideImageActivity" />
         <activity android:name=".activities.MergeImageActivity" />
         <activity android:name=".activities.SettingsActivity" />
-
+        <activity android:name=".activities.ExampleServerPage" />
+sttus
         <provider
             android:name=".views.GenericFileProvider"
             android:authorities="com.senior_project.group_1.mobilesr"
