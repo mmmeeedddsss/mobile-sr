@@ -142,6 +142,8 @@ public class BitmapHelpers {
      * Overload for the case when we want to crop/pad a full bitmap without ZoomableImageView
      */
     public static Bitmap cropBitmapUsingSubselection(Bitmap bm) {
+        if( SRModelConfigurationManager.getCurrentConfiguration().isRemote() )
+            return bm;
         return cropBitmapUsingSubselection(bm, getBitmapRect(bm));
     }
 

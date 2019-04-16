@@ -142,6 +142,7 @@ public abstract class PreprocessAndEnhanceActivity extends AppCompatActivity {
     private void processImage() {
         // create a new URI for the requested part of the image
         Bitmap bm = imageView.getCurrentBitmap();
+        Log.i("wowowowowowowowowowowowwoow", ""+bm.getWidth());
         Uri partialUri = BitmapHelpers.saveImageToTemp(bm, this);
         ArrayList<UserSelectedBitmapInfo> bmInfos = new ArrayList<>();
         bmInfos.add(new UserSelectedBitmapInfo(partialUri, 0, this.getContentResolver()));
@@ -157,6 +158,7 @@ public abstract class PreprocessAndEnhanceActivity extends AppCompatActivity {
             {
                 Bitmap origBitmap = bitmapInfos.get(i).getBitmap();
                 Bitmap paddedBitmap = BitmapHelpers.cropBitmapUsingSubselection(origBitmap);
+                Log.i("wowowowowowowowowowowowwoow", ""+paddedBitmap.getWidth());
                 bitmapInfos.get(i).setBitmap(paddedBitmap);
             }
             i = (i + 1) % numImages;
