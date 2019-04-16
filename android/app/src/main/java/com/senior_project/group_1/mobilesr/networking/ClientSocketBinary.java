@@ -1,3 +1,5 @@
+package com.senior_project.group_1.mobilesr.networking;
+
 import java.io.IOException;
 import java.net.InetAddress;
 import java.net.Socket;
