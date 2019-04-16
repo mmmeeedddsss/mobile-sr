@@ -6,7 +6,6 @@ import android.util.Log;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
-import java.io.OutputStream;
 import java.net.InetAddress;
 import java.net.Socket;
 
@@ -15,26 +14,9 @@ import java.net.Socket;
  */
 public class ClientSocketBinary {
     private Socket socket;
-    private CustomFileReader fileReader;
 
     public ClientSocketBinary(InetAddress serverAddress, int serverPort) throws IOException {
         this.socket = new Socket(serverAddress, serverPort);
-    }
-
-    public void sendFile(String fileName) throws IOException {
-        //
-        // Read file from disk
-        //
-        fileReader = new CustomFileReader();
-        byte[] data = fileReader.readFile(fileName);
-        //
-        // Send binary data over the TCP/IP socket connection
-        //
-        for (byte i : data) {
-            this.socket.getOutputStream().write(i);
-        }
-
-        System.out.println("\r\nSent " + data.length + " bytes to server.");
     }
 
     public void sendBitmap(Bitmap bm) throws IOException {
