@@ -29,6 +29,9 @@ def parse_arguments():
   parser.add_argument(
     '--verbose', action='store_true',
     help='enable verbose mode')
+  parser.add_argument(
+    '--single', action='store_true',
+    help='single image mode')
   args = parser.parse_args()
   return args
 
@@ -107,9 +110,13 @@ if __name__ == '__main__':
   print('Listening on: ' + str(addr))
 
   clientSock, clientAddr = sock.accept()
-  completed = False
-  while not completed:
-    completed = handle_request(clientSock)
+
+  if args.single:
+    handle_request(clientSock)
+  else:
+    completed = False
+    while not completed:
+      completed = handle_request(clientSock)
   print('Closing connection...')
   clientSock.close()
   sock.close()
