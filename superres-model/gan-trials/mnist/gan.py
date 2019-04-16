@@ -8,19 +8,21 @@ from PIL import Image
 from data import *
 from schedulers import GoodfellowScheduler
 
+LABEL = 7
+LEARNING_RATE = 0.0002
 LATENT_SIZE = 100
 IMG_DIR = 'images'
 PRINT_EVERY = 25
 PRETRAIN_DISCR = False
-NUM_EPOCHS = 10 
-BATCH_SIZE = 64
+NUM_EPOCHS = 25 
+BATCH_SIZE = 64 
 
 def save_imbatch(imdata, batch_count, imdir):
     batch_dir = os.path.join(imdir, str(batch_count))
     os.makedirs(batch_dir, exist_ok=True)
     j = 0
     for float_img in imdata:
-        img = np.squeeze(((float_img + 0.5) * 255).astype('uint8'))
+        img = np.squeeze(((float_img + 1.0) * 127.5).astype('uint8'))
         save_path = os.path.join(batch_dir, f'{j}.png')
         img_obj = Image.fromarray(img)
         img_obj.save(save_path, 'PNG')
@@ -30,10 +32,10 @@ def save_imbatch(imdata, batch_count, imdir):
 def build_discriminator_model():
     # define the model using the Keras functional API
     inputs = tf.keras.layers.Input(shape=(28, 28, 1))
-    x = tf.keras.layers.Conv2D(32, 5, 1, 'same', activation=tf.nn.leaky_relu)(inputs)
-    x = tf.keras.layers.MaxPool2D(2, padding='same')(x)
+    x = tf.keras.layers.Conv2D(32, 3, 2, 'same', activation=tf.nn.leaky_relu)(inputs)
     x = tf.keras.layers.Conv2D(64, 3, 1, 'same', activation=tf.nn.leaky_relu)(x)
-    x = tf.keras.layers.MaxPool2D(2, padding='same')(x)
+    x = tf.keras.layers.Conv2D(128, 3, 1, 'same', activation=tf.nn.leaky_relu)(x)
+    x = tf.keras.layers.Conv2D(256, 3, 1, 'same', activation=tf.nn.leaky_relu)(x)
     x = tf.keras.layers.Flatten()(x)
     # x = tf.keras.layers.Dense(98, activation=tf.nn.leaky_relu)(x)
     predictions = tf.keras.layers.Dense(1, activation=tf.nn.sigmoid)(x)
@@ -68,7 +70,7 @@ if __name__ == '__main__':
     print('DISCRIMINATOR:')
     discriminator = build_discriminator_model()
     discriminator.compile(
-        optimizer=tf.keras.optimizers.Adam(lr=0.0002),
+        optimizer=tf.keras.optimizers.RMSprop(lr=LEARNING_RATE),
         loss='binary_crossentropy',
         metrics=['accuracy'])
     discriminator.summary()
@@ -86,16 +88,16 @@ if __name__ == '__main__':
     combined = tf.keras.Model(inputs=noise_input, outputs=discr_fake_pred) # create a combined model
     print('COMBINED:')
     combined.compile(
-        optimizer=tf.keras.optimizers.Adam(lr=0.0002),
+        optimizer=tf.keras.optimizers.RMSprop(lr=LEARNING_RATE),
         loss=['binary_crossentropy'])
     combined.summary()
 
     # pretrain the discriminator with mnist & noise if requested
     if PRETRAIN_DISCR:
         # load the discriminator sets
-        train_images, train_labels = get_discriminator_training_set(BATCH_SIZE)
+        train_images, train_labels = get_discriminator_training_set(BATCH_SIZE, LABEL)
         N = train_images.shape[0]
-        test_images, test_labels = get_discriminator_test_set()
+        test_images, test_labels = get_discriminator_test_set(LABEL)
         # pre-train the discriminator
         discriminator.fit(train_images, train_labels, epochs=NUM_EPOCHS, batch_size=BATCH_SIZE)
         # evaluate test accuracy
@@ -103,9 +105,9 @@ if __name__ == '__main__':
         print(f'Discriminator Test accuracy: {acc}')
     
     # load the MNIST sets
-    train_images, _ = get_training_set()
+    train_images, _ = get_training_set(LABEL)
     N = train_images.shape[0]
-    test_images, _ = get_test_set()
+    test_images, _ = get_test_set(LABEL)
 
     scheduler = GoodfellowScheduler(1) # train D k times, G once
     hb_size = BATCH_SIZE // 2
@@ -118,18 +120,20 @@ if __name__ == '__main__':
         for ep in range(NUM_EPOCHS):
             print('************************')
             print('************************')
-            print(f'Epoch {ep}/{NUM_EPOCHS}')
+            print(f'Epoch {ep+1}/{NUM_EPOCHS}')
             i = 0
             while i < N:
                 if scheduler.train_discriminator():
-                    # create half a noise batch
-                    noise_hbatch = get_noise_batch(hb_size, LATENT_SIZE)
-                    # pass it through the generator to create a fake half-batch
-                    fake_hbatch = generator.predict_on_batch(noise_hbatch)
-                    fake_hlabels = np.zeros(hb_size)
                     # get a real mnist data half-batch
                     mnist_hbatch = train_images[i:i+hb_size, :, :, :]
-                    mnist_hlabels = np.ones(hb_size)
+                    # for the last batch, the gotten size may be less than the hb_size
+                    gotten_size = mnist_hbatch.shape[0]
+                    mnist_hlabels = np.ones(gotten_size)
+                    # create half a noise batch
+                    noise_hbatch = get_noise_batch(gotten_size, LATENT_SIZE)
+                    # pass it through the generator to create a fake half-batch
+                    fake_hbatch = generator.predict_on_batch(noise_hbatch)
+                    fake_hlabels = np.zeros(gotten_size)
                     # combine them and train the discriminator
                     discr_batch = np.concatenate((mnist_hbatch, fake_hbatch))
                     discr_labels = np.concatenate((mnist_hlabels, fake_hlabels))
