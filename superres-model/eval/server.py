@@ -12,6 +12,7 @@ ip = '0.0.0.0'
 port = 61274
 
 image_file_name = 'low_res_img.png'
+model_path = '../saved-model'
 
 # argument parser
 def parse_arguments():
@@ -23,6 +24,9 @@ def parse_arguments():
     '--port',
     help='bind to port')
   parser.add_argument(
+    '--model',
+    help='specify the model path')
+  parser.add_argument(
     '--verbose', action='store_true',
     help='enable verbose mode')
   args = parser.parse_args()
@@ -31,7 +35,7 @@ def parse_arguments():
 # SR processing
 def process():
   proc = subprocess.Popen(["python", 'superresolve.py',
-    '../saved-model', image_file_name],
+    model_path, image_file_name],
     stdout=subprocess.PIPE,stderr=subprocess.PIPE)
   (out, err) = proc.communicate()
   return err
@@ -92,6 +96,8 @@ if __name__ == '__main__':
     ip = args.bind
   if args.port:
     port = int(args.port)
+  if args.model:
+    model_path = args.model
   addr = (ip, port)
 
   sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
