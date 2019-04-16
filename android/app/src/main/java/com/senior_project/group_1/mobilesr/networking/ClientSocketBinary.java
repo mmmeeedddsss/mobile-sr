@@ -33,4 +33,8 @@ public class ClientSocketBinary {
     public Bitmap getBitmap() throws IOException{
         return BitmapFactory.decodeStream( socket.getInputStream() );
     }
+
+    public void endConnection() throws IOException {
+        socket.getOutputStream().write(String.format("%10d", 0).getBytes());
+    }
 }

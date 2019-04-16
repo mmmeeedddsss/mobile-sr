@@ -31,14 +31,12 @@ public class RemoteImageProcessingTask extends ImageProcessingTask {
             ClientSocketBinary conn = new ClientSocketBinary(InetAddress.getByName("192.168.1.26"), 61275);
             for (int imgIndex = 0, len = bitmapInfos.size(); imgIndex < len; imgIndex++) {
 
-                if (false && bitmapInfos.get(imgIndex).isProcessed()) // cached case TODO correct
+                if (bitmapInfos.get(imgIndex).isProcessed()) // cached case TODO correct
                     continue;
 
                 // try to load the bitmap first
                 Bitmap bitmap = bitmapInfos.get(imgIndex).getBitmap();
                 if (bitmap != null) {
-
-                    // TODO create single or multiple serialized bitmaps for sending over tcp to server
 
                     Log.i("RemoteImageProcessingTask", "Sent Bitmap is being called !");
 
@@ -55,12 +53,12 @@ public class RemoteImageProcessingTask extends ImageProcessingTask {
                     bitmapInfos.get(imgIndex).setBitmap( conn.getBitmap() );
                 }
             }
+            conn.endConnection();
         }
         catch ( Exception ex )
         {
             ex.printStackTrace();
             Log.e("RemoteImageProcessingTask", "Connection Error :(");
-            return null; // TODO change this for better error handling
         }
         return bitmapInfos;
     }
