@@ -9,8 +9,10 @@ from argparse import ArgumentParser
 # can be changed from command line
 # arguments when running
 ip = '0.0.0.0'
-port = 61274
+port = 61275
 
+# TODO: Don't bother with filesystem
+# Do everything in-memory
 image_file_name = 'low_res_img.png'
 model_path = '../saved-model'
 
@@ -26,6 +28,9 @@ def parse_arguments():
   parser.add_argument(
     '--model',
     help='specify the model path')
+  parser.add_argument(
+    '--image',
+    help='specify which path to save image')
   parser.add_argument(
     '--verbose', action='store_true',
     help='enable verbose mode')
@@ -50,7 +55,7 @@ def handle_request(clientSock):
   print('Reading ' + str(imageSize) + ' bytes of data...')
 
   # Get data from client
-  imageData = ""
+  imageData = b''
   sizetoread = imageSize
   readData = clientSock.recv(sizetoread)
   while True:
@@ -82,15 +87,15 @@ def handle_request(clientSock):
     buffSize = len(buff)
     buffSizeStr = str(buffSize)
     print('Sending ' + buffSizeStr + ' bytes of data')
-    srSize = '%10s' % buffSizeStr
-    clientSock.send(srSize)
+    #srSize = '%10s' % buffSizeStr
+    #clientSock.send(srSize)
     clientSock.send(buff)
 
   print('File sent.')
   print('Time taken: ' + str(t))
 
   # cleanup
-  os.system('rm -rf sr-images')
+  #os.system('rm -rf sr-images')
   return False
 
 if __name__ == '__main__':
@@ -101,9 +106,12 @@ if __name__ == '__main__':
     port = int(args.port)
   if args.model:
     model_path = args.model
+  if args.image:
+    image_file_name = args.image
   addr = (ip, port)
 
   sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+  sock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
   sock.bind(addr)
   sock.listen(1)
 
