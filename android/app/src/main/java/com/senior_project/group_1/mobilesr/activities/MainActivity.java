@@ -111,17 +111,6 @@ public class MainActivity extends AppCompatActivity {
         });
 
 
-        tcpTestButton = (Button) findViewById(R.id.tcpTestButton);
-
-        tcpTestButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                Intent serverStartIntent = new Intent(MainActivity.this, ExampleServerPage.class);
-                startActivity(serverStartIntent);
-            }
-        });
-
-
         try { // Load configuration xml
             File root = android.os.Environment.getExternalStorageDirectory();
             File file = new File(root.getAbsolutePath(), "sr_model_configurations.xml");

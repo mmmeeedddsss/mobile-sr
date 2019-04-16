@@ -19,16 +19,4 @@ public class CustomFileReader {
         br.close();
         return fileData;
     }
-
-    /**
-     * For testing:
-     *    args[0] = Name of binary file to read into memory.
-     */
-    public static void main(String[] args) throws IOException {
-        //
-        // Read file into byte array and print its size
-        //
-        byte[] data = new CustomFileReader().readFile(args[0]);
-        System.out.println("size: " + data.length);
-    }
 }

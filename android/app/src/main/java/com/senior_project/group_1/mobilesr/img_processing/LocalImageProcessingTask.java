@@ -46,7 +46,7 @@ public class LocalImageProcessingTask extends ImageProcessingTask {
         numImages = bitmapInfos.size();
         for(int imgIndex = 0, len = bitmapInfos.size(); imgIndex < len; imgIndex++) {
 
-            if( bitmapInfos.get(imgIndex).isProcessed() )
+            if( bitmapInfos.get(imgIndex).isProcessed() ) // cached case
                 continue;
 
             // try to load the bitmap first

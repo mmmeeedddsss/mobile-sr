@@ -1,9 +1,15 @@
 package com.senior_project.group_1.mobilesr.img_processing;
 
 import android.graphics.Bitmap;
+import android.util.Log;
+
 import com.senior_project.group_1.mobilesr.BuildConfig;
 import com.senior_project.group_1.mobilesr.activities.PreprocessAndEnhanceActivity;
 import com.senior_project.group_1.mobilesr.configurations.SRModelConfiguration;
+import com.senior_project.group_1.mobilesr.networking.ClientSocketBinary;
+
+import java.io.IOException;
+import java.net.InetAddress;
 import java.util.ArrayList;
 
 public class RemoteImageProcessingTask extends ImageProcessingTask {
@@ -20,26 +26,41 @@ public class RemoteImageProcessingTask extends ImageProcessingTask {
             throw new AssertionError();
         ArrayList<UserSelectedBitmapInfo> bitmapInfos = bitmapUrisArr[0];
         numImages = bitmapInfos.size();
-        for(int imgIndex = 0, len = bitmapInfos.size(); imgIndex < len; imgIndex++) {
 
-            if( bitmapInfos.get(imgIndex).isProcessed() )
-                continue;
+        try {
+            ClientSocketBinary conn = new ClientSocketBinary(InetAddress.getByName("192.168.1.26"), 61275);
+            for (int imgIndex = 0, len = bitmapInfos.size(); imgIndex < len; imgIndex++) {
 
-            // try to load the bitmap first
-            Bitmap bitmap = bitmapInfos.get(imgIndex).getBitmap();
-            if(bitmap != null) {
+                if (false && bitmapInfos.get(imgIndex).isProcessed()) // cached case TODO correct
+                    continue;
 
-                // TODO create single or multiple serialized bitmaps for sending over tcp to server
+                // try to load the bitmap first
+                Bitmap bitmap = bitmapInfos.get(imgIndex).getBitmap();
+                if (bitmap != null) {
 
-                // AsyncTask things
-                publishProgress(0);
-                if (isCancelled())
-                    break;
+                    // TODO create single or multiple serialized bitmaps for sending over tcp to server
 
-                // reconstruct the image and save it
-                Bitmap result = null; // TODO fill
-                bitmapInfos.get(imgIndex).setBitmap(result);
+                    Log.i("RemoteImageProcessingTask", "Sent Bitmap is being called !");
+
+                    conn.sendBitmap(bitmap);
+
+                    Log.i("RemoteImageProcessingTask", "Done Sent !");
+
+
+                    // AsyncTask things
+                    //publishProgress(0);
+                    if (isCancelled())
+                        break;
+
+                    bitmapInfos.get(imgIndex).setBitmap( conn.getBitmap() );
+                }
             }
+        }
+        catch ( Exception ex )
+        {
+            ex.printStackTrace();
+            Log.e("RemoteImageProcessingTask", "Connection Error :(");
+            return null; // TODO change this for better error handling
         }
         return bitmapInfos;
     }

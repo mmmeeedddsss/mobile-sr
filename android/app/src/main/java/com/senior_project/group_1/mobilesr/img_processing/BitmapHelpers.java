@@ -12,6 +12,7 @@ import android.provider.MediaStore;
 import android.util.Log;
 
 import com.senior_project.group_1.mobilesr.configurations.ApplicationConstants;
+import com.senior_project.group_1.mobilesr.configurations.SRModelConfiguration;
 import com.senior_project.group_1.mobilesr.configurations.SRModelConfigurationManager;
 import com.senior_project.group_1.mobilesr.views.GenericFileProvider;
 
@@ -102,6 +103,9 @@ public class BitmapHelpers {
             // overlap + (chunk_size-overlap)*n = size_y
             // (size_y-overlap)/(chunk_size-overlap) = n
             // + 1 is selecting a bigger area
+
+            if( SRModelConfigurationManager.getCurrentConfiguration().isRemote() )
+                return bm;
 
             int modelInputSizeX = SRModelConfigurationManager.getCurrentConfiguration().getInputImageWidth();
             int modelInputSizeY = SRModelConfigurationManager.getCurrentConfiguration().getInputImageWidth();

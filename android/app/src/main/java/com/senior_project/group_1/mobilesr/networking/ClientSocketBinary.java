@@ -1,6 +1,12 @@
 package com.senior_project.group_1.mobilesr.networking;
 
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+import android.util.Log;
+
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.io.OutputStream;
 import java.net.InetAddress;
 import java.net.Socket;
 
@@ -10,11 +16,12 @@ import java.net.Socket;
 public class ClientSocketBinary {
     private Socket socket;
     private CustomFileReader fileReader;
-    private ClientSocketBinary(InetAddress serverAddress, int serverPort) throws Exception {
+
+    public ClientSocketBinary(InetAddress serverAddress, int serverPort) throws IOException {
         this.socket = new Socket(serverAddress, serverPort);
     }
 
-    private void sendFile(String fileName) throws IOException {
+    public void sendFile(String fileName) throws IOException {
         //
         // Read file from disk
         //
@@ -29,20 +36,19 @@ public class ClientSocketBinary {
 
         System.out.println("\r\nSent " + data.length + " bytes to server.");
     }
-    /**
-     * Requires 3 arguments:
-     *     1: TCP/IP server host name or IP address
-     *     2: TCP/IP server port number
-     *     3: Absolute path and file name of file to send
-     *
-     * @param args
-     * @throws Exception
-     */
-    public static void main(String[] args) throws Exception {
-        ClientSocketBinary client = new ClientSocketBinary(
-                InetAddress.getByName(args[0]),
-                Integer.parseInt(args[1]));
-        System.out.println("\r\nConnected to Server: " + client.socket.getInetAddress());
-        client.sendFile(args[2]);
+
+    public void sendBitmap(Bitmap bm) throws IOException {
+        ByteArrayOutputStream stream = new ByteArrayOutputStream();
+        bm.compress(Bitmap.CompressFormat.PNG,99, stream);
+
+        Log.i("ClientSocketBinary.sendBitmap file size", String.format("%10d", stream.size()));
+
+        socket.getOutputStream().write(String.format("%10d", stream.size()).getBytes());
+        socket.getOutputStream().write(stream.toByteArray());
+        Log.i("ClientSocketBinary","Sent bitmap to server");
+    }
+
+    public Bitmap getBitmap() throws IOException{
+        return BitmapFactory.decodeStream( socket.getInputStream() );
     }
 }
