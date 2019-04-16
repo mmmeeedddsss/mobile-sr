@@ -5,7 +5,7 @@ import idx
 
 def center_images(data):
     # normalize and center the data
-    return data.astype('float32') / 255.0 - 0.5
+    return (data.astype('float32') / 255.0 - 0.5) * 2
 
 def get_set(data_path, label_path):
     images = center_images(
@@ -24,7 +24,7 @@ def get_test_set():
     return get_set('dataset/t10k-images-idx3-ubyte', 'dataset/t10k-labels-idx1-ubyte')
 
 def get_noise_batch(batch_size, latent_size):
-    return np.random.normal(scale=0.3, size=(batch_size, latent_size)) # roughly between -1 and 1
+    return np.random.uniform(-1, 1, size=(batch_size, latent_size)) # roughly between -1 and 1
 
 def get_discriminator_training_set(batch_size):
     # get the training set and its size

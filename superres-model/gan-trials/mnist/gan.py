@@ -12,7 +12,7 @@ LATENT_SIZE = 100
 IMG_DIR = 'images'
 PRINT_EVERY = 25
 PRETRAIN_DISCR = False
-NUM_EPOCHS = 20 
+NUM_EPOCHS = 10 
 BATCH_SIZE = 64
 
 def save_imbatch(imdata, batch_count, imdir):
@@ -45,10 +45,15 @@ def build_generator_model(latent_size):
     # once again, use the Keras functional API
     inputs = tf.keras.layers.Input(shape=(latent_size,))
     # stack some dense layers
-    x = tf.keras.layers.Dense(256, activation=tf.nn.leaky_relu)(inputs) # dense layer 
-    x = tf.keras.layers.Dense(512, activation=tf.nn.leaky_relu)(inputs) # dense layer 
-    x = tf.keras.layers.Dense(784, activation=tf.nn.leaky_relu)(inputs) # dense layer 
-    output = tf.keras.layers.Reshape((28, 28, 1))(x)
+    x = tf.keras.layers.Dense(3 * 3 * 384, activation=tf.nn.leaky_relu)(inputs) # dense layer 
+    x = tf.keras.layers.Reshape((3, 3, 384))(x) 
+    x = tf.keras.layers.Conv2DTranspose(192, 5, strides=1, padding='valid', 
+                                        activation=tf.nn.leaky_relu)(x) # upsampled to 7x7
+    x = tf.keras.layers.Conv2DTranspose(96, 5, strides=2, padding='same', 
+                                        activation=tf.nn.leaky_relu)(x) # upsampled to 14x14
+    x = tf.keras.layers.Conv2DTranspose(1, 5, strides=2, padding='same', 
+                                        activation=tf.nn.tanh)(x) # upsampled to 28x28 
+    output = x
     # create the model, no need to compile yet
     model = tf.keras.Model(inputs=inputs, outputs=output)
     return model
