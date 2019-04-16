@@ -77,7 +77,7 @@ def handle_request(clientSock):
 
   # send file back
   print('Sending SR image...')
-  with open('sr-images/'+image_file_name+'-sr.png', 'rb') as srData:
+  with open('sr-images/'+image_file_name[:-4]+'-sr.png', 'rb') as srData:
     buff = srData.read()
     buffSize = len(buff)
     buffSizeStr = str(buffSize)
