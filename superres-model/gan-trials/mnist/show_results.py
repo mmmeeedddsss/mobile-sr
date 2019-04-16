@@ -1,4 +1,5 @@
 import os
+from argparse import ArgumentParser
 from subprocess import run
 from sys import argv
 
@@ -8,8 +9,30 @@ from PIL import Image
 
 
 IMGS_PER_ROW = 4
-GIF_DELAY = 100 # in cs
-GIF_PATH = 'result.gif'
+
+def parse_arguments():
+    parser = ArgumentParser()
+    parser.add_argument(
+        'image_dir',
+        help='path to the directory where gan.py output images are stored')
+    parser.add_argument(
+        'loss_file',
+        help='path to the file where gan.py output losses are stored')
+    parser.add_argument(
+        '--gifit', '-g',
+        help='if specified, a GIF will be created from batch outputs',
+        action='store_true')
+    parser.add_argument(
+        '--delay', '-d',
+        help='delay between each frame in the GIF, in centiseconds. Defaults to 100.',
+        type=int,
+        default=100)
+    parser.add_argument(
+        '--out-path', '-o',
+        help='path to the output GIF file. Defaults to result.gif',
+        default='result.gif')
+    args = parser.parse_args()
+    return args
 
 def determine_batch_size(imdir):
     """ open a batch directory, count the number of images and return it """
@@ -32,22 +55,14 @@ def show_losses(loss_file):
     plt.legend(['Discriminator Loss', 'Adversarial Loss'])
 
 if __name__ == '__main__':
-    if len(argv) == 2:
-        _, imdir = argv
-        lossfile = None
-    elif len(argv) == 3:
-        _, imdir, lossfile = argv
+    args = parse_arguments()
 
-        # start by showing the losses 
-        show_losses(lossfile)
-        plt.show()
-    else:
-        print('Usage: python show_results.py image_directory [losses.npz]')
-        print('       if losses.npz is not provided, a GIF is created from the image_directory')
-        exit(1)
+    # show the losses on a plot
+    show_losses(args.loss_file)
+    plt.show()
 
     # get statistics for the dataset
-    epoch_count, batch_size = determine_batch_size(imdir)
+    epoch_count, batch_size = determine_batch_size(args.image_dir)
     print(f'Epoch count is {epoch_count}, size is {batch_size}')
     ncols = IMGS_PER_ROW
     nrows = int(np.ceil(batch_size / ncols))
@@ -56,12 +71,12 @@ if __name__ == '__main__':
     fig = plt.figure(figsize=(8, 8))
     axes = [fig.add_subplot(nrows, ncols, i+1) for i in range(batch_size)]
     keyf = lambda x: int(x.split('/')[-1])
-    epoch_dirs = sorted([epochdir.path for epochdir in os.scandir(imdir)], key=keyf)
+    epoch_dirs = sorted([epochdir.path for epochdir in os.scandir(args.image_dir)], key=keyf)
 
     epoch_index = 0
     imshow_objs = []
     def plot_batch(event): # callback function for switching between batches
-        # move forward or backward in batches if the mouse wheel was used
+        # move forward or backward in batches using left & right arrow keys
         global epoch_index
         if event:
             if event.key == 'right':
@@ -85,12 +100,9 @@ if __name__ == '__main__':
         fig.suptitle(f'Generator after epoch {epoch_index+1}')
         plt.draw() 
 
-    if lossfile: # show the generated images
-        # then, connect the callback and draw generator outputs
-        fig.canvas.mpl_connect('key_press_event', plot_batch) # connect the callback
-        plot_batch(None) # plot the zeroth batch
-        plt.show()
-    else: # create a GIF from the generated images
+    if args.gifit: # create a GIF before showing
+        print('Creating GIF...')
+        # go through each epoch, plot it and create a PNG, and store its path
         impaths = []
         while epoch_index < epoch_count:
             impath = f'{epoch_index}.png'
@@ -98,5 +110,15 @@ if __name__ == '__main__':
             plt.savefig(impath)
             impaths.append(impath)
             epoch_index += 1
-        run(['convert', '-delay', f'{GIF_DELAY}', '-loop', '0', *impaths, GIF_PATH])
+        # create a GIF from the PNGs with imagemagick
+        run(['convert', '-delay', f'{args.delay}', '-loop', '0', *impaths, args.out_path])
+        # remove all the pngs
         run(['rm', *impaths])
+        print('Done!')
+        epoch_index = 0
+
+    # then, connect the callback and draw generator outputs
+    fig.canvas.mpl_connect('key_press_event', plot_batch) # connect the callback
+    plot_batch(None) # plot the zeroth batch
+    plt.show()
+
