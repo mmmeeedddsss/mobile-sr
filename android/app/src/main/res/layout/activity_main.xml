@@ -79,18 +79,6 @@
             android:typeface="sans"
             app:backgroundTint="@color/colorButtonBackground" />
 
-        <android.support.v7.widget.AppCompatButton
-            android:id="@+id/tcpTestButton"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="tcp test"
-            android:textColor="@color/colorButtonText"
-            android:textStyle="bold"
-            android:typeface="sans"
-            app:backgroundTint="@color/colorButtonBackground" />
-
-
-
     </LinearLayout>
 
 </RelativeLayout>

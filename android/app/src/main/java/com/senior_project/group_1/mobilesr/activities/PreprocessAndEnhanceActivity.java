@@ -141,8 +141,8 @@ public abstract class PreprocessAndEnhanceActivity extends AppCompatActivity {
 
     private void processImage() {
         // create a new URI for the requested part of the image
-        Bitmap partialImg = imageView.getCurrentBitmap();
-        Uri partialUri = BitmapHelpers.saveImageToTemp(partialImg, this);
+        Bitmap bm = imageView.getCurrentBitmap();
+        Uri partialUri = BitmapHelpers.saveImageToTemp(bm, this);
         ArrayList<UserSelectedBitmapInfo> bmInfos = new ArrayList<>();
         bmInfos.add(new UserSelectedBitmapInfo(partialUri, 0, this.getContentResolver()));
         processImages(bmInfos);

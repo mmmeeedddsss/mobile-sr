@@ -41,7 +41,6 @@ public class RemoteImageEnhanceActivity extends PreprocessAndEnhanceActivity {
         cleanUpTask();
     }
 
-    // TODO Refactor later to keep a clean design and apply LSP
     @Override
     protected void processImages( ArrayList<UserSelectedBitmapInfo> bmInfos ) {
         try {
@@ -56,9 +55,6 @@ public class RemoteImageEnhanceActivity extends PreprocessAndEnhanceActivity {
         dialog.show();
 
         imageProcessingTask.execute(bmInfos);
-
-        // TODO fill here with server communication
-
         Log.i("RemoteImageEnhanceActivity", "Called processImage of Remote Processing Activity");
     }
 }

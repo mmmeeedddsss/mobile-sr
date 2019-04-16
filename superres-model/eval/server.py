@@ -8,8 +8,8 @@ from argparse import ArgumentParser
 # default values
 # can be changed from command line
 # arguments when running
-ip = '0.0.0.0'
-port = 61274
+ip = ''
+port = 61275
 
 # argument parser
 def parse_arguments():
@@ -29,7 +29,7 @@ def parse_arguments():
 # SR processing
 def process():
   proc = subprocess.Popen(["python", 'superresolve.py',
-    '../saved-model', 'low_res_image.png'],
+    '../saved-model', 'sr-images/low_res_image.png'],
     stdout=subprocess.PIPE,stderr=subprocess.PIPE)
   (out, err) = proc.communicate()
   return err
@@ -43,6 +43,7 @@ if __name__ == '__main__':
   addr = (ip, port)
 
   sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+  sock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
   sock.bind(addr)
   sock.listen(1)
 
@@ -53,7 +54,7 @@ if __name__ == '__main__':
   print('Reading ' + str(imageSize) + ' bytes of data')
 
   # Get data from client
-  imageData = ""
+  imageData = b''
   readData = clientSock.recv(4096)
   while True:
     imageData += readData
@@ -63,7 +64,7 @@ if __name__ == '__main__':
   print(str(len(imageData)) + ' bytes read')
 
   # write data to file
-  with open('low_res_image.png', 'wb') as f:
+  with open('sr-images/low_res_image.png', 'wb') as f:
     f.write(imageData)
 
   # apply SR on file
@@ -80,15 +81,13 @@ if __name__ == '__main__':
     buffSize = len(buff)
     buffSizeStr = str(buffSize)
     print('Sending ' + buffSizeStr + ' bytes of data')
-    srSize = '%10s' % buffSizeStr
-    clientSock.send(srSize)
     clientSock.send(buff)
 
   print('File sent')
   print('Time taken: ' + str(t))
 
   # cleanup
-  os.system('rm -rf sr-images')
+  #os.system('rm -rf sr-images')
   print('Closing connection...')
   clientSock.close()
   sock.close()
