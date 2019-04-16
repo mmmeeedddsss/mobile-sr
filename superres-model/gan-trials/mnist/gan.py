@@ -44,12 +44,11 @@ def build_discriminator_model():
 def build_generator_model(latent_size):
     # once again, use the Keras functional API
     inputs = tf.keras.layers.Input(shape=(latent_size,))
-    x = tf.keras.layers.Dense(7 * 7 * 256, activation=tf.nn.leaky_relu)(inputs) # dense layer 
-    x = tf.keras.layers.Reshape((7, 7, 256))(x) # reshape to 3D
-    # upsample to 14x14x256
-    x = tf.keras.layers.Conv2DTranspose(128, 3, 2, 'same', activation=tf.nn.leaky_relu)(x)
-    # upsample to 28x28x1
-    output = tf.keras.layers.Conv2DTranspose(1, 3, 2, 'same', activation=tf.nn.leaky_relu)(x)
+    # stack some dense layers
+    x = tf.keras.layers.Dense(256, activation=tf.nn.leaky_relu)(inputs) # dense layer 
+    x = tf.keras.layers.Dense(512, activation=tf.nn.leaky_relu)(inputs) # dense layer 
+    x = tf.keras.layers.Dense(784, activation=tf.nn.leaky_relu)(inputs) # dense layer 
+    output = tf.keras.layers.Reshape((28, 28, 1))(x)
     # create the model, no need to compile yet
     model = tf.keras.Model(inputs=inputs, outputs=output)
     return model
@@ -64,7 +63,7 @@ if __name__ == '__main__':
     print('DISCRIMINATOR:')
     discriminator = build_discriminator_model()
     discriminator.compile(
-        optimizer=tf.keras.optimizers.RMSprop(lr=0.0005),
+        optimizer=tf.keras.optimizers.Adam(lr=0.0002),
         loss='binary_crossentropy',
         metrics=['accuracy'])
     discriminator.summary()
@@ -82,7 +81,7 @@ if __name__ == '__main__':
     combined = tf.keras.Model(inputs=noise_input, outputs=discr_fake_pred) # create a combined model
     print('COMBINED:')
     combined.compile(
-        optimizer=tf.keras.optimizers.RMSprop(lr=0.002),
+        optimizer=tf.keras.optimizers.Adam(lr=0.0002),
         loss=['binary_crossentropy'])
     combined.summary()
 
