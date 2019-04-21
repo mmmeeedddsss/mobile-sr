@@ -11,9 +11,10 @@ import android.util.Log;
 import android.view.View;
 
 import com.senior_project.group_1.mobilesr.BuildConfig;
+import com.senior_project.group_1.mobilesr.img_processing.ImageProcessingTask;
 import com.senior_project.group_1.mobilesr.img_processing.UserSelectedBitmapInfo;
 import com.senior_project.group_1.mobilesr.img_processing.ImageProcessingDialog;
-import com.senior_project.group_1.mobilesr.img_processing.ImageProcessingTask;
+import com.senior_project.group_1.mobilesr.img_processing.LocalImageProcessingTask;
 import com.senior_project.group_1.mobilesr.R;
 import com.senior_project.group_1.mobilesr.configurations.SRModelConfiguration;
 import com.senior_project.group_1.mobilesr.configurations.SRModelConfigurationManager;
@@ -37,14 +38,14 @@ public abstract class PreprocessAndEnhanceActivity extends AppCompatActivity {
     protected ZoomableImageView imageView;
     protected FloatingTextButton rotateButton, processButton,
             processAllButton, toggleButton, saveButton, shareButton;
-    private ImageProcessingDialog dialog;
-    private ImageProcessingTask imageProcessingTask;
+    protected ImageProcessingDialog dialog;
+    protected ImageProcessingTask imageProcessingTask;
     protected  ArrayList<UserSelectedBitmapInfo> bitmapInfos;
     protected int numImages;
     protected int imgIndex;
 
     private boolean isFABOpen = false;
-    private boolean notProcessedYet = true;
+    protected boolean notProcessedYet = true;
 
     @Override
     public void onCreate(Bundle savedInstance) {
@@ -124,34 +125,31 @@ public abstract class PreprocessAndEnhanceActivity extends AppCompatActivity {
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
+        dialog = new ImageProcessingDialog(this);
     }
 
-    private void processImages( ArrayList<UserSelectedBitmapInfo> bmInfos ) {
+    protected void processImages( ArrayList<UserSelectedBitmapInfo> bmInfos ) {
         try {
             notProcessedYet = false;
             toggleFabs();
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
-
-        SRModelConfiguration modelConfiguration = SRModelConfigurationManager.getCurrentConfiguration();
-        dialog = new ImageProcessingDialog(this);
         dialog.show();
-        imageProcessingTask = new ImageProcessingTask(this, dialog, modelConfiguration);
         imageProcessingTask.execute(bmInfos);
     }
 
     private void processImage() {
         // create a new URI for the requested part of the image
-        Bitmap partialImg = imageView.getCurrentBitmap();
-        Uri partialUri = BitmapHelpers.saveImageToTemp(partialImg, this);
+        Bitmap bm = imageView.getCurrentBitmap();
+        Uri partialUri = BitmapHelpers.saveImageToTemp(bm, this);
         ArrayList<UserSelectedBitmapInfo> bmInfos = new ArrayList<>();
         bmInfos.add(new UserSelectedBitmapInfo(partialUri, 0, this.getContentResolver()));
         processImages(bmInfos);
     }
 
     // This method preprocessed the images to add padding, skips if image is cached
-    private void processAllImages() {
+    public void processAllImages() {
         int i = imgIndex;
         do {
             // isCached call fills the content if processed bitmap is cached
@@ -240,7 +238,7 @@ public abstract class PreprocessAndEnhanceActivity extends AppCompatActivity {
         }
     }
 
-    private void toggleFabs() throws InterruptedException {
+    protected void toggleFabs() throws InterruptedException {
         int offsetFromBottom = 105;
         if( isFABOpen ) {
             processButton.setVisibility(View.VISIBLE);

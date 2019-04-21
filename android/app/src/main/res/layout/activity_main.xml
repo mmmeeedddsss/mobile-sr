@@ -79,7 +79,6 @@
             android:typeface="sans"
             app:backgroundTint="@color/colorButtonBackground" />
 
-
     </LinearLayout>
 
 </RelativeLayout>

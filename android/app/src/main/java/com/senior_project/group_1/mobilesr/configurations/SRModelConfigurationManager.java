@@ -21,8 +21,6 @@ import javax.xml.transform.TransformerFactory;
 import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.stream.StreamResult;
 import org.w3c.dom.Document;
-import org.w3c.dom.Element;
-import org.w3c.dom.NamedNodeMap;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 import org.xml.sax.SAXException;
@@ -93,6 +91,9 @@ public class SRModelConfigurationManager {
                     case "num_parallel_batch":
                         newConfiguration.setNumParallelBatch(Integer.parseInt(parser.nextText()));
                         break;
+                    case "remote":
+                        newConfiguration.setRemote( Boolean.parseBoolean(parser.nextText()) );
+                        break;
                     case "default_selection":
                         if( Boolean.parseBoolean( parser.nextText() ) )
                             currentConfiguration = newConfiguration;
@@ -100,6 +101,8 @@ public class SRModelConfigurationManager {
                 }
 
             } else if( eventType == XmlPullParser.END_TAG && currentTag.equals("configuration")){
+                Log.i("SRModelConfigurationManager.processParsing",
+                        String.format("Conf with name %s is read", newConfiguration.getModelName() ));
                 configurationMap.put(newConfiguration.getModelName(),newConfiguration);
                 newConfiguration = new SRModelConfiguration();
             }

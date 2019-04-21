@@ -23,7 +23,7 @@ public class UserSelectedBitmapInfo {
     }
 
     public void setBitmap(Bitmap bitmap) {
-        this.bitmap.recycle();
+        //this.bitmap.recycle();
         this.bitmap = bitmap;
     }
 
