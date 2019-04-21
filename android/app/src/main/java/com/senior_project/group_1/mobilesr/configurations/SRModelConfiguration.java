@@ -95,4 +95,20 @@ public class SRModelConfiguration{
     public void setRemote(boolean remote) {
         this.REMOTE = remote;
     }
+
+    public String getIPAddress() {
+        return IPAddress;
+    }
+
+    public void setIPAddress(String IPAddress) {
+        this.IPAddress = IPAddress;
+    }
+
+    public int getPort() {
+        return Port;
+    }
+
+    public void setPort(int port) {
+        Port = port;
+    }
 }
