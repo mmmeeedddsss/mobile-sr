@@ -5,6 +5,8 @@ import subprocess
 import sys
 from argparse import ArgumentParser
 
+import sr
+
 # default values
 # can be changed from command line
 # arguments when running
@@ -41,14 +43,11 @@ def parse_arguments():
   return args
 
 # SR processing
-def process():
-  proc = subprocess.Popen(["python3", 'superresolve.py',
-    model_path, image_file_name],
-    stdout=subprocess.PIPE,stderr=subprocess.PIPE)
-  (out, err) = proc.communicate()
-  return err
+def process(lr_img, model):
+  hr_img = sr.apply_sr(lr_img, model)
+  return hr_img
 
-def handle_request(clientSock):
+def handle_request(clientSock, model):
   imageSize = int(clientSock.recv(10))
   if imageSize == 0:
     return True
@@ -67,21 +66,25 @@ def handle_request(clientSock):
     readData = clientSock.recv(sizetoread)
   print(str(len(imageData)) + ' bytes read.')
 
+  '''
   # write data to file
   with open(image_file_name, 'wb') as f:
     f.write(imageData)
+  '''
 
   # apply SR on file
   print('Superresolution started...')
   t = time.time()
-  err = process()
+  hr_data = process(imageData, model)
   t = time.time() - t
-  if err and args.verbose:
-    print(err)
   print('Superresolution finished.')
 
   # send file back
   print('Sending SR image...')
+  hr_size = str(len(hr_data))
+  print('Sending ' + hr_size + ' bytes of data')
+  clientSock.send(hr_data)
+  '''
   with open('sr-images/'+image_file_name[:-4]+'-sr.png', 'rb') as srData:
     buff = srData.read()
     buffSize = len(buff)
@@ -90,6 +93,7 @@ def handle_request(clientSock):
     #srSize = '%10s' % buffSizeStr
     #clientSock.send(srSize)
     clientSock.send(buff)
+  '''
 
   print('File sent.')
   print('Time taken: ' + str(t))
@@ -120,7 +124,7 @@ if __name__ == '__main__':
   clientSock, clientAddr = sock.accept()
 
   if args.single:
-    handle_request(clientSock)
+    handle_request(clientSock, model_path)
   else:
     completed = False
     while not completed:
