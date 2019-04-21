@@ -3,6 +3,7 @@ import cv2
 import tensorflow as tf
 
 
+# loads model with given path
 def load_model(sess, model_path):
     tf.saved_model.loader.load(
         sess,
@@ -14,29 +15,41 @@ def load_model(sess, model_path):
     output_sym = dg.get_tensor_by_name('output_image:0')
     return input_sym, output_sym
 
+# convert between color spaces
+# and data normalization
 def bgr2rgbnb(img):
     rgb = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
     rgbnorm = rgb.astype('float32') * (1.0 / 255.0) - 0.5
     batched = np.expand_dims(rgbnorm, axis=0)
     return batched
 
+# convert between color spaces
+# and data normalization
 def rgbnb2bgr(img):
     rgbnorm = np.squeeze(img)
     rgb = ((rgbnorm + 0.5) * 255).astype('uint8')
     bgr = cv2.cvtColor(rgb, cv2.COLOR_RGB2BGR)
     return bgr
 
+# decodes given bytestream to
+# OpenCV Mat object
 def bytestream2img(byte_array):
     np_img = np.fromstring(byte_array, np.uint8)
     lr_img = cv2.imdecode(np_img, cv2.IMREAD_COLOR)
     return lr_img
 
+# encodes given OpenCV Mat object to
+# png file and returns the final bytearray
 def img2bytestream(img):
     encoded = cv2.imencode('.png', img)
     retval, buf = encoded
     byte_array = buf.tobytes()
     return byte_array
 
+# Given low-res image data and model path
+# returns high-res image data
+# convertions between binary data and Mat objects
+# are done internally
 def apply_sr(lr_data, model_dir):
     with tf.Session() as sess:
         lr_img = bytestream2img(lr_data)

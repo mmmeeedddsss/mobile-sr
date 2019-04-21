@@ -38,10 +38,19 @@ def parse_arguments():
   return args
 
 # SR processing
+# given low-res image data
+# and model path
+# return high-res image data
 def process(lr_img, model):
   hr_img = sr.apply_sr(lr_img, model)
   return hr_img
 
+# handles single request from client
+# returns True if client sends special
+# end of transmission message at the end
+# returns False if client has more
+# data to send
+# exception to that: single-image mode
 def handle_request(clientSock, model):
   imageSize = int(clientSock.recv(10))
   if imageSize == 0:
@@ -91,6 +100,7 @@ if __name__ == '__main__':
     image_file_name = args.image
   addr = (ip, port)
 
+  # configure socket
   sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
   sock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
   sock.bind(addr)
