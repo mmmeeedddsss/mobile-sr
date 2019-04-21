@@ -1,3 +1,4 @@
+#!/usr/bin/python3
 import socket
 import os
 import time
@@ -5,16 +6,15 @@ import subprocess
 import sys
 from argparse import ArgumentParser
 
+import sr
+
 # default values
 # can be changed from command line
 # arguments when running
 ip = '0.0.0.0'
 port = 61275
 
-# TODO: Don't bother with filesystem
-# Do everything in-memory
-image_file_name = 'low_res_img.png'
-model_path = '../saved-model'
+VERBOSE=False
 
 # argument parser
 def parse_arguments():
@@ -26,33 +26,42 @@ def parse_arguments():
     '--port',
     help='bind to port')
   parser.add_argument(
-    '--model',
-    help='specify the model path')
-  parser.add_argument(
-    '--image',
-    help='specify which path to save image')
+    '--single', action='store_true',
+    help='single image mode')
   parser.add_argument(
     '--verbose', action='store_true',
     help='enable verbose mode')
   parser.add_argument(
-    '--single', action='store_true',
-    help='single image mode')
+    '--model', required=True,
+    help='specify the model path')
   args = parser.parse_args()
   return args
 
 # SR processing
-def process():
-  proc = subprocess.Popen(["python", 'superresolve.py',
-    model_path, image_file_name],
-    stdout=subprocess.PIPE,stderr=subprocess.PIPE)
-  (out, err) = proc.communicate()
-  return err
+# given low-res image data
+# and model path
+# return high-res image data
+def process(lr_img, model):
+  hr_img = sr.apply_sr(lr_img, model)
+  return hr_img
 
-def handle_request(clientSock):
+# logger function
+# active if VERBOSE is defined
+def log(s):
+  if VERBOSE:
+    print(s)
+
+# handles single request from client
+# returns True if client sends special
+# end of transmission message at the end
+# returns False if client has more
+# data to send
+# exception to that: single-image mode
+def handle_request(clientSock, model):
   imageSize = int(clientSock.recv(10))
   if imageSize == 0:
     return True
-  print('Reading ' + str(imageSize) + ' bytes of data...')
+  log('Reading ' + str(imageSize) + ' bytes of data...')
 
   # Get data from client
   imageData = b''
@@ -65,37 +74,24 @@ def handle_request(clientSock):
       break
     sizetoread = imageSize-readSize
     readData = clientSock.recv(sizetoread)
-  print(str(len(imageData)) + ' bytes read.')
-
-  # write data to file
-  with open(image_file_name, 'wb') as f:
-    f.write(imageData)
+  log(str(len(imageData)) + ' bytes read.')
 
   # apply SR on file
-  print('Superresolution started...')
+  log('Superresolution started...')
   t = time.time()
-  err = process()
+  hr_data = process(imageData, model)
   t = time.time() - t
-  if err and args.verbose:
-    print(err)
-  print('Superresolution finished.')
+  log('Superresolution finished.')
 
   # send file back
-  print('Sending SR image...')
-  with open('sr-images/'+image_file_name[:-4]+'-sr.png', 'rb') as srData:
-    buff = srData.read()
-    buffSize = len(buff)
-    buffSizeStr = str(buffSize)
-    print('Sending ' + buffSizeStr + ' bytes of data')
-    #srSize = '%10s' % buffSizeStr
-    #clientSock.send(srSize)
-    clientSock.send(buff)
+  log('Sending SR image...')
+  hr_size = str(len(hr_data))
+  log('Sending ' + hr_size + ' bytes of data')
+  clientSock.send(hr_data)
 
-  print('File sent.')
-  print('Time taken: ' + str(t))
+  log('File sent.')
+  log('Time taken: ' + str(t))
 
-  # cleanup
-  #os.system('rm -rf sr-images')
   return False
 
 if __name__ == '__main__':
@@ -104,12 +100,12 @@ if __name__ == '__main__':
     ip = args.bind
   if args.port:
     port = int(args.port)
-  if args.model:
-    model_path = args.model
-  if args.image:
-    image_file_name = args.image
+  if args.verbose:
+    VERBOSE = args.verbose
+  model_path = args.model
   addr = (ip, port)
 
+  # configure socket
   sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
   sock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
   sock.bind(addr)
@@ -120,11 +116,11 @@ if __name__ == '__main__':
   clientSock, clientAddr = sock.accept()
 
   if args.single:
-    handle_request(clientSock)
+    handle_request(clientSock, model_path)
   else:
     completed = False
     while not completed:
-      completed = handle_request(clientSock)
+      completed = handle_request(clientSock, model_path)
   print('Closing connection...')
   clientSock.close()
   sock.close()
