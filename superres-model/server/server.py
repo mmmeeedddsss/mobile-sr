@@ -13,6 +13,8 @@ import sr
 ip = '0.0.0.0'
 port = 61275
 
+VERBOSE=False
+
 # argument parser
 def parse_arguments():
   parser = ArgumentParser()
@@ -42,6 +44,12 @@ def process(lr_img, model):
   hr_img = sr.apply_sr(lr_img, model)
   return hr_img
 
+# logger function
+# active if VERBOSE is defined
+def log(s):
+  if VERBOSE:
+    print(s)
+
 # handles single request from client
 # returns True if client sends special
 # end of transmission message at the end
@@ -52,7 +60,7 @@ def handle_request(clientSock, model):
   imageSize = int(clientSock.recv(10))
   if imageSize == 0:
     return True
-  print('Reading ' + str(imageSize) + ' bytes of data...')
+  log('Reading ' + str(imageSize) + ' bytes of data...')
 
   # Get data from client
   imageData = b''
@@ -65,23 +73,23 @@ def handle_request(clientSock, model):
       break
     sizetoread = imageSize-readSize
     readData = clientSock.recv(sizetoread)
-  print(str(len(imageData)) + ' bytes read.')
+  log(str(len(imageData)) + ' bytes read.')
 
   # apply SR on file
-  print('Superresolution started...')
+  log('Superresolution started...')
   t = time.time()
   hr_data = process(imageData, model)
   t = time.time() - t
-  print('Superresolution finished.')
+  log('Superresolution finished.')
 
   # send file back
-  print('Sending SR image...')
+  log('Sending SR image...')
   hr_size = str(len(hr_data))
-  print('Sending ' + hr_size + ' bytes of data')
+  log('Sending ' + hr_size + ' bytes of data')
   clientSock.send(hr_data)
 
-  print('File sent.')
-  print('Time taken: ' + str(t))
+  log('File sent.')
+  log('Time taken: ' + str(t))
 
   return False
 
