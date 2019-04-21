@@ -99,8 +99,9 @@ if __name__ == '__main__':
     ip = args.bind
   if args.port:
     port = int(args.port)
-  if args.model:
-    model_path = args.model
+  if args.verbose:
+    VERBOSE = args.verbose
+  model_path = args.model
   addr = (ip, port)
 
   # configure socket
