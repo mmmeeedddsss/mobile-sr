@@ -1,6 +1,11 @@
 import numpy as np
 import cv2
 import tensorflow as tf
+import os
+
+# Disable deprecation warnings
+tf.logging.set_verbosity(tf.logging.FATAL)
+os.environ['TF_CPP_MIN_LOG_LEVEL'] = '2'
 
 
 # loads model with given path

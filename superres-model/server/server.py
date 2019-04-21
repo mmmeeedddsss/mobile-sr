@@ -1,3 +1,4 @@
+#!/usr/bin/python3
 import socket
 import os
 import time
@@ -25,11 +26,11 @@ def parse_arguments():
     '--port',
     help='bind to port')
   parser.add_argument(
-    '--verbose', action='store_true',
-    help='enable verbose mode')
-  parser.add_argument(
     '--single', action='store_true',
     help='single image mode')
+  parser.add_argument(
+    '--verbose', action='store_true',
+    help='enable verbose mode')
   parser.add_argument(
     '--model', required=True,
     help='specify the model path')
