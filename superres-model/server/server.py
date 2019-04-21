@@ -13,11 +13,6 @@ import sr
 ip = '0.0.0.0'
 port = 61275
 
-# TODO: Don't bother with filesystem
-# Do everything in-memory
-image_file_name = 'low_res_img.png'
-model_path = '../saved-model'
-
 # argument parser
 def parse_arguments():
   parser = ArgumentParser()
@@ -66,12 +61,6 @@ def handle_request(clientSock, model):
     readData = clientSock.recv(sizetoread)
   print(str(len(imageData)) + ' bytes read.')
 
-  '''
-  # write data to file
-  with open(image_file_name, 'wb') as f:
-    f.write(imageData)
-  '''
-
   # apply SR on file
   print('Superresolution started...')
   t = time.time()
@@ -84,22 +73,10 @@ def handle_request(clientSock, model):
   hr_size = str(len(hr_data))
   print('Sending ' + hr_size + ' bytes of data')
   clientSock.send(hr_data)
-  '''
-  with open('sr-images/'+image_file_name[:-4]+'-sr.png', 'rb') as srData:
-    buff = srData.read()
-    buffSize = len(buff)
-    buffSizeStr = str(buffSize)
-    print('Sending ' + buffSizeStr + ' bytes of data')
-    #srSize = '%10s' % buffSizeStr
-    #clientSock.send(srSize)
-    clientSock.send(buff)
-  '''
 
   print('File sent.')
   print('Time taken: ' + str(t))
 
-  # cleanup
-  #os.system('rm -rf sr-images')
   return False
 
 if __name__ == '__main__':
@@ -128,7 +105,7 @@ if __name__ == '__main__':
   else:
     completed = False
     while not completed:
-      completed = handle_request(clientSock)
+      completed = handle_request(clientSock, model_path)
   print('Closing connection...')
   clientSock.close()
   sock.close()
