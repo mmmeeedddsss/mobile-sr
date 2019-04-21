@@ -42,7 +42,7 @@ def parse_arguments():
 
 # SR processing
 def process():
-  proc = subprocess.Popen(["python", 'superresolve.py',
+  proc = subprocess.Popen(["python3", 'superresolve.py',
     model_path, image_file_name],
     stdout=subprocess.PIPE,stderr=subprocess.PIPE)
   (out, err) = proc.communicate()
