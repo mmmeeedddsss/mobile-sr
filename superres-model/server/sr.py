@@ -49,7 +49,7 @@ def img2bytestream(img, file_format='.png'):
 
 # Given low-res image data and model path
 # returns high-res image data
-# convertions between binary data and Mat objects
+# conversions between binary data and Mat objects
 # are done internally
 def apply_sr(lr_data, model_dir):
     lr_img = bytestream2img(lr_data)

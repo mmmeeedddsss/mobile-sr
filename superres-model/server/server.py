@@ -23,17 +23,14 @@ def parse_arguments():
     '--port',
     help='bind to port')
   parser.add_argument(
-    '--model',
-    help='specify the model path')
-  parser.add_argument(
-    '--image',
-    help='specify which path to save image')
-  parser.add_argument(
     '--verbose', action='store_true',
     help='enable verbose mode')
   parser.add_argument(
     '--single', action='store_true',
     help='single image mode')
+  parser.add_argument(
+    '--model', required=True,
+    help='specify the model path')
   args = parser.parse_args()
   return args
 
@@ -96,8 +93,6 @@ if __name__ == '__main__':
     port = int(args.port)
   if args.model:
     model_path = args.model
-  if args.image:
-    image_file_name = args.image
   addr = (ip, port)
 
   # configure socket
