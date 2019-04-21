@@ -39,9 +39,10 @@ def bytestream2img(byte_array):
     return lr_img
 
 # encodes given OpenCV Mat object to
-# png file and returns the final bytearray
-def img2bytestream(img):
-    encoded = cv2.imencode('.png', img)
+# file with given format and returns the final bytearray
+# default: PNG
+def img2bytestream(img, file_format='.png'):
+    encoded = cv2.imencode(file_format, img)
     retval, buf = encoded
     byte_array = buf.tobytes()
     return byte_array
@@ -51,11 +52,17 @@ def img2bytestream(img):
 # convertions between binary data and Mat objects
 # are done internally
 def apply_sr(lr_data, model_dir):
+    lr_img = bytestream2img(lr_data)
+    hr_img = apply_sr_img(lr_img, model_dir)
+    hr_data = img2bytestream(hr_img)
+    return hr_data
+
+# Given low-res image Mat object and model path
+# returns high-res image Mat object
+def apply_sr_img(lr_img, model_dir):
     with tf.Session() as sess:
-        lr_img = bytestream2img(lr_data)
         input_sym, output_sym = load_model(sess, model_dir)
         lr_norm = bgr2rgbnb(lr_img)
         hr_norm = sess.run(output_sym, feed_dict={input_sym: lr_norm})
         hr_img = rgbnb2bgr(hr_norm)
-        hr_data = img2bytestream(hr_img)
-        return hr_data
+        return hr_img
