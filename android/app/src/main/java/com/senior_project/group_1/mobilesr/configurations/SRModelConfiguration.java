@@ -14,6 +14,8 @@ public class SRModelConfiguration{
     private int INPUT_IMAGE_HEIGHT;
     private int NUM_PARALLEL_BATCH;
     private boolean REMOTE;
+    private String IPAddress;
+    private int Port;
 
     public String getModelName() { return MODEL_NAME; }
     public String getModelPath(){
@@ -92,5 +94,21 @@ public class SRModelConfiguration{
 
     public void setRemote(boolean remote) {
         this.REMOTE = remote;
+    }
+
+    public String getIPAddress() {
+        return IPAddress;
+    }
+
+    public void setIPAddress(String IPAddress) {
+        this.IPAddress = IPAddress;
+    }
+
+    public int getPort() {
+        return Port;
+    }
+
+    public void setPort(int port) {
+        Port = port;
     }
 }
