@@ -6,9 +6,9 @@ import android.util.Log;
 import com.senior_project.group_1.mobilesr.BuildConfig;
 import com.senior_project.group_1.mobilesr.activities.PreprocessAndEnhanceActivity;
 import com.senior_project.group_1.mobilesr.configurations.SRModelConfiguration;
+import com.senior_project.group_1.mobilesr.configurations.SRModelConfigurationManager;
 import com.senior_project.group_1.mobilesr.networking.ClientSocketBinary;
 
-import java.io.IOException;
 import java.net.InetAddress;
 import java.util.ArrayList;
 
@@ -28,25 +28,25 @@ public class RemoteImageProcessingTask extends ImageProcessingTask {
         numImages = bitmapInfos.size();
 
         try {
-            ClientSocketBinary conn = new ClientSocketBinary(InetAddress.getByName("192.168.1.26"), 61275);
+
+            String ip = SRModelConfigurationManager.getCurrentConfiguration().getIPAddress();
+            int port = SRModelConfigurationManager.getCurrentConfiguration().getPort();
+            Log.i("RemoteImageProcessingTask.doInBackground",
+                    String.format("Sending request to  -  %s:%d", ip, port));
+
+            ClientSocketBinary conn = new ClientSocketBinary(InetAddress.getByName(ip), port);
             for (int imgIndex = 0, len = bitmapInfos.size(); imgIndex < len; imgIndex++) {
 
-                if (bitmapInfos.get(imgIndex).isProcessed()) // cached case TODO correct
+                if (bitmapInfos.get(imgIndex).isProcessed()) // cached case
                     continue;
 
                 // try to load the bitmap first
                 Bitmap bitmap = bitmapInfos.get(imgIndex).getBitmap();
                 if (bitmap != null) {
-
                     Log.i("RemoteImageProcessingTask", "Sent Bitmap is being called !");
-
                     conn.sendBitmap(bitmap);
-
                     Log.i("RemoteImageProcessingTask", "Done Sent !");
 
-
-                    // AsyncTask things
-                    //publishProgress(0);
                     if (isCancelled())
                         break;
 

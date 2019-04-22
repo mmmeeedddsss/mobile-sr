@@ -94,6 +94,12 @@ public class SRModelConfigurationManager {
                     case "remote":
                         newConfiguration.setRemote( Boolean.parseBoolean(parser.nextText()) );
                         break;
+                    case "server_ip":
+                        newConfiguration.setIPAddress( parser.nextText() );
+                        break;
+                    case "server_port":
+                        newConfiguration.setPort( Integer.parseInt(parser.nextText()) );
+                        break;
                     case "default_selection":
                         if( Boolean.parseBoolean( parser.nextText() ) )
                             currentConfiguration = newConfiguration;
