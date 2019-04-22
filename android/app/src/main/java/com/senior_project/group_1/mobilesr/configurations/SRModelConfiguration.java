@@ -14,6 +14,8 @@ public class SRModelConfiguration{
     private int INPUT_IMAGE_HEIGHT;
     private int NUM_PARALLEL_BATCH;
     private boolean REMOTE;
+    private String IPAddress;
+    private int Port = 0;
 
     public String getModelName() { return MODEL_NAME; }
     public String getModelPath(){
