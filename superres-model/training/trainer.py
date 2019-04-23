@@ -95,8 +95,14 @@ def wrap_model(data_loader, model, discr_model, img_loss, optimizer, discr_optim
             summarize_collection(tf.get_collection(OPTS.DISCR_LOSSES))
         tf.summary.scalar('discriminator-loss', discr_loss)
         # optimize the loss for the discr model
+        # only optimize discr variables!!!
+        discr_vars = tf.get_collection(tf.GraphKeys.GLOBAL_VARIABLES,
+                                       scope=OPTS.DISCR_SCOPE)
         with tf.control_dependencies(tf.get_collection(OPTS.DISCR_LOSSES)):
-            discr_train_op = discr_optimizer.minimize(discr_loss, global_step=global_step)
+            discr_train_op = discr_optimizer.minimize(
+                discr_loss, 
+                global_step=global_step, 
+                var_list=discr_vars)
         # pack the discr variables together
         discr_syms = (discr_loss, discr_train_op)
     else:
@@ -115,8 +121,11 @@ def wrap_model(data_loader, model, discr_model, img_loss, optimizer, discr_optim
     # merge summaries
     merged_summary = tf.summary.merge_all()
     # insert control dependencies and optimize the loss
+    # only optimize model variables!!!
+    model_vars = tf.get_collection(tf.GraphKeys.GLOBAL_VARIABLES,
+                                   scope=OPTS.MODEL_SCOPE)
     with tf.control_dependencies(tf.get_collection(OPTS.MODEL_LOSSES)):
-        train_op = optimizer.minimize(model_loss, global_step=global_step)
+        train_op = optimizer.minimize(model_loss, global_step=global_step, var_list=model_vars)
     # pack the model variables together
     model_syms = (input_lr_batch, output_hr_batch, model_loss, train_op)
     # return some useful variables
@@ -261,7 +270,7 @@ def main():
         OPTS.DATA_LOADER)
     model = srcnn_x2_weak
     discr_model = srgan_discriminator
-    scheduler = GoodfellowScheduler(1)
+    scheduler = SingleScheduler(True) # GoodfellowScheduler(1)
     img_loss = mse_loss
     optimizer = tf.train.RMSPropOptimizer(args.learning_rate)
     discr_optimizer = tf.train.RMSPropOptimizer(args.discr_learning_rate)
