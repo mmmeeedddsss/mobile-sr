@@ -42,6 +42,12 @@ def parse_arguments():
     arguments = parser.parse_args()
     return arguments
 
+def summarize_collection(loss_collection):
+    """ a small function to add a loss collection to the summary """
+    for tensor in loss_collection:
+        name, _ = tensor.name.split(':') # get the left of the ':' in the name
+        tf.summary.scalar(name, tensor)
+
 def format_loss(loss_collection, loss_values):
     """ a small function that formats a loss string based on a collection for printing """
     strings = []
@@ -84,7 +90,9 @@ def wrap_model(data_loader, model, discr_model, img_loss, optimizer, discr_optim
         # create the losses through the input & output HR images
         model_loss, discr_loss = create_loss_layer(input_hr_batch, output_hr_batch, img_loss, 
                                                    logits_real, logits_fake)
-        # add the discr loss to summaries
+        # add the discr losses to summaries
+        if OPTS.TRAIN['show_detailed_losses']:
+            summarize_collection(tf.get_collection(OPTS.DISCR_LOSSES))
         tf.summary.scalar('discriminator-loss', discr_loss)
         # optimize the loss for the discr model
         with tf.control_dependencies(tf.get_collection(OPTS.DISCR_LOSSES)):
@@ -94,6 +102,8 @@ def wrap_model(data_loader, model, discr_model, img_loss, optimizer, discr_optim
     else:
         model_loss = create_loss_layer(input_hr_batch, output_hr_batch, img_loss)
     # add summaries for interesting variables
+    if OPTS.TRAIN['show_detailed_losses']:
+        summarize_collection(tf.get_collection(OPTS.MODEL_LOSSES))
     tf.summary.scalar('loss', model_loss) # summary for the loss
     tf.summary.image('lr_batch', input_lr_batch) # summary for the input LR
     tf.summary.image('hr_batch', input_hr_batch) # summary for the input HR
