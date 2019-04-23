@@ -25,8 +25,8 @@ def create_loss_layer(input_hr_batch, output_hr_batch, img_loss_fn,
             tf.nn.sigmoid_cross_entropy_with_logits(
                 logits=discr_logits_fake, labels=tf.zeros_like(discr_logits_fake)),
             name='discr-loss-fake') 
-        discr_loss = discr_loss_real + discr_loss_fake
-        tf.add_to_collection(OPTS.DISCR_LOSSES, discr_loss)
+        tf.add_to_collection(OPTS.DISCR_LOSSES, discr_loss_real)
+        tf.add_to_collection(OPTS.DISCR_LOSSES, discr_loss_fake)
 
         # add adversarial loss
         adv_loss = tf.reduce_mean(
@@ -62,7 +62,10 @@ def create_loss_layer(input_hr_batch, output_hr_batch, img_loss_fn,
 
     # sum and return the losses
     total_loss = tf.reduce_sum(tf.get_collection(OPTS.MODEL_LOSSES))
-    total_discr_loss = tf.reduce_sum(tf.get_collection(OPTS.DISCR_LOSSES)) if discr_exists else None
+    if not discr_exists:
+        return total_loss
+
+    total_discr_loss = tf.reduce_sum(tf.get_collection(OPTS.DISCR_LOSSES))
     return total_loss, total_discr_loss
 
 def mse_loss(input_hr_batch, output_hr_batch):

@@ -15,6 +15,7 @@ TRAIN = {
     'model_dir': 'saved-model',
     'print_every': 1,
     'save_every': 100,
+    'show_detailed_losses': True,
 }
 
 LOSS = {

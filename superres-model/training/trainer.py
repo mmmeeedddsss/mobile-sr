@@ -36,13 +36,24 @@ def parse_arguments():
         default=4)
     parser.add_argument(
         '--num-epochs', '-n',
-        help='number of training epochs. Defaults to 1. The epoch is based on the training'
-             ' of the generator, and not the discriminator',
+        help='number of training epochs. Defaults to 1.',
         type=int,
         default=1)
     arguments = parser.parse_args()
     return arguments
 
+def format_loss(loss_collection, loss_values):
+    """ a small function that formats a loss string based on a collection for printing """
+    strings = []
+    total_loss = 0
+    for tensor, val in zip(loss_collection, loss_values):
+        total_loss += val # add to total loss
+        name, _ = tensor.name.split(':') # get the left of the ':' in the name
+        string = f'{name}: {val:.2e}'
+        strings.append(string)
+    if len(loss_collection) > 1:
+        strings.append(f'total: {total_loss:.2e}')
+    return ' + '.join(strings)
 
 def wrap_model(data_loader, model, discr_model, img_loss, optimizer, discr_optimizer, opts):
     # create global step
@@ -81,7 +92,7 @@ def wrap_model(data_loader, model, discr_model, img_loss, optimizer, discr_optim
         # pack the discr variables together
         discr_syms = (discr_loss, discr_train_op)
     else:
-        model_loss, _ = create_loss_layer(input_hr_batch, output_hr_batch, img_loss)
+        model_loss = create_loss_layer(input_hr_batch, output_hr_batch, img_loss)
     # add summaries for interesting variables
     tf.summary.scalar('loss', model_loss) # summary for the loss
     tf.summary.image('lr_batch', input_lr_batch) # summary for the input LR
@@ -110,10 +121,19 @@ def train(model_vars, num_epochs, scheduler, opts):
     model_syms, discr_syms, data_syms, merged_summary = model_vars
     input_lr_sym, output_hr_sym, model_loss_sym, train_op = model_syms
     train_init, val_init = data_syms
+    # show each loss separately if required
+    if opts['show_detailed_losses']:
+        model_loss_syms = tf.get_collection(OPTS.MODEL_LOSSES)
+    else:
+        model_loss_syms = (model_loss_sym,)
     # also unpack discr vars if they exist
     discr_exists = discr_syms is not None
     if discr_exists:
         discr_loss_sym, discr_train_op = discr_syms
+        if opts['show_detailed_losses']:
+            discr_loss_syms = tf.get_collection(OPTS.DISCR_LOSSES)
+        else:
+            discr_loss_syms = (discr_loss_sym,)
     # create a saver & global step
     saver = tf.train.Saver()
     global_step = tf.train.get_global_step()
@@ -153,20 +173,22 @@ def train(model_vars, num_epochs, scheduler, opts):
                         while True:
                             # if it is the discriminator's turn, train the discriminator
                             if discr_exists and scheduler.train_discriminator():
-                                _, discr_loss, step = sess.run(
-                                    [discr_train_op, discr_loss_sym, global_step])
+                                _, step, *discr_losses = sess.run(
+                                    [discr_train_op, global_step, *discr_loss_syms])
                                 # mark the network and calc. loss
-                                loss = discr_loss
+                                loss_string = format_loss(discr_loss_syms, discr_losses)
                                 network = 'discriminator'
                             else:
                                 # run an iteration, get the loss and step to print them out
                                 # also run on the train op to force gradient backprop
-                                _, loss, step = sess.run([train_op, model_loss_sym, global_step])
+                                _, step, *model_losses = sess.run(
+                                    [train_op, global_step, *model_loss_syms])
+                                loss_string = format_loss(model_loss_syms, model_losses)
                                 network = 'generator'
 
                             # print step & loss, if required by the step
                             if step % opts['print_every'] == 0:
-                                print(f'Step {step}: {network} loss {loss:.2e}')
+                                print(f'Step {step}: {network} -> {loss_string}')
 
                             # save a checkpoint, if required by the step
                             if step % opts['save_every'] == 0:
@@ -234,7 +256,7 @@ def main():
     optimizer = tf.train.RMSPropOptimizer(args.learning_rate)
     discr_optimizer = tf.train.RMSPropOptimizer(args.discr_learning_rate)
     # combine the parts to create the full model
-    model_vars = wrap_model(data_loader, model, discr_model, img_loss, optimizer, discr_optimizer, OPTS.MODEL)
+    model_vars = wrap_model(data_loader, model, discr_model, img_loss, optimizer, discr_optimizer, OPTS.MODEL)    
     # do the training
     train(model_vars, args.num_epochs, scheduler, OPTS.TRAIN)
 
