@@ -5,6 +5,7 @@ import time
 import subprocess
 import sys
 import threading
+import hashlib
 from argparse import ArgumentParser
 
 import sr
@@ -35,20 +36,32 @@ def parse_arguments():
   args = parser.parse_args()
   return args
 
-def submit(img_data, model):
+def submit(img_data):
   sr_queue.put(img_data)
 
 def lookup(md5):
-  # TODO
-  pass
+  try:
+    img_file = open(md5, 'r')
+    data = img_file.read()
+    img_file.close()
+    return data
+  except:
+    return None
+
+def save_to_fs(hr_img, md5):
+  with open(md5, 'w') as f:
+    f.write(hr_img)
 
 # SR processing
 # given low-res image data
 # and model path
 # return high-res image data
 def process(lr_img, model):
-  hr_img = sr.apply_sr(lr_img, model)
-  return hr_img
+  while True:
+    lr_img = sr_queue.get()
+    md5 = hexdigest.md5(lr_img).hexdigest()
+    hr_img = sr.apply_sr(lr_img, model)
+    save_to_fs(hr_img, md5)
 
 # logger function
 # active if VERBOSE is defined
@@ -91,7 +104,7 @@ def handle_new_request(clientSock, model):
 
   # apply SR on file
   log('Submitting job...')
-  hr_data = submit(imageData, model)
+  hr_data = submit(imageData)
   log('Job submitted.')
 
 def handle_prev_req(clientSock):
