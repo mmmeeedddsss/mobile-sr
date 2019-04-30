@@ -166,12 +166,17 @@ if __name__ == '__main__':
   print('Listening on: ' + str(addr))
 
   # start processing images from the queue
-  threading.Thread(target=process, args=(model_path,)).start()
+  process_t = threading.Thread(target=process, args=(model_path,))
+  process_t.daemon = True
+  process_t.start()
 
   while True:
-    clientSock, clientAddr = sock.accept()
-    req_handler_t = threading.Thread(target=handle_request, args=(clientSock,))
-    req_handler_t.start()
+    try:
+      clientSock, clientAddr = sock.accept()
+      req_handler_t = threading.Thread(target=handle_request, args=(clientSock,))
+      req_handler_t.start()
+    except KeyboardInterrupt:
+      break
 
   print('Closing connection...')
   sock.close()
