@@ -35,6 +35,13 @@ def parse_arguments():
   args = parser.parse_args()
   return args
 
+def submit(img_data, model):
+  sr_queue.put(img_data)
+
+def lookup(md5):
+  # TODO
+  pass
+
 # SR processing
 # given low-res image data
 # and model path
@@ -56,9 +63,17 @@ def log(s):
 # data to send
 # exception to that: single-image mode
 def handle_request(clientSock, model):
+  request_type = int(clientSock.recv(1))
+  if request_type == 0:
+    handle_new_request(clientSock, model)
+  elif request_type == 1:
+    handle_prev_req(clientSock, model)
+  else:
+    print('Not recognized message')
+    sys.exit(1)
+
+def handle_new_request(clientSock, model):
   imageSize = int(clientSock.recv(10))
-  if imageSize == 0:
-    return True
   log('Reading ' + str(imageSize) + ' bytes of data...')
 
   # Get data from client
@@ -75,22 +90,26 @@ def handle_request(clientSock, model):
   log(str(len(imageData)) + ' bytes read.')
 
   # apply SR on file
-  log('Superresolution started...')
-  t = time.time()
-  hr_data = process(imageData, model)
-  t = time.time() - t
-  log('Superresolution finished.')
+  log('Submitting job...')
+  hr_data = submit(imageData, model)
+  log('Job submitted.')
 
-  # send file back
-  log('Sending SR image...')
-  hr_size = str(len(hr_data))
-  log('Sending ' + hr_size + ' bytes of data')
-  clientSock.send(hr_data)
+def handle_prev_req(clientSock):
+  # get MD5 sum of image
+  md5 = clientSock.recv(16)
+  
+  response = lookup(md5)
+  if response:
+    # send file back
+    log('Sending SR image...')
+    hr_size = str(len(response))
+    log('Sending ' + hr_size + ' bytes of data')
+    clientSock.send(response)
 
-  log('File sent.')
-  log('Time taken: ' + str(t))
-
-  return False
+    log('File sent.')
+  else:
+    log('Not found.')
+    clientSock.send(b'\x00')
 
 if __name__ == '__main__':
   args = parse_arguments()
