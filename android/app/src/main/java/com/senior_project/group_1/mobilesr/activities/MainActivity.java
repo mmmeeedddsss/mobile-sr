@@ -17,6 +17,7 @@ import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
+import android.widget.ImageView;
 import android.widget.Toast;
 
 import com.senior_project.group_1.mobilesr.configurations.ApplicationConstants;
@@ -40,7 +41,7 @@ public class MainActivity extends AppCompatActivity {
     static final int REQUEST_IMAGE_CAPTURE = 111;
     static final int REQUEST_IMAGE_SELECT = 112;
 
-    Button pickPhotoButton, takePhotoButton, settingsButton, settingsButton2, tutorialButton;
+    ImageView pickPhotoImageView, takePhotoImageView, settingsImageView, settingsButton2, tutorialImageView;
     Button tcpTestButton;
     private Uri mImageUri;
 
@@ -53,10 +54,10 @@ public class MainActivity extends AppCompatActivity {
         createNotificationChannel();
 
         // Pick photo button activity
-        pickPhotoButton = (Button) findViewById(R.id.buttonPickPhoto);
+        pickPhotoImageView = (ImageView) findViewById(R.id.ic_gallery);
 
         // Capture Pick Photo clicks
-        pickPhotoButton.setOnClickListener(new View.OnClickListener() {
+        pickPhotoImageView.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 pickImageFromGallery();
@@ -64,10 +65,10 @@ public class MainActivity extends AppCompatActivity {
         });
 
         // Take photo button activity
-        takePhotoButton = (Button) findViewById(R.id.buttonTakePhoto);
+        takePhotoImageView = (ImageView) findViewById(R.id.ic_take_photo);
 
         // Take Photo clicks hasSystemFeature(PackageManager.FEATURE_CAMERA_ANY)
-        takePhotoButton.setOnClickListener(new View.OnClickListener() {
+        takePhotoImageView.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 captureImage();
@@ -75,10 +76,10 @@ public class MainActivity extends AppCompatActivity {
         });
 
         // Settings button activitys
-        settingsButton = (Button) findViewById(R.id.buttonSetttings);
+        settingsImageView = (ImageView) findViewById(R.id.ic_settings);
 
         // Settings button clicks
-        settingsButton.setOnClickListener(new View.OnClickListener() {
+        settingsImageView.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 Intent settingsIntent = new Intent(MainActivity.this, SettingsActivity.class);
@@ -86,7 +87,7 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
-        // Settings button activitys
+       /* // Settings button activitys
         settingsButton2 = (Button) findViewById(R.id.buttonSetttings2);
 
         // Settings button clicks
@@ -96,13 +97,13 @@ public class MainActivity extends AppCompatActivity {
                 Intent settingsIntent = new Intent(MainActivity.this, SettingsActivity2.class);
                 startActivity(settingsIntent);
             }
-        });
+        });*/
 
         // Tutorial button activity
-        tutorialButton = (Button) findViewById(R.id.buttonTutorial);
+        tutorialImageView = (ImageView) findViewById(R.id.ic_tutorial);
 
         // Tutorial button clicks
-        tutorialButton.setOnClickListener(new View.OnClickListener() {
+        tutorialImageView.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 Intent tutorialIntent = new Intent(MainActivity.this, TutorialActivity.class);

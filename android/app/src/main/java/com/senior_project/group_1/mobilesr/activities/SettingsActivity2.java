@@ -9,9 +9,11 @@ import android.media.RingtoneManager;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
+import android.preference.EditTextPreference;
 import android.preference.ListPreference;
 import android.preference.Preference;
 import android.preference.PreferenceActivity;
+import android.preference.SwitchPreference;
 import android.support.v7.app.ActionBar;
 import android.preference.PreferenceFragment;
 import android.preference.PreferenceManager;
@@ -21,6 +23,8 @@ import android.view.MenuItem;
 import android.support.v4.app.NavUtils;
 
 import com.senior_project.group_1.mobilesr.R;
+import com.senior_project.group_1.mobilesr.configurations.SRModelConfiguration;
+import com.senior_project.group_1.mobilesr.configurations.SRModelConfigurationManager;
 
 import java.util.List;
 
@@ -45,6 +49,35 @@ public class SettingsActivity2 extends AppCompatPreferenceActivity {
         @Override
         public boolean onPreferenceChange(Preference preference, Object value) {
             String stringValue = value.toString();
+            String preferenceValue = PreferenceManager
+                    .getDefaultSharedPreferences(preference.getContext())
+                    .getString(preference.getKey(), "");
+            SRModelConfiguration configuration  = SRModelConfigurationManager.getCurrentConfiguration();
+            if(preference instanceof EditTextPreference) {
+                if(preference.getKey().equals("input_image_width"))
+                    configuration.setInputImageWidth(Integer.parseInt(preferenceValue));
+                if(preference.getKey().equals("input_image_height"))
+                    configuration.setInputImageHeight(Integer.parseInt(preferenceValue));
+                if(preference.getKey().equals("input_image_width"))
+                    configuration.setInputImageWidth(Integer.parseInt(preferenceValue));
+                if(preference.getKey().equals("rescaling_factor"))
+                    configuration.setRescalingFactor(Integer.parseInt(preferenceValue));
+                if(preference.getKey().equals("parallel_batch_number"))
+                    configuration.setNumParallelBatch(Integer.parseInt(preferenceValue));
+                if(preference.getKey().equals("ip"))
+                    configuration.setIPAddress(preferenceValue);
+                if(preference.getKey().equals("port"))
+                    configuration.setPort(Integer.parseInt(preferenceValue));
+                preference.setSummary(stringValue);
+            }
+
+            if(preference instanceof SwitchPreference) {
+                if(preference.getKey().equals("use_nnapi_switch"))
+                    configuration.setNNAPISetting(Boolean.parseBoolean(preferenceValue));
+                if(preference.getKey().equals("model_rescales_switch"))
+                    configuration.setModelRescales(Boolean.parseBoolean(preferenceValue));
+                preference.setSummary(stringValue);
+            }
 
             if (preference instanceof ListPreference) {
                 // For list preferences, look up the correct display value in
@@ -57,11 +90,16 @@ public class SettingsActivity2 extends AppCompatPreferenceActivity {
                         index >= 0
                                 ? listPreference.getEntries()[index]
                                 : null);
+                if(preference.getKey().equals("model_name_list")) {
+                    if(index >= 0) {
+                        final StringBuilder sb = new StringBuilder(listPreference.getEntries()[index].length());
+                        sb.append(listPreference.getEntries()[index]);
+                        configuration.setModelName(sb.toString());
 
-            } else {
-                // For all other preferences, set the summary to the value's
-                // simple string representation.
-                preference.setSummary(stringValue);
+                    }
+                }
+
+
             }
             return true;
         }
