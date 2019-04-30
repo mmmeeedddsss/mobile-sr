@@ -74,7 +74,10 @@ def process(model):
     lr_img = sr_queue.get()
     md5 = hashlib.md5(lr_img).hexdigest()
     hr_img = sr.apply_sr(lr_img, model)
+    log('SR process completed.')
+    log('Saving to file...')
     save_to_fs(hr_img, md5)
+    log('Saved to file.')
 
 # logger function
 # active if VERBOSE is defined
@@ -129,8 +132,10 @@ def handle_prev_req(clientSock):
   # get MD5 sum of image
   md5 = clientSock.recv(32)
   
+  log('Looking up the hash...')
   response = lookup(md5)
   if response:
+    log('SR image found.')
     # send file back
     log('Sending SR image...')
     hr_size = str(len(response))
