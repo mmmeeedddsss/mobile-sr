@@ -24,12 +24,10 @@ i2 = np.array(i2).astype('float32') / 255.0
 inp = tf.placeholder(tf.float32, [1, 224, 224, 3])
 inp2 = tf.placeholder(tf.float32, [1, 224, 224, 3])
 
-with tf.variable_scope('vgg19'):
-    vgg = Vgg19()
-    vgg.build(inp)
-with tf.variable_scope('vgg19', reuse=True):
-    vgg2 = Vgg19()
-    vgg2.build(inp2)
+vgg = Vgg19()
+vgg.build(inp)
+vgg2 = Vgg19()
+vgg2.build(inp2)
 
 tf.summary.image('i1', inp)
 tf.summary.image('i2', inp2)
