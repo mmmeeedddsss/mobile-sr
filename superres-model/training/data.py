@@ -18,9 +18,9 @@ def decode_png(serialized_record):
 
 
 def normalize_pair(hr_img, lr_img):
-    ''' a function for mapping an image pair from [0,255]+uint8 to [-.5,.5]-float32 '''
-    hr_norm = tf.cast(hr_img, tf.float32) * (1.0 / 255.0) - 0.5
-    lr_norm = tf.cast(lr_img, tf.float32) * (1.0 / 255.0) - 0.5
+    ''' a function for mapping an image pair from [0,255]-uint8 to [-1,1]-float32 '''
+    hr_norm = tf.cast(hr_img, tf.float32) / 127.5 - 1.0
+    lr_norm = tf.cast(lr_img, tf.float32) / 127.5 - 1.0
     return hr_norm, lr_norm
 
 
@@ -43,25 +43,16 @@ def create_png_pair_dataset(input_files, batch_size, opts):
 
 def create_combined_iterator(training_set, validation_set):
     ''' a function that creates an iterator that can be reinitialized over both datasets '''
-    # create a handle for iterator feeding
-    handle = tf.placeholder(tf.string, shape=[])
-    # create an iterator through the handle & defined structure
-    itr = tf.data.Iterator.from_string_handle(handle, training_set.output_types, 
-                                              training_set.output_shapes)
+    # create an iterator through the defined structure
+    itr = tf.data.Iterator.from_structure(training_set.output_types, 
+                                          training_set.output_shapes)
     # create the tensor to get the next element (the actual iterator)
     itr_next = itr.get_next()
-    # create reinitializable iterators, don't forget to get handles for both later!
-    training_itr = training_set.make_initializable_iterator()
-    validation_itr = validation_set.make_initializable_iterator()
-    # add two extra infinite training iterators for the discriminator
-    # the reason we require two iterators is that we want to get the same
-    # data twice: once for training with the original data, and then
-    # training with the superresolved data
-    discr_set = training_set.repeat()
-    discr_itr1 = discr_set.make_one_shot_iterator()
-    discr_itr2 = discr_set.make_one_shot_iterator()
+    # create reinitialization operators
+    training_init = itr.make_initializer(training_set)
+    validation_init = itr.make_initializer(validation_set)
     # return everything
-    return handle, itr_next, training_itr, validation_itr, discr_itr1, discr_itr2
+    return itr_next, training_init, validation_init
 
 
 def create_combined_data_loader(training_data_file, validation_data_file, 

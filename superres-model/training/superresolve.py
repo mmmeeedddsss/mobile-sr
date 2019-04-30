@@ -46,14 +46,14 @@ def load_model(sess, model_path):
 
 def bgr2rgbnb(img):
     rgb = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
-    rgbnorm = rgb.astype('float32') * (1.0 / 255.0) - 0.5
+    rgbnorm = rgb.astype('float64') / 127.5 - 1.0
     batched = np.expand_dims(rgbnorm, axis=0)
     return batched
 
 
 def rgbnb2bgr(img):
     rgbnorm = np.squeeze(img)
-    rgb = ((rgbnorm + 0.5) * 255).astype('uint8')
+    rgb = ((rgbnorm + 1.0) * 127.5).astype('uint8')
     bgr = cv2.cvtColor(rgb, cv2.COLOR_RGB2BGR)
     return bgr
 

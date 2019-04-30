@@ -36,21 +36,38 @@ def parse_arguments():
         default=4)
     parser.add_argument(
         '--num-epochs', '-n',
-        help='number of training epochs. Defaults to 1. The epoch is based on the training'
-             ' of the generator, and not the discriminator',
+        help='number of training epochs. Defaults to 1.',
         type=int,
         default=1)
     arguments = parser.parse_args()
     return arguments
 
+def summarize_collection(loss_collection):
+    """ a small function to add a loss collection to the summary """
+    for tensor in loss_collection:
+        name, _ = tensor.name.split(':') # get the left of the ':' in the name
+        tf.summary.scalar(name, tensor)
+
+def format_loss(loss_collection, loss_values):
+    """ a small function that formats a loss string based on a collection for printing """
+    strings = []
+    total_loss = 0
+    for tensor, val in zip(loss_collection, loss_values):
+        total_loss += val # add to total loss
+        name, _ = tensor.name.split(':') # get the left of the ':' in the name
+        string = f'{name}: {val:.2e}'
+        strings.append(string)
+    if len(loss_collection) > 1:
+        strings.append(f'total: {total_loss:.2e}')
+    return ' + '.join(strings)
 
 def wrap_model(data_loader, model, discr_model, img_loss, optimizer, discr_optimizer, opts):
     # create global step
     global_step = tf.train.create_global_step()
     # extract the data loader variables
-    handle, itr_next, training_itr, val_itr, discr_itr1, discr_itr2 = data_loader
+    itr_next, training_init, val_init = data_loader
     # pack some necessary ones together
-    data_syms = (handle, training_itr, val_itr, discr_itr1, discr_itr2)
+    data_syms = (training_init, val_init)
     # load the data batches
     input_hr_batch, input_lr_batch = itr_next
     # extra for naming
@@ -64,34 +81,37 @@ def wrap_model(data_loader, model, discr_model, img_loss, optimizer, discr_optim
     discr_syms = None
     # forward through discriminator as well, pass as None if none
     if discr_model:
-        # create a boolean placeholder to decide on passing either original or fake
-        use_original = tf.placeholder(tf.bool, shape=[])
-        # pass either original or generated HR images through the discriminator
+        # pass the real image through the discriminator
         with tf.variable_scope(OPTS.DISCR_SCOPE):
-            # select the input either from the dataset or from the superresolution output
-            discr_input = tf.cond(use_original, lambda: input_hr_batch, lambda: output_hr_batch)
-            # pass the input through the discriminator
-            discr_output = discr_model(discr_input)
-            # create labels matching the input type
-            discr_labels = tf.cond(
-                use_original,
-                lambda: tf.ones_like(discr_output),
-                lambda: tf.zeros_like(discr_output))
+            logits_real = discr_model(input_hr_batch)
+        # pass the fake image through the discriminator, reusing weights
+        with tf.variable_scope(OPTS.DISCR_SCOPE, reuse=True):
+            logits_fake = discr_model(output_hr_batch)
         # create the losses through the input & output HR images
         model_loss, discr_loss = create_loss_layer(input_hr_batch, output_hr_batch, img_loss, 
-                                                   use_original, discr_output, discr_labels)
-        # add the discr loss to summaries
+                                                   logits_real, logits_fake)
+        # add the discr losses to summaries
+        if OPTS.TRAIN['show_detailed_losses']:
+            summarize_collection(tf.get_collection(OPTS.DISCR_LOSSES))
         tf.summary.scalar('discriminator-loss', discr_loss)
         # optimize the loss for the discr model
+        # only optimize discr variables!!!
+        discr_vars = tf.get_collection(tf.GraphKeys.GLOBAL_VARIABLES,
+                                       scope=OPTS.DISCR_SCOPE)
         with tf.control_dependencies(tf.get_collection(OPTS.DISCR_LOSSES)):
-            discr_train_op = discr_optimizer.minimize(discr_loss)
+            discr_train_op = discr_optimizer.minimize(
+                discr_loss, 
+                global_step=global_step, 
+                var_list=discr_vars)
         # pack the discr variables together
-        discr_syms = (use_original, discr_loss, discr_train_op)
+        discr_syms = (discr_loss, discr_train_op)
     else:
-        model_loss, _ = create_loss_layer(input_hr_batch, output_hr_batch, img_loss)
+        model_loss = create_loss_layer(input_hr_batch, output_hr_batch, img_loss)
     # add summaries for interesting variables
+    if OPTS.TRAIN['show_detailed_losses']:
+        summarize_collection(tf.get_collection(OPTS.MODEL_LOSSES))
     tf.summary.scalar('loss', model_loss) # summary for the loss
-    tf.summary.image('lr_patch', input_lr_batch) # summary for the input LR
+    tf.summary.image('lr_batch', input_lr_batch) # summary for the input LR
     tf.summary.image('hr_batch', input_hr_batch) # summary for the input HR
     tf.summary.image('output_batch', output_hr_batch) # summary for the output HR batch
     # also summarize trained weights as histograms
@@ -101,8 +121,11 @@ def wrap_model(data_loader, model, discr_model, img_loss, optimizer, discr_optim
     # merge summaries
     merged_summary = tf.summary.merge_all()
     # insert control dependencies and optimize the loss
+    # only optimize model variables!!!
+    model_vars = tf.get_collection(tf.GraphKeys.GLOBAL_VARIABLES,
+                                   scope=OPTS.MODEL_SCOPE)
     with tf.control_dependencies(tf.get_collection(OPTS.MODEL_LOSSES)):
-        train_op = optimizer.minimize(model_loss, global_step=global_step)
+        train_op = optimizer.minimize(model_loss, global_step=global_step, var_list=model_vars)
     # pack the model variables together
     model_syms = (input_lr_batch, output_hr_batch, model_loss, train_op)
     # return some useful variables
@@ -116,22 +139,25 @@ def train(model_vars, num_epochs, scheduler, opts):
     # unpack the model variables
     model_syms, discr_syms, data_syms, merged_summary = model_vars
     input_lr_sym, output_hr_sym, model_loss_sym, train_op = model_syms
-    handle, training_itr, val_itr, discr_itr1, discr_itr2 = data_syms
+    train_init, val_init = data_syms
+    # show each loss separately if required
+    if opts['show_detailed_losses']:
+        model_loss_syms = tf.get_collection(OPTS.MODEL_LOSSES)
+    else:
+        model_loss_syms = (model_loss_sym,)
     # also unpack discr vars if they exist
     discr_exists = discr_syms is not None
     if discr_exists:
-        use_orig_sym, discr_loss_sym, discr_train_op = discr_syms
+        discr_loss_sym, discr_train_op = discr_syms
+        if opts['show_detailed_losses']:
+            discr_loss_syms = tf.get_collection(OPTS.DISCR_LOSSES)
+        else:
+            discr_loss_syms = (discr_loss_sym,)
     # create a saver & global step
     saver = tf.train.Saver()
     global_step = tf.train.get_global_step()
     # start a session
     with tf.Session() as sess:
-        # create iterator handles
-        training_handle, val_handle = sess.run([training_itr.string_handle(),
-                                                val_itr.string_handle()])
-        if discr_exists:
-            discr_orig_handle, discr_fake_handle = sess.run([discr_itr1.string_handle(),
-                                                             discr_itr2.string_handle()])
         # check for the existence of the checkpoint directory
         if tf.gfile.Exists(opts['checkpoint_dir']):
             # find the last checkpoint file
@@ -160,36 +186,28 @@ def train(model_vars, num_epochs, scheduler, opts):
                 for _ in range(num_epochs):
                     try:
                         # run the training initializer
-                        sess.run(training_itr.initializer)
-                        # end of training is signaled by a tf.errors.OutOfRangeError
-                        # note that the exception will only be raised by the training
-                        # initializer since the discr. set is repeated ad infinitum
-                        # exception, so our while loop runs forever
+                        sess.run(train_init)
+                        # end of training is signaled by a tf.errors.OutOfRangeError,
+                        # so we need a try-except structure
                         while True:
                             # if it is the discriminator's turn, train the discriminator
                             if discr_exists and scheduler.train_discriminator():
-                                # train a step with original data
-                                _, discr_loss1, step = sess.run(
-                                    [discr_train_op, discr_loss_sym, global_step],
-                                    feed_dict={handle: discr_orig_handle, use_orig_sym: True})
-                                # train a step with the fake data
-                                _, discr_loss2 = sess.run(
-                                    [discr_train_op, discr_loss_sym],
-                                    feed_dict={handle: discr_fake_handle, use_orig_sym: False})
+                                _, step, *discr_losses = sess.run(
+                                    [discr_train_op, global_step, *discr_loss_syms])
                                 # mark the network and calc. loss
-                                loss = (discr_loss1 + discr_loss2) * 0.5
+                                loss_string = format_loss(discr_loss_syms, discr_losses)
                                 network = 'discriminator'
                             else:
                                 # run an iteration, get the loss and step to print them out
                                 # also run on the train op to force gradient backprop
-                                _, loss, step = sess.run([train_op, model_loss_sym, global_step],
-                                                          feed_dict={handle: training_handle,
-                                                                     use_orig_sym: False})
+                                _, step, *model_losses = sess.run(
+                                    [train_op, global_step, *model_loss_syms])
+                                loss_string = format_loss(model_loss_syms, model_losses)
                                 network = 'generator'
 
                             # print step & loss, if required by the step
                             if step % opts['print_every'] == 0:
-                                print(f'Step {step}: {network} loss {loss:.2e}')
+                                print(f'Step {step}: {network} -> {loss_string}')
 
                             # save a checkpoint, if required by the step
                             if step % opts['save_every'] == 0:
@@ -198,8 +216,7 @@ def train(model_vars, num_epochs, scheduler, opts):
                             if step % opts['log_every'] == 0:
                                 # rerun to get a merged summary, without touching other ops
                                 # TODO: fix this summary mess!
-                                summary = sess.run(merged_summary, 
-                                    feed_dict={handle: training_handle, use_orig_sym: False})
+                                summary = sess.run(merged_summary)
                                 # write the summary
                                 train_writer.add_summary(summary, step)
                     # wait for the dataset to be exhausted (tf.errors.OutOfRangeError)
@@ -208,21 +225,21 @@ def train(model_vars, num_epochs, scheduler, opts):
                         print('End of epoch reached. Calculating validation error...')
                         try:
                             # run the validation initializer
-                            sess.run(val_itr.initializer)
+                            sess.run(val_init)
                             # run over the whole set again, calculating losses and counting
                             model_losses = []
                             vc = count(0)
                             while True:
                                 print(f'\rProcessing validation batch {next(vc)}...', end='')
                                 # calculate the loss of a batch
-                                loss = sess.run(loss_sym, feed_dict={handle: val_handle})
+                                loss = sess.run(model_loss_sym)
                                 # append it to losses
-                                losses.append(loss)
+                                model_losses.append(loss)
                         # validation dataset is exhausted
                         except tf.errors.OutOfRangeError: 
                             # calculate the loss with numpy, print it
-                            avg_loss = np.mean(np.array(losses))
-                            print(f'Average validation loss: {avg_loss:.2e}')
+                            avg_loss = np.mean(np.array(model_losses))
+                            print(f'Average validation loss of sr-model: {avg_loss:.2e}')
                             # record it by manually creating a Summary protobuf
                             val_loss_summary = tf.Summary(value=[
                                 tf.Summary.Value(tag='loss', simple_value=avg_loss)])
@@ -253,12 +270,12 @@ def main():
         OPTS.DATA_LOADER)
     model = srcnn_x2_weak
     discr_model = srgan_discriminator
-    scheduler = GoodfellowScheduler(1)
+    scheduler = SingleScheduler(True) # GoodfellowScheduler(1)
     img_loss = mse_loss
-    optimizer = tf.train.AdamOptimizer(args.learning_rate)
-    discr_optimizer = tf.train.AdamOptimizer(args.discr_learning_rate)
+    optimizer = tf.train.RMSPropOptimizer(args.learning_rate)
+    discr_optimizer = tf.train.RMSPropOptimizer(args.discr_learning_rate)
     # combine the parts to create the full model
-    model_vars = wrap_model(data_loader, model, discr_model, img_loss, optimizer, discr_optimizer, OPTS.MODEL)
+    model_vars = wrap_model(data_loader, model, discr_model, img_loss, optimizer, discr_optimizer, OPTS.MODEL)    
     # do the training
     train(model_vars, args.num_epochs, scheduler, OPTS.TRAIN)
 
