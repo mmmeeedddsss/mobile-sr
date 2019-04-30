@@ -7,6 +7,7 @@ import inspect
 
 VGG_MEAN = [103.939, 116.779, 123.68]
 
+TF_CONSTS = {}
 
 class Vgg19:
     def __init__(self, vgg19_npy_path=None):
@@ -118,11 +119,17 @@ class Vgg19:
 
             return fc
 
+    def _get_filter_wrapper(self, name, index, cname):
+        key = name + ':' + cname
+        if key not in TF_CONSTS:
+            TF_CONSTS[key] = tf.constant(self.data_dict[name][index], name=cname)
+        return TF_CONSTS[key]
+
     def get_conv_filter(self, name):
-        return tf.constant(self.data_dict[name][0], name="filter")
+        return self._get_filter_wrapper(name, 0, 'filter')
 
     def get_bias(self, name):
-        return tf.constant(self.data_dict[name][1], name="biases")
+        return self._get_filter_wrapper(name, 1, 'biases')
 
     def get_fc_weight(self, name):
-        return tf.constant(self.data_dict[name][0], name="weights")
+        return self._get_filter_wrapper(name, 0, 'weights')

@@ -38,8 +38,10 @@ summary = tf.summary.merge_all()
 # run the images through the network
 with tf.Session() as sess:
     with tf.summary.FileWriter('log/test', sess.graph) as writer:
-        summ = sess.run(summary, feed_dict={inp: i1.reshape(1, 224, 224, 3), 
-                                            inp2: i2.reshape(1, 224, 224, 3)})
+        o1, o2, summ = sess.run(
+            [inp, inp2, summary], 
+            feed_dict={inp: i1.reshape(1, 224, 224, 3), 
+                       inp2: i2.reshape(1, 224, 224, 3)})
         writer.add_summary(summ, 1)
 
     tf.saved_model.simple_save(
@@ -47,3 +49,5 @@ with tf.Session() as sess:
         'model',
         inputs={'i1': inp, 'i2': inp2},
         outputs={'o1': vgg.conv1_1, 'o2': vgg.conv1_1})
+
+print(np.sum(o1 - o2))
