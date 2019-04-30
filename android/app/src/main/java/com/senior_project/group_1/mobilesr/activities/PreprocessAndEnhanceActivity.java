@@ -1,11 +1,13 @@
 package com.senior_project.group_1.mobilesr.activities;
 
 import android.content.ClipData;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.View;
@@ -14,10 +16,7 @@ import com.senior_project.group_1.mobilesr.BuildConfig;
 import com.senior_project.group_1.mobilesr.img_processing.ImageProcessingTask;
 import com.senior_project.group_1.mobilesr.img_processing.UserSelectedBitmapInfo;
 import com.senior_project.group_1.mobilesr.img_processing.ImageProcessingDialog;
-import com.senior_project.group_1.mobilesr.img_processing.LocalImageProcessingTask;
 import com.senior_project.group_1.mobilesr.R;
-import com.senior_project.group_1.mobilesr.configurations.SRModelConfiguration;
-import com.senior_project.group_1.mobilesr.configurations.SRModelConfigurationManager;
 import com.senior_project.group_1.mobilesr.img_processing.BitmapHelpers;
 import com.senior_project.group_1.mobilesr.views.ZoomableImageView;
 import ru.dimorinny.floatingtextbutton.FloatingTextButton;
@@ -95,7 +94,28 @@ public abstract class PreprocessAndEnhanceActivity extends AppCompatActivity {
         });
 
         saveButton = findViewById(R.id.save_image_button);
-        saveButton.setOnClickListener(v -> BitmapHelpers.saveImageExternal(imageView.getFullBitmap(), getApplicationContext()));
+        saveButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                CharSequence cs[] = {"Override", "Save as new", "Save only processed parts"};
+                new AlertDialog.Builder(PreprocessAndEnhanceActivity.this)
+                        .setTitle("Select Saving Preferance")
+                        .setItems( cs, (dialog, which) -> {
+                            if (which == 0){
+                                BitmapHelpers.saveImageInternal(imageView.getFullBitmap(),
+                                        bitmapInfos.get(imgIndex).getNonProcessedUri(), getApplicationContext());
+                            }
+                            else if (which == 1){
+                                BitmapHelpers.saveImageExternal(imageView.getFullBitmap(), getApplicationContext());
+                            }
+                            else if (which == 2){
+                                ArrayList<Bitmap> processedBitmaps = imageView.getProcessedBitmaps();
+                                for ( Bitmap bm : processedBitmaps )
+                                    BitmapHelpers.saveImageExternal(bm, getApplicationContext());
+                            }
+                        }).show();
+            }
+        });
 
         FloatingActionButton fab = findViewById(R.id.fab);
         fab.setOnClickListener(new View.OnClickListener() {
@@ -271,4 +291,6 @@ public abstract class PreprocessAndEnhanceActivity extends AppCompatActivity {
         }
         isFABOpen = !isFABOpen;
     }
+
+
 }

@@ -460,6 +460,14 @@ public class ZoomableImageView extends AppCompatImageView {
         return resizedBitmap;
     }
 
+    public ArrayList<Bitmap> getProcessedBitmaps(){
+        ArrayList<Bitmap> bms = new ArrayList<>();
+        for (ProcessedBitmapViewInfo bmInfo : processedBitmaps) {
+            bms.add(bmInfo.processedBitmap);
+        }
+        return bms;
+    }
+
 
     public Bitmap getCurrentBitmap() {
         return BitmapHelpers.cropBitmapUsingSubselection(this.bm, src_rect);
