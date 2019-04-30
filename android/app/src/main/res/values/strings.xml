@@ -23,6 +23,12 @@
     <string name="title_rescaling_factor">Rescaling Factor</string>
     <string name="pref_default_rescaling_factor">2</string>
 
+    <string name="title_ip">IP</string>
+    <string name="pref_default_ip">0.0.0.0</string>
+
+    <string name="title_port">PORT</string>
+    <string name="pref_default_port">5054</string>
+
     <string name="title_model_name">Model Name</string>
     <string name="pref_default_model_name">SRCNN_NR_256</string>
     <string-array name="model_name_list_titles">
