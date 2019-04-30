@@ -4,6 +4,7 @@ import os
 import time
 import subprocess
 import sys
+import threading
 from argparse import ArgumentParser
 
 import sr
@@ -25,9 +26,6 @@ def parse_arguments():
   parser.add_argument(
     '--port',
     help='bind to port')
-  parser.add_argument(
-    '--single', action='store_true',
-    help='single image mode')
   parser.add_argument(
     '--verbose', action='store_true',
     help='enable verbose mode')
@@ -113,14 +111,11 @@ if __name__ == '__main__':
 
   print('Listening on: ' + str(addr))
 
-  clientSock, clientAddr = sock.accept()
+  while True:
+    clientSock, clientAddr = sock.accept()
+    req_handler_t = threading.Thread(target=handle_request, args=(clientSock, model_path))
+    req_handler_t.start()
 
-  if args.single:
-    handle_request(clientSock, model_path)
-  else:
-    completed = False
-    while not completed:
-      completed = handle_request(clientSock, model_path)
   print('Closing connection...')
   clientSock.close()
   sock.close()
