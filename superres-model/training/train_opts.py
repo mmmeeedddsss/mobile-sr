@@ -21,7 +21,9 @@ TRAIN = {
 LOSS = {
     'l2_mult': 0.0,
     'discr_l2_mult': 0.0,
-    'adversarial_mult': 1e-3,
+    'adversarial_mult': 0.0,
+    'mse_mult': 0.1,
+    'perceptual_mult': 0.9
 }
 
 # scope names to separate related variables
