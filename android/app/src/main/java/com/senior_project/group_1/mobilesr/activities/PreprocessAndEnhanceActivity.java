@@ -100,18 +100,18 @@ public abstract class PreprocessAndEnhanceActivity extends AppCompatActivity {
                 CharSequence cs[] = {"Override", "Save as new", "Save only processed parts"};
                 new AlertDialog.Builder(PreprocessAndEnhanceActivity.this)
                         .setTitle("Select Saving Preferance")
-                        .setItems( cs, new DialogInterface.OnClickListener() {
-                            @Override
-                            public void onClick(DialogInterface dialog, int which) {
-                                if (which == 0){
-
-                                }
-                                else if (which == 1){
-                                    BitmapHelpers.saveImageExternal(imageView.getFullBitmap(), getApplicationContext());
-                                }
-                                else if (which == 2){
-
-                                }
+                        .setItems( cs, (dialog, which) -> {
+                            if (which == 0){
+                                BitmapHelpers.saveImageInternal(imageView.getFullBitmap(),
+                                        bitmapInfos.get(imgIndex).getNonProcessedUri(), getApplicationContext());
+                            }
+                            else if (which == 1){
+                                BitmapHelpers.saveImageExternal(imageView.getFullBitmap(), getApplicationContext());
+                            }
+                            else if (which == 2){
+                                ArrayList<Bitmap> processedBitmaps = imageView.getProcessedBitmaps();
+                                for ( Bitmap bm : processedBitmaps )
+                                    BitmapHelpers.saveImageExternal(bm, getApplicationContext());
                             }
                         }).show();
             }

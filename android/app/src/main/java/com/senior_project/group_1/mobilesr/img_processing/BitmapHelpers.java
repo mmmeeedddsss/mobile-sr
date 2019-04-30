@@ -3,6 +3,7 @@ package com.senior_project.group_1.mobilesr.img_processing;
 import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
+import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.Rect;
 import android.graphics.RectF;
@@ -11,6 +12,7 @@ import android.os.Environment;
 import android.provider.MediaStore;
 import android.util.Log;
 
+import com.senior_project.group_1.mobilesr.BuildConfig;
 import com.senior_project.group_1.mobilesr.configurations.ApplicationConstants;
 import com.senior_project.group_1.mobilesr.configurations.SRModelConfiguration;
 import com.senior_project.group_1.mobilesr.configurations.SRModelConfigurationManager;
@@ -18,7 +20,9 @@ import com.senior_project.group_1.mobilesr.views.GenericFileProvider;
 
 import java.io.File;
 import java.io.FileOutputStream;
+import java.io.FileWriter;
 import java.io.IOException;
+import java.io.OutputStream;
 import java.security.MessageDigest;
 import java.util.Arrays;
 import java.util.Calendar;
@@ -337,6 +341,23 @@ public class BitmapHelpers {
     public static Uri saveImageExternal( Bitmap bm, Context context ) {
         String fname = "SR_IMAGE_" + Calendar.getInstance().getTimeInMillis();
         return saveImage(bm, context, getExternalSavingFolder(), fname);
+    }
+
+    public static void saveImageInternal(Bitmap bm, Uri originalPath, Context context){
+        try{
+            String path = originalPath.getPath().substring( originalPath.getPath().indexOf('/', 1)+1 );
+            Log.i("saveImageInternal", "Image path : " + path);
+            FileOutputStream stream =  new FileOutputStream( new File( path ),false );
+            if( path.endsWith("jpg") || path.endsWith("jpeg") )
+                bm.compress(Bitmap.CompressFormat.JPEG, 100, stream);
+            else
+                bm.compress(Bitmap.CompressFormat.PNG, 100, stream);
+            stream.flush();
+            stream.close();
+        }catch (Exception e){
+            e.printStackTrace();
+
+        }
     }
 
     /*
