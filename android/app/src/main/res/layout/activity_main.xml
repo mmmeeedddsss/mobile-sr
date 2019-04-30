@@ -1,12 +1,13 @@
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:fancy="http://schemas.android.com/apk/res-auto"
     android:layout_width="fill_parent"
     android:layout_height="fill_parent"
     android:paddingLeft="16dp"
     android:paddingRight="16dp"
     android:background="#ffffff">
 
-    <TextView
+  <!--  <TextView
         android:id="@+id/name"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
@@ -19,7 +20,7 @@
         android:textColor="@color/colorButtonBackground"
         android:textSize="50dp"
         android:textStyle="bold"
-        android:typeface="sans" />
+        android:typeface="sans" /> -->
 
     <LinearLayout
         android:layout_width="wrap_content"
@@ -30,7 +31,7 @@
         android:layout_marginTop="49dp"
         android:orientation="vertical">
 
-        <android.support.v7.widget.AppCompatButton
+   <!--     <android.support.v7.widget.AppCompatButton
             android:id="@+id/buttonPickPhoto"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -77,7 +78,45 @@
             android:textColor="@color/colorButtonText"
             android:textStyle="bold"
             android:typeface="sans"
-            app:backgroundTint="@color/colorButtonBackground" />
+            app:backgroundTint="@color/colorButtonBackground" />-->
+
+
+        <ImageView android:id="@+id/ic_take_photo"
+            android:layout_width="100dp"
+            android:layout_height="100dp"
+            android:layout_gravity="center_horizontal"
+            android:layout_marginBottom="30dp"
+            android:layout_marginTop="30dp"
+            app:srcCompat="@drawable/ic_take_photo"
+            android:clickable="true"/>
+
+        <ImageView android:id="@+id/ic_gallery"
+            android:layout_width="100dp"
+            android:layout_height="100dp"
+            android:layout_gravity="center_horizontal"
+            android:layout_marginBottom="30dp"
+            android:layout_marginTop="30dp"
+            app:srcCompat="@drawable/ic_gallery"
+            android:clickable="true"/>
+
+        <ImageView android:id="@+id/ic_settings"
+            android:layout_width="100dp"
+            android:layout_height="100dp"
+            android:layout_gravity="center_horizontal"
+            android:layout_marginBottom="30dp"
+            android:layout_marginTop="30dp"
+            app:srcCompat="@drawable/ic_settings"
+            android:clickable="true"/>
+
+
+        <ImageView android:id="@+id/ic_tutorial"
+            android:layout_width="100dp"
+            android:layout_height="100dp"
+            android:layout_gravity="center_horizontal"
+            android:layout_marginBottom="30dp"
+            android:layout_marginTop="30dp"
+            app:srcCompat="@drawable/ic_tutorial"
+            android:clickable="true"/>
 
     </LinearLayout>
 
