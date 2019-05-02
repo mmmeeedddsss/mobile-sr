@@ -269,8 +269,8 @@ def main():
         args.batch_size, 
         OPTS.DATA_LOADER)
     model = srcnn_x2_weak
-    discr_model = srgan_discriminator
-    scheduler = SingleScheduler(True) # GoodfellowScheduler(1)
+    discr_model = None # srgan_discriminator
+    scheduler = SingleScheduler(schedule_discriminator=False) # GoodfellowScheduler(1)
     img_loss = mse_loss
     optimizer = tf.train.RMSPropOptimizer(args.learning_rate)
     discr_optimizer = tf.train.RMSPropOptimizer(args.discr_learning_rate)
