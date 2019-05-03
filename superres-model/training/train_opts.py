@@ -1,6 +1,7 @@
 DATA_LOADER = {
-    'prefetch_size': 32,
+    'prefetch_size': 128,
     'shuffle_multiplier': 500,
+    'num_parallel': 6,
 }
 
 MODEL = {

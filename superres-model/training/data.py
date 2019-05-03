@@ -29,9 +29,9 @@ def create_png_pair_dataset(input_files, batch_size, opts):
     # create a tfrecorddataset from the input files
     dataset = tf.data.TFRecordDataset(input_files)
     # map decode_png over the dataset to get decoded image pairs
-    dataset = dataset.map(decode_png)
+    dataset = dataset.map(decode_png, num_parallel_calls=opts['num_parallel'])
     # map normalize pair over the dataset to move the images into floating point domain
-    dataset = dataset.map(normalize_pair)
+    dataset = dataset.map(normalize_pair, num_parallel_calls=opts['num_parallel'])
     # shuffle the dataset with a buffer size multiple of the batch size
     dataset = dataset.shuffle(opts['shuffle_multiplier'] * batch_size)
     # divide the dataset into batches
