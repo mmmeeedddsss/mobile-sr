@@ -26,7 +26,15 @@ public class TutorialActivity extends AppCompatActivity {
         setContentView(R.layout.tutorial_activity);
         iv = findViewById(R.id.imageView);
         current = 0;
-        imgs = new int[]{R.drawable.first, R.drawable.second, R.drawable.third};
+        imgs = new int[]{
+                R.drawable.img1,
+                R.drawable.img2,
+                R.drawable.img3,
+                R.drawable.img4,
+                R.drawable.img5,
+                R.drawable.img6,
+                R.drawable.img7,
+        };
         skipBtn = findViewById(R.id.skip_btn);
         skipBtn.setOnClickListener(v -> skipTutorial());
         iv.setOnTouchListener(new OnSwipeTouchListener(this) {
@@ -55,7 +63,7 @@ public class TutorialActivity extends AppCompatActivity {
     }
 
     private void nextImage() {
-        if (current >= 2 )
+        if (current >= imgs.length -1 )
             finish();
         else
             iv.setImageResource(imgs[++current]);
