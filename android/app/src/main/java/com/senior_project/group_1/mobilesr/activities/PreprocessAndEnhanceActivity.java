@@ -1,5 +1,6 @@
 package com.senior_project.group_1.mobilesr.activities;
 
+import android.annotation.SuppressLint;
 import android.content.ClipData;
 import android.content.Intent;
 import android.graphics.Bitmap;
@@ -7,7 +8,11 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v7.app.AppCompatActivity;
+import android.support.v7.view.menu.MenuBuilder;
 import android.util.Log;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
 
 import com.senior_project.group_1.mobilesr.BuildConfig;
@@ -271,4 +276,44 @@ public abstract class PreprocessAndEnhanceActivity extends AppCompatActivity {
         }
         isFABOpen = !isFABOpen;
     }
+
+    @SuppressLint("RestrictedApi")
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        MenuInflater inflater = getMenuInflater();
+        inflater.inflate(R.menu.menu, menu);
+        if(menu instanceof MenuBuilder){
+            MenuBuilder m = (MenuBuilder) menu;
+            m.setOptionalIconsVisible(true);
+        }
+        return true;
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        if (item.getItemId() == R.id.save) {
+            BitmapHelpers.saveImageExternal(imageView.getFullBitmap(), getApplicationContext());
+        }
+        if (item.getItemId() == R.id.share) {
+            Uri savedImageUri = BitmapHelpers.saveImageExternal(imageView.getFullBitmap(), getApplicationContext());
+            startActivity(Intent.createChooser(BitmapHelpers.createShareIntentByUri(savedImageUri), "Share Image"));
+        }
+        if (item.getItemId() == R.id.rotate){
+            imageView.rotate();
+        }
+        if (item.getItemId() == R.id.process){
+            processImage();
+        }
+        if (item.getItemId() == R.id.processall){
+            processAllImages();
+        }
+        if (item.getItemId() == R.id.toggle){
+            imageView.toggleSrDrawal();
+        }
+        return super.onOptionsItemSelected(item);
+    }
 }
+
+
+
+
