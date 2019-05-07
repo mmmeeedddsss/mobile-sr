@@ -8,6 +8,8 @@ import psnr
 import ssim
 from argparse import ArgumentParser
 import cv2
+import matplotlib.pyplot as plt
+
 datasets = ['Set5', 'Set14', 'BSDS100']
 set5_range = (1, 6)
 set14_range = (1, 15)
@@ -168,7 +170,8 @@ def parse_arguments():
         help='create heatmap')
     parser.add_argument(
         '-v',
-        help='visualization for DATASET')
+        help='visualization for DATASET',
+        choices=['set5', 'set14', 'bsd100'])
     parser.add_argument(
         '--no-low-res', action='store_true',
         help='use this if you already have LR images and don\'t want to create them again')
@@ -183,6 +186,66 @@ def parse_arguments():
         print('error: dataset path have to be specified')
         exit(1)
     return args
+
+def show_dataset(dataset_path, vset, extension, model_available=True):
+    set_attr_map = {
+        'set5':     ('Set5', 5), 
+        'set14':    ('Set14', 14), 
+        'bsd100':   ('BSD100', 100),
+    }
+    prefix, set_size = set_attr_map[vset]
+    path = os.path.join(dataset_path, prefix)
+    # create the figure, axes and titles
+    fig = plt.figure()
+    lr_ax = plt.subplot(1, 3, 1)
+    sr_ax = plt.subplot(1, 3, 2)
+    hr_ax = plt.subplot(1, 3, 3)
+    lr_ax.set_title('LR Img.')
+    sr_ax.set_title('SR Img.')
+    hr_ax.set_title('HR Img.')
+    # remove ticks on the axes
+    for ax in (lr_ax, sr_ax, hr_ax):
+        ax.tick_params(
+            axis='both',
+            which='both',
+            bottom=False,
+            top=False,
+            labelbottom=False,
+            left=False,
+            right=False,
+            labelleft=False)
+    # create a nonlocal counter
+    i = 0 
+    # callback function for matplotlib to plot with
+    def plot_img(event): 
+        # move on left and right keys
+        nonlocal i
+        if event:
+            if event.key == 'right':
+                i = (i + 1) % set_size
+            elif event.key == 'left':
+                i = (i - 1) % set_size
+        j = i + 1 # an extra index to bring the range to 1-indexed
+        # plot the current images
+        # have to convert to RGB before plotting since we used cv2
+        lr_bgr = cv2.imread(path + '_{}_LR.png'.format(j), cv2.IMREAD_COLOR)
+
+        print(lr_bgr.shape)
+        lr_ax.imshow(cv2.cvtColor(lr_bgr, cv2.COLOR_BGR2RGB))
+        if model_available:
+            sr_bgr = cv2.imread(path + '_{}_LR{}.png'.format(j, extension),
+                                cv2.IMREAD_COLOR)
+            sr_ax.imshow(cv2.cvtColor(sr_bgr, cv2.COLOR_BGR2RGB))
+        hr_bgr = cv2.imread(path + '_{}.png'.format(j),
+                            cv2.IMREAD_COLOR)
+        hr_ax.imshow(cv2.cvtColor(hr_bgr, cv2.COLOR_BGR2RGB))
+        # redraw the axes
+        fig.canvas.draw_idle()
+    # plot the first image in the dataset
+    plot_img(None) 
+    # connect the callback to draw
+    fig.canvas.mpl_connect('key_press_event', plot_img)
+    plt.show() # show the plot
 
 if __name__ == '__main__':
   # replace the path with the directory
@@ -227,24 +290,9 @@ if __name__ == '__main__':
       print('old:\t' + '\t'.join(ssim))
       print(ssim_line)
   elif args.v:
+      model_available = bool(args.s)
       path = args.dataset_path
-      if args.v == 'set5':
-        for i in range(*set5_range):
-          cv2.imshow(path+'/{}.png'.format(i))
-          cv2.imshow(path+'/{}_LR'.format(i)+'{}.png'.format(extension))
-          cv2.waitKey()
-      elif args.v == 'set14':
-        for i in range(*set14_range):
-          cv2.imshow(path+'/{}.png'.format(i))
-          cv2.imshow(path+'/{}_LR'.format(i)+'{}.png'.format(extension))
-          cv2.waitKey()
-      elif args.v == 'bsd100':
-        for i in range(*bsd100_range):
-          cv2.imshow(path+'/{}.png'.format(i))
-          cv2.imshow(path+'/{}_LR'.format(i)+'{}.png'.format(extension))
-          cv2.waitKey()
-      else:
-        print('not recognized option for dataset')
+      show_dataset(path, args.v, extension, model_available)
   elif args.hm:
     set5_path, set14_path, bsd100_path = dataset_paths(args.dataset_path)
     for i in range(*set5_range):
