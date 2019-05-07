@@ -11,7 +11,7 @@
         android:layout_height="878dp"
         android:layout_weight="1"
         android:clickable="true"
-        app:srcCompat="@drawable/first" />
+        app:srcCompat="@drawable/img1" />
 
     <Button
         android:id="@+id/skip_btn"
