@@ -3,6 +3,7 @@ package com.senior_project.group_1.mobilesr.img_processing;
 import android.app.Activity;
 import android.graphics.Bitmap;
 import android.graphics.Color;
+import android.graphics.ColorSpace;
 import android.util.Log;
 
 import com.senior_project.group_1.mobilesr.configurations.SRModelConfiguration;
@@ -28,6 +29,10 @@ public class TFLiteSuperResolver implements BitmapProcessor {
     private final int INPUT_IMAGE_HEIGHT;
 
     private static final int SIZEOF_FLOAT = 4;
+
+    private static final float OFFSET = 1.0f;
+    private static final float SCALE = 127.5f;
+    private static final float INV_SCALE = (float) (1.0 / 127.5);
 
     private int inputTensorBatch;
     private int inputTensorWidth;
@@ -156,6 +161,17 @@ public class TFLiteSuperResolver implements BitmapProcessor {
         return modelBuffer;
     }
 
+    // method to convert a float in the range [0, 255] to the [-1, 1] suitable for our models
+    private static float full2network(float val) {
+        return (val * INV_SCALE) - OFFSET;
+    }
+
+    // method to convert an output float in the range [-1, 1] to [0, 1], also performs clamping
+    private static float network2full(float val) {
+        float clamped = Math.max(-1.0f, Math.min(val, 1.0f)); // clamp to the range limits
+        return (clamped + 1.0f) * 0.5f;
+    }
+
     // method to transform an insert the bitmaps into a ByteBuffer for input to the interpreter
     private void bufferInputBitmaps(final Bitmap[] bitmaps) {
         // reset the buffer
@@ -170,9 +186,12 @@ public class TFLiteSuperResolver implements BitmapProcessor {
                 imageRescaler.resizePixels(inputImagePixels, INPUT_IMAGE_WIDTH, rescaledImagePixels, RESCALING_FACTOR);
             // insert the data into the buffer
             for (int color : rescaledImagePixels) {
-                inputTensorData.putFloat(Color.red(color));
-                inputTensorData.putFloat(Color.green(color));
-                inputTensorData.putFloat(Color.blue(color));
+                float red = full2network(Color.red(color)); // from [0, 255] to [-1, 1]
+                float green = full2network(Color.green(color));
+                float blue = full2network(Color.blue(color));
+                inputTensorData.putFloat(red);
+                inputTensorData.putFloat(green);
+                inputTensorData.putFloat(blue);
             }
         }
     }
@@ -189,10 +208,10 @@ public class TFLiteSuperResolver implements BitmapProcessor {
         int outputImageSize = outputImagePixels.length;
         int outputDataSize = outputImageSize * outputTensorBatch;
         for(int i = 0; i < outputDataSize; ++i) {
-            float r = outputTensorData.getFloat();
-            float g = outputTensorData.getFloat();
-            float b = outputTensorData.getFloat();
-            outputImagePixels[j++] = Color.rgb((int) r, (int) g, (int) b);
+            float r = network2full(outputTensorData.getFloat()); // range [0, 1]
+            float g = network2full(outputTensorData.getFloat());
+            float b = network2full(outputTensorData.getFloat());
+            outputImagePixels[j++] = Color.rgb(r, g, b);
             if(j == outputImageSize) { // a full patch has been unbuffered
                 // create a bitmap for the patch
                 Bitmap bitmap = Bitmap.createBitmap(outputImagePixels, OUTPUT_TENSOR_WIDTH, OUTPUT_TENSOR_HEIGHT, Bitmap.Config.ARGB_8888);

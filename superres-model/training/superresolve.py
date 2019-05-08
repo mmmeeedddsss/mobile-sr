@@ -52,7 +52,8 @@ def bgr2rgbnb(img):
 
 
 def rgbnb2bgr(img):
-    rgbnorm = np.squeeze(img)
+    rgbnorm = np.clip(np.squeeze(img), -1.0, +1.0)
+    print(rgbnorm.min(), rgbnorm.max())
     rgb = ((rgbnorm + 1.0) * 127.5).astype('uint8')
     bgr = cv2.cvtColor(rgb, cv2.COLOR_RGB2BGR)
     return bgr
