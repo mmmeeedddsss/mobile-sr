@@ -33,31 +33,71 @@
 
         <LinearLayout
             android:id="@+id/photoandcamera"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignStart="@+id/buttonsLayout"
             android:orientation="horizontal">
 
-            <ImageView
-                android:id="@+id/ic_gallery"
-                android:layout_width="100dp"
-                android:layout_height="100dp"
-                android:layout_gravity="center_horizontal"
-                android:layout_marginTop="30dp"
-                android:layout_marginBottom="30dp"
-                android:clickable="true"
-                android:padding="10dp"
-                app:srcCompat="@drawable/gallery" />
+            <LinearLayout
+                android:id="@+id/galleryanditstext"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:orientation="vertical">
 
-            <ImageView
-                android:id="@+id/ic_take_photo"
-                android:layout_width="100dp"
-                android:layout_height="100dp"
-                android:layout_gravity="center_horizontal"
-                android:layout_marginTop="30dp"
-                android:layout_marginBottom="30dp"
-                android:clickable="true"
-                android:padding="10dp"
-                app:srcCompat="@drawable/camera" />
+                <ImageView
+                    android:id="@+id/ic_gallery"
+                    android:layout_width="100dp"
+                    android:layout_height="100dp"
+                    android:layout_gravity="center_horizontal"
+                    android:layout_marginTop="30dp"
+                    android:layout_marginBottom="30dp"
+                    android:clickable="true"
+                    android:paddingLeft="10dp"
+                    android:paddingTop="10dp"
+                    android:paddingRight="10dp"
+                    app:srcCompat="@drawable/gallery" />
+
+                <TextView
+                    android:id="@+id/gallerytextview"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:fontFamily="cursive"
+                    android:gravity="center"
+                    android:text="Browse Gallery"
+                    android:textColor="#000000"
+                    android:textSize="10sp" />
+
+            </LinearLayout>
+
+            <LinearLayout
+                android:id="@+id/cameraanditstext"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:orientation="vertical">
+
+                <ImageView
+                    android:id="@+id/ic_take_photo"
+                    android:layout_width="100dp"
+                    android:layout_height="100dp"
+                    android:layout_gravity="center_horizontal"
+                    android:layout_marginTop="30dp"
+                    android:layout_marginBottom="30dp"
+                    android:clickable="true"
+                    android:padding="10dp"
+                    app:srcCompat="@drawable/camera" />
+
+                <TextView
+                    android:id="@+id/cameratextview"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:fontFamily="cursive"
+                    android:gravity="center"
+                    android:text="Take a Photo"
+                    android:textColor="#000000"
+                    android:textSize="10sp" />
+
+
+            </LinearLayout>
         </LinearLayout>
 
         <LinearLayout
@@ -66,19 +106,73 @@
             android:layout_alignBottom="@+id/photoandcamera"
             android:orientation="horizontal">
 
-            <ImageView
-                android:id="@+id/ic_settings"
-                android:layout_width="100dp"
-                android:layout_height="100dp"
-                android:layout_gravity="center_horizontal"
-                android:layout_marginTop="30dp"
-                android:layout_marginBottom="30dp"
-                android:clickable="true"
-                android:padding="10dp"
-                app:srcCompat="@drawable/settings" />
+            <LinearLayout
+                android:id="@+id/settingsanditstext"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:orientation="vertical">
+
+                <ImageView
+                    android:id="@+id/ic_settings"
+                    android:layout_width="100dp"
+                    android:layout_height="100dp"
+                    android:layout_gravity="center_horizontal"
+                    android:layout_marginTop="30dp"
+                    android:layout_marginBottom="30dp"
+                    android:clickable="true"
+                    android:padding="10dp"
+                    app:srcCompat="@drawable/settings" />
+
+                <TextView
+                    android:id="@+id/settingstextview"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:fontFamily="cursive"
+                    android:gravity="center"
+                    android:text="Settings"
+                    android:textColor="#000000"
+                    android:textSize="10sp" />
+
+            </LinearLayout>
+
+            <LinearLayout
+                android:id="@+id/tutorialanditstext"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:orientation="vertical">
+
+                <ImageView
+                    android:id="@+id/ic_tutorial"
+                    android:layout_width="100dp"
+                    android:layout_height="100dp"
+                    android:layout_gravity="center_horizontal"
+                    android:layout_marginTop="30dp"
+                    android:layout_marginBottom="30dp"
+                    android:clickable="true"
+                    android:padding="10dp"
+                    app:srcCompat="@drawable/tutorial" />
+
+                <TextView
+                    android:id="@+id/tutorialtextview"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:fontFamily="cursive"
+                    android:gravity="center"
+                    android:text="Tutorial"
+                    android:textColor="#000000"
+                    android:textSize="10sp" />
+
+            </LinearLayout>
+        </LinearLayout>
+
+        <LinearLayout
+            android:id="@+id/tutorialanditstext"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="vertical">
 
             <ImageView
-                android:id="@+id/ic_tutorial"
+                android:id="@+id/ic_settings2"
                 android:layout_width="100dp"
                 android:layout_height="100dp"
                 android:layout_gravity="center_horizontal"
@@ -86,7 +180,18 @@
                 android:layout_marginBottom="30dp"
                 android:clickable="true"
                 android:padding="10dp"
-                app:srcCompat="@drawable/tutorial" />
+                app:srcCompat="@drawable/toggle" />
+
+            <TextView
+                android:id="@+id/settings2textview"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:fontFamily="cursive"
+                android:gravity="center"
+                android:text="Settings 2"
+                android:textColor="#000000"
+                android:textSize="10sp" />
+
         </LinearLayout>
 
     </LinearLayout>
