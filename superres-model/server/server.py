@@ -4,7 +4,10 @@ import os
 import time
 import subprocess
 import sys
+import threading
+import hashlib
 from argparse import ArgumentParser
+from queue import Queue
 
 import sr
 
@@ -16,6 +19,9 @@ port = 61275
 
 VERBOSE=False
 
+# initialize the queue
+sr_queue = Queue()
+
 # argument parser
 def parse_arguments():
   parser = ArgumentParser()
@@ -26,9 +32,6 @@ def parse_arguments():
     '--port',
     help='bind to port')
   parser.add_argument(
-    '--single', action='store_true',
-    help='single image mode')
-  parser.add_argument(
     '--verbose', action='store_true',
     help='enable verbose mode')
   parser.add_argument(
@@ -37,13 +40,44 @@ def parse_arguments():
   args = parser.parse_args()
   return args
 
+# put the data to end of the queue
+def submit(img_data):
+  sr_queue.put(img_data)
+
+# check whether the file with given MD5
+# is ready
+# returns the SR'd data if so,
+# returns None if not
+def lookup(md5):
+  try:
+    img_file = open(md5, 'rb')
+    data = img_file.read()
+    img_file.close()
+    return data
+  except:
+    return None
+
+# saves the SR'd image to the filesystem
+# with the MD5 as the filename
+# MD5 is the hash of LR image
+def save_to_fs(hr_img, md5):
+  with open(md5, 'wb') as f:
+    f.write(hr_img)
+
 # SR processing
-# given low-res image data
-# and model path
-# return high-res image data
-def process(lr_img, model):
-  hr_img = sr.apply_sr(lr_img, model)
-  return hr_img
+# takes the model path as arg
+# takes the LR image from the front of
+# the queue, processes it and saves as
+# a file naming it as its MD5
+def process(model):
+  while True:
+    lr_img = sr_queue.get()
+    md5 = hashlib.md5(lr_img).hexdigest()
+    hr_img = sr.apply_sr(lr_img, model)
+    log('SR process completed.')
+    log('Saving to file...')
+    save_to_fs(hr_img, md5)
+    log('Saved to file.')
 
 # logger function
 # active if VERBOSE is defined
@@ -51,16 +85,25 @@ def log(s):
   if VERBOSE:
     print(s)
 
-# handles single request from client
-# returns True if client sends special
-# end of transmission message at the end
-# returns False if client has more
-# data to send
-# exception to that: single-image mode
-def handle_request(clientSock, model):
+# handles a single request from client
+# according to the type of the request
+# 0 is new job submission
+# 1 is result of a previous job submission
+def handle_request(clientSock):
+  request_type = int(clientSock.recv(1))
+  if request_type == 0:
+    handle_new_request(clientSock)
+  elif request_type == 1:
+    handle_prev_req(clientSock)
+  else:
+    print('Not recognized message')
+    sys.exit(1)
+  clientSock.close()
+
+# reads a single image from the socket and
+# puts it to the end of the queue
+def handle_new_request(clientSock):
   imageSize = int(clientSock.recv(10))
-  if imageSize == 0:
-    return True
   log('Reading ' + str(imageSize) + ' bytes of data...')
 
   # Get data from client
@@ -77,22 +120,31 @@ def handle_request(clientSock, model):
   log(str(len(imageData)) + ' bytes read.')
 
   # apply SR on file
-  log('Superresolution started...')
-  t = time.time()
-  hr_data = process(imageData, model)
-  t = time.time() - t
-  log('Superresolution finished.')
+  log('Submitting job...')
+  hr_data = submit(imageData)
+  log('Job submitted.')
 
-  # send file back
-  log('Sending SR image...')
-  hr_size = str(len(hr_data))
-  log('Sending ' + hr_size + ' bytes of data')
-  clientSock.send(hr_data)
-
-  log('File sent.')
-  log('Time taken: ' + str(t))
-
-  return False
+# reads the MD5 hash sum of an image
+# from the socket and sends back its SR'd image
+# if it's already processes
+# sends a zero byte if it's not processed yet
+def handle_prev_req(clientSock):
+  # get MD5 sum of image
+  md5 = clientSock.recv(32)
+  
+  log('Looking up the hash...')
+  response = lookup(md5)
+  if response:
+    log('SR image found.')
+    # send file back
+    log('Sending SR image...')
+    hr_size = str(len(response))
+    log('Sending ' + hr_size + ' bytes of data')
+    clientSock.send(response)
+    log('File sent.')
+  else:
+    log('Not found.')
+    clientSock.send(b'\x00')
 
 if __name__ == '__main__':
   args = parse_arguments()
@@ -113,15 +165,19 @@ if __name__ == '__main__':
 
   print('Listening on: ' + str(addr))
 
-  clientSock, clientAddr = sock.accept()
+  # start processing images from the queue
+  process_t = threading.Thread(target=process, args=(model_path,))
+  process_t.daemon = True
+  process_t.start()
 
-  if args.single:
-    handle_request(clientSock, model_path)
-  else:
-    completed = False
-    while not completed:
-      completed = handle_request(clientSock, model_path)
+  while True:
+    try:
+      clientSock, clientAddr = sock.accept()
+      req_handler_t = threading.Thread(target=handle_request, args=(clientSock,))
+      req_handler_t.start()
+    except KeyboardInterrupt:
+      break
+
   print('Closing connection...')
-  clientSock.close()
   sock.close()
   sys.exit()

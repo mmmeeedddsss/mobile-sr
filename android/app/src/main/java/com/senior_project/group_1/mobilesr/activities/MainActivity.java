@@ -217,6 +217,8 @@ public class MainActivity extends AppCompatActivity {
                 }
             }
             pickPhotoIntent.putExtra("imageClipData", imageClipData);
+            pickPhotoIntent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
+            pickPhotoIntent.addFlags(Intent.FLAG_GRANT_WRITE_URI_PERMISSION);
             startActivity(pickPhotoIntent);
         }
     }

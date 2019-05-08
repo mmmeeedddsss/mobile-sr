@@ -23,3 +23,16 @@ class GoodfellowScheduler:
             self.ctr = 0
             return False
         return True
+
+class SingleScheduler:
+    """
+    Schedules either the generator or the discriminator all the time, for debugging purposes
+    """
+    def __init__(self, schedule_discriminator):
+        self.schedule_discriminator = schedule_discriminator
+
+    def reset(self):
+        pass
+
+    def train_discriminator(self):
+        return self.schedule_discriminator
