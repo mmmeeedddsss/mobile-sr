@@ -41,7 +41,7 @@ public class MainActivity extends AppCompatActivity {
     static final int REQUEST_IMAGE_CAPTURE = 111;
     static final int REQUEST_IMAGE_SELECT = 112;
 
-    ImageView pickPhotoImageView, takePhotoImageView, settingsImageView, settingsButton2, tutorialImageView;
+    ImageView pickPhotoImageView, takePhotoImageView, settingsImageView, settingsImageView2, tutorialImageView;
     Button tcpTestButton;
     private Uri mImageUri;
 
@@ -87,17 +87,17 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
-       /* // Settings button activitys
-        settingsButton2 = (Button) findViewById(R.id.buttonSetttings2);
+       // Settings button activitys
+        settingsImageView2 = (ImageView) findViewById(R.id.ic_settings2);
 
         // Settings button clicks
-        settingsButton2.setOnClickListener(new View.OnClickListener() {
+        settingsImageView2.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 Intent settingsIntent = new Intent(MainActivity.this, SettingsActivity2.class);
                 startActivity(settingsIntent);
             }
-        });*/
+        });
 
         // Tutorial button activity
         tutorialImageView = (ImageView) findViewById(R.id.ic_tutorial);

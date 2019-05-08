@@ -7,117 +7,194 @@
     android:paddingRight="16dp"
     android:background="#ffffff">
 
-  <!--  <TextView
-        android:id="@+id/name"
-        android:layout_width="wrap_content"
+    <TextView
+        android:id="@+id/textView10"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_alignParentTop="true"
-        android:layout_alignParentEnd="true"
-        android:layout_marginTop="144dp"
-        android:layout_marginEnd="69dp"
-        android:hint=""
+        android:layout_above="@+id/buttonsLayout"
+        android:fontFamily="cursive"
+        android:gravity="center"
         android:text="MobileSR"
-        android:textColor="@color/colorButtonBackground"
-        android:textSize="50dp"
-        android:textStyle="bold"
-        android:typeface="sans" /> -->
+
+        android:textColor="@color/colorPrimary"
+        android:textSize="50sp" />
+
 
     <LinearLayout
+        android:id="@+id/buttonsLayout"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_below="@+id/name"
-        android:layout_alignParentStart="true"
-        android:layout_marginStart="131dp"
+        android:layout_centerInParent="true"
+        android:layout_centerVertical="true"
         android:layout_marginTop="49dp"
         android:orientation="vertical">
 
-   <!--     <android.support.v7.widget.AppCompatButton
-            android:id="@+id/buttonPickPhoto"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="pıck photo"
-            android:textColor="@color/colorButtonText"
-            android:textStyle="bold"
-            android:typeface="sans"
-            app:backgroundTint="@color/colorButtonBackground" />
 
-        <android.support.v7.widget.AppCompatButton
-            android:id="@+id/buttonTakePhoto"
+        <LinearLayout
+            android:id="@+id/photoandcamera"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="take photo"
-            android:textColor="@color/colorButtonText"
-            android:textStyle="bold"
-            android:typeface="sans"
-            app:backgroundTint="@color/colorButtonBackground" />
+            android:layout_alignStart="@+id/buttonsLayout"
+            android:orientation="horizontal">
 
-        <android.support.v7.widget.AppCompatButton
-            android:id="@+id/buttonSetttings"
+            <LinearLayout
+                android:id="@+id/galleryanditstext"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:orientation="vertical">
+
+                <ImageView
+                    android:id="@+id/ic_gallery"
+                    android:layout_width="100dp"
+                    android:layout_height="100dp"
+                    android:layout_gravity="center_horizontal"
+                    android:layout_marginTop="30dp"
+                    android:layout_marginBottom="30dp"
+                    android:clickable="true"
+                    android:paddingLeft="10dp"
+                    android:paddingTop="10dp"
+                    android:paddingRight="10dp"
+                    app:srcCompat="@drawable/gallery" />
+
+                <TextView
+                    android:id="@+id/gallerytextview"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:fontFamily="cursive"
+                    android:gravity="center"
+                    android:text="Browse Gallery"
+                    android:textColor="#000000"
+                    android:textSize="10sp" />
+
+            </LinearLayout>
+
+            <LinearLayout
+                android:id="@+id/cameraanditstext"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:orientation="vertical">
+
+                <ImageView
+                    android:id="@+id/ic_take_photo"
+                    android:layout_width="100dp"
+                    android:layout_height="100dp"
+                    android:layout_gravity="center_horizontal"
+                    android:layout_marginTop="30dp"
+                    android:layout_marginBottom="30dp"
+                    android:clickable="true"
+                    android:padding="10dp"
+                    app:srcCompat="@drawable/camera" />
+
+                <TextView
+                    android:id="@+id/cameratextview"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:fontFamily="cursive"
+                    android:gravity="center"
+                    android:text="Take a Photo"
+                    android:textColor="#000000"
+                    android:textSize="10sp" />
+
+
+            </LinearLayout>
+        </LinearLayout>
+
+        <LinearLayout
             android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_alignBottom="@+id/photoandcamera"
+            android:orientation="horizontal">
+
+            <LinearLayout
+                android:id="@+id/settingsanditstext"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:orientation="vertical">
+
+                <ImageView
+                    android:id="@+id/ic_settings"
+                    android:layout_width="100dp"
+                    android:layout_height="100dp"
+                    android:layout_gravity="center_horizontal"
+                    android:layout_marginTop="30dp"
+                    android:layout_marginBottom="30dp"
+                    android:clickable="true"
+                    android:padding="10dp"
+                    app:srcCompat="@drawable/settings" />
+
+                <TextView
+                    android:id="@+id/settingstextview"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:fontFamily="cursive"
+                    android:gravity="center"
+                    android:text="Settings"
+                    android:textColor="#000000"
+                    android:textSize="10sp" />
+
+            </LinearLayout>
+
+            <LinearLayout
+                android:id="@+id/tutorialanditstext"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:orientation="vertical">
+
+                <ImageView
+                    android:id="@+id/ic_tutorial"
+                    android:layout_width="100dp"
+                    android:layout_height="100dp"
+                    android:layout_gravity="center_horizontal"
+                    android:layout_marginTop="30dp"
+                    android:layout_marginBottom="30dp"
+                    android:clickable="true"
+                    android:padding="10dp"
+                    app:srcCompat="@drawable/tutorial" />
+
+                <TextView
+                    android:id="@+id/tutorialtextview"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:fontFamily="cursive"
+                    android:gravity="center"
+                    android:text="Tutorial"
+                    android:textColor="#000000"
+                    android:textSize="10sp" />
+
+            </LinearLayout>
+        </LinearLayout>
+
+        <LinearLayout
+            android:id="@+id/tutorialanditstext"
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="settıngs"
-            android:textColor="@color/colorButtonText"
-            android:textStyle="bold"
-            app:backgroundTint="@color/colorButtonBackground" />
+            android:orientation="vertical">
 
-        <android.support.v7.widget.AppCompatButton
-            android:id="@+id/buttonSetttings2"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="settıngs2"
-            android:textColor="@color/colorButtonText"
-            android:textStyle="bold"
-            app:backgroundTint="@color/colorButtonBackground" />
+            <ImageView
+                android:id="@+id/ic_settings2"
+                android:layout_width="100dp"
+                android:layout_height="100dp"
+                android:layout_gravity="center_horizontal"
+                android:layout_marginTop="30dp"
+                android:layout_marginBottom="30dp"
+                android:clickable="true"
+                android:padding="10dp"
+                app:srcCompat="@drawable/toggle" />
 
+            <TextView
+                android:id="@+id/settings2textview"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:fontFamily="cursive"
+                android:gravity="center"
+                android:text="Settings 2"
+                android:textColor="#000000"
+                android:textSize="10sp" />
 
-        <android.support.v7.widget.AppCompatButton
-            android:id="@+id/buttonTutorial"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="tutorıal"
-            android:textColor="@color/colorButtonText"
-            android:textStyle="bold"
-            android:typeface="sans"
-            app:backgroundTint="@color/colorButtonBackground" />-->
-
-
-        <ImageView android:id="@+id/ic_take_photo"
-            android:layout_width="100dp"
-            android:layout_height="100dp"
-            android:layout_gravity="center_horizontal"
-            android:layout_marginBottom="30dp"
-            android:layout_marginTop="30dp"
-            app:srcCompat="@drawable/ic_take_photo"
-            android:clickable="true"/>
-
-        <ImageView android:id="@+id/ic_gallery"
-            android:layout_width="100dp"
-            android:layout_height="100dp"
-            android:layout_gravity="center_horizontal"
-            android:layout_marginBottom="30dp"
-            android:layout_marginTop="30dp"
-            app:srcCompat="@drawable/ic_gallery"
-            android:clickable="true"/>
-
-        <ImageView android:id="@+id/ic_settings"
-            android:layout_width="100dp"
-            android:layout_height="100dp"
-            android:layout_gravity="center_horizontal"
-            android:layout_marginBottom="30dp"
-            android:layout_marginTop="30dp"
-            app:srcCompat="@drawable/ic_settings"
-            android:clickable="true"/>
-
-
-        <ImageView android:id="@+id/ic_tutorial"
-            android:layout_width="100dp"
-            android:layout_height="100dp"
-            android:layout_gravity="center_horizontal"
-            android:layout_marginBottom="30dp"
-            android:layout_marginTop="30dp"
-            app:srcCompat="@drawable/ic_tutorial"
-            android:clickable="true"/>
+        </LinearLayout>
 
     </LinearLayout>
+
 
 </RelativeLayout>
