@@ -1,21 +1,15 @@
 <?xml version="1.0" encoding="utf-8"?>
 <menu xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:android="http://schemas.android.com/apk/res/android">
-    <item android:id="@+id/save"
-        android:icon="@drawable/save"
-        android:title="Save" />
-    <item android:id="@+id/toggle"
-        android:icon="@drawable/toggle"
-        android:title="Toggle" />
     <item android:id="@+id/rotate"
         android:icon="@drawable/rotate"
         android:title="Rotate" />
-    <item android:id="@+id/process"
-        android:icon="@drawable/process"
-        android:title="Process" />
-    <item android:id="@+id/processall"
-        android:icon="@drawable/processall"
-        android:title="Process All" />
+    <item android:id="@+id/toggle"
+        android:icon="@drawable/toggle"
+        android:title="Toggle" />
+    <item android:id="@+id/save"
+        android:icon="@drawable/save"
+        android:title="Save" />
     <item android:id="@+id/share"
         android:icon="@drawable/share"
         android:title="Share" />

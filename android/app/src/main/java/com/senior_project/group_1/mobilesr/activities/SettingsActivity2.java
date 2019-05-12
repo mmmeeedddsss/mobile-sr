@@ -19,6 +19,7 @@ import android.preference.PreferenceFragment;
 import android.preference.PreferenceManager;
 import android.preference.RingtonePreference;
 import android.text.TextUtils;
+import android.util.Log;
 import android.view.MenuItem;
 import android.support.v4.app.NavUtils;
 
@@ -49,6 +50,7 @@ public class SettingsActivity2 extends AppCompatPreferenceActivity {
         @Override
         public boolean onPreferenceChange(Preference preference, Object value) {
             String stringValue = value.toString();
+            Log.i("Settings2", stringValue + " is selected");
             String preferenceValue = PreferenceManager
                     .getDefaultSharedPreferences(preference.getContext())
                     .getString(preference.getKey(), "");
@@ -90,6 +92,8 @@ public class SettingsActivity2 extends AppCompatPreferenceActivity {
                         index >= 0
                                 ? listPreference.getEntries()[index]
                                 : null);
+
+                Log.i("Settings2", ""+listPreference.getEntries()[index] + " is selected");
                 if(preference.getKey().equals("model_name_list")) {
                     if(index >= 0) {
                         final StringBuilder sb = new StringBuilder(listPreference.getEntries()[index].length());

@@ -36,12 +36,14 @@
         <item>SRCNN_NR_128</item>
         <item>SRCNN_NR_64</item>
         <item>SRCNN_REMOTE</item>
+        <item>PERC_NR_128</item>
     </string-array>
     <string-array name="model_name_list_values">
         <item>SRCNN_NR_256</item>
         <item>SRCNN_NR_128</item>
         <item>SRCNN_NR_64</item>
         <item>SRCNN_REMOTE</item>
+        <item>PERC_NR_128</item>
     </string-array>
 
     <string name="title_parallel_batch_number">Parallel Batch Number</string>

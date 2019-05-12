@@ -12,17 +12,6 @@
         android:layout_weight="1" />
 
     <ru.dimorinny.floatingtextbutton.FloatingTextButton
-        android:id="@+id/process_all_button"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        app:floating_background_color="#ff1da1f2"
-        android:layout_margin="12dp"
-        android:layout_gravity="bottom|end"
-        app:floating_title="Process All"
-        app:floating_left_icon="@drawable/processall"
-        app:floating_title_color="@android:color/white"
-        />
-    <ru.dimorinny.floatingtextbutton.FloatingTextButton
         android:id="@+id/process_image_button"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
@@ -33,60 +22,17 @@
         app:floating_left_icon="@drawable/process"
         app:floating_title_color="@android:color/white"
         />
-    <ru.dimorinny.floatingtextbutton.FloatingTextButton
-        android:id="@+id/save_image_button"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        app:floating_background_color="#ff1da1f2"
-        android:layout_margin="12dp"
-        android:layout_gravity="bottom|end"
-        app:floating_left_icon="@drawable/save"
-        app:floating_title="Save"
-        app:floating_title_color="@android:color/white"
-        />
-    <ru.dimorinny.floatingtextbutton.FloatingTextButton
-        android:id="@+id/share_image_button"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        app:floating_background_color="#ff1da1f2"
-        android:layout_margin="12dp"
-        android:layout_gravity="bottom|end"
-        app:floating_title="Share"
-        app:floating_left_icon="@drawable/share"
-        app:floating_title_color="@android:color/white"
-        />
-    <ru.dimorinny.floatingtextbutton.FloatingTextButton
-        android:id="@+id/rotate_image_button"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        app:floating_background_color="#ff1da1f2"
-        android:layout_margin="12dp"
-        android:layout_gravity="bottom|end"
-        app:floating_title="Rotate"
-        app:floating_left_icon="@drawable/rotate"
-        app:floating_title_color="@android:color/white"
 
-        />
     <ru.dimorinny.floatingtextbutton.FloatingTextButton
-        android:id="@+id/toggle_sr_button"
+        android:id="@+id/process_all_button"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         app:floating_background_color="#ff1da1f2"
         android:layout_margin="12dp"
         android:layout_gravity="bottom|end"
-        app:floating_title="Toggle"
-        app:floating_left_icon="@drawable/toggle"
+        app:floating_title="Process All"
+        app:floating_left_icon="@drawable/processall"
         app:floating_title_color="@android:color/white"
-        />
-
-    <android.support.design.widget.FloatingActionButton
-        android:id="@+id/fab"
-        android:layout_width="55dp"
-        android:layout_height="55dp"
-        android:layout_gravity="bottom|end"
-        android:layout_margin="25dp"
-        app:backgroundTint="#ff1da1f2"
-        app:srcCompat="@drawable/plusbutton"
         />
 
 

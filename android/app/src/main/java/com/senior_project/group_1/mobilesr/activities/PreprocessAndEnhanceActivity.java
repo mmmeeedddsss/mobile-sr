@@ -11,6 +11,7 @@ import android.support.design.widget.FloatingActionButton;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.view.menu.MenuBuilder;
+import android.util.DisplayMetrics;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -40,16 +41,14 @@ public abstract class PreprocessAndEnhanceActivity extends AppCompatActivity {
 
     private boolean isPaused;
     protected ZoomableImageView imageView;
-    protected FloatingTextButton rotateButton, processButton,
-            processAllButton, toggleButton, saveButton, shareButton;
+    protected FloatingTextButton processButton, processAllButton;
     protected ImageProcessingDialog dialog;
     protected ImageProcessingTask imageProcessingTask;
     protected  ArrayList<UserSelectedBitmapInfo> bitmapInfos;
     protected int numImages;
     protected int imgIndex;
 
-    private boolean isFABOpen = false;
-    protected boolean notProcessedYet = true;
+    Menu settingsMenu;
 
     @Override
     public void onCreate(Bundle savedInstance) {
@@ -63,14 +62,13 @@ public abstract class PreprocessAndEnhanceActivity extends AppCompatActivity {
 
         imageView = findViewById(R.id.pick_photo_image_view);
 
-        rotateButton = findViewById(R.id.rotate_image_button);
+        /*rotateButton = findViewById(R.id.rotate_image_button);
         rotateButton.setEnabled(true);
-        rotateButton.setOnClickListener(v -> imageView.rotate());
+        rotateButton.setOnClickListener(v -> imageView.rotate());*/
 
         processButton = findViewById(R.id.process_image_button);
         processButton.setOnClickListener(v -> {
             processImage();
-            rotateButton.setEnabled(false);
         });
 
         processAllButton = findViewById(R.id.process_all_button);
@@ -89,7 +87,7 @@ public abstract class PreprocessAndEnhanceActivity extends AppCompatActivity {
             }
         });
 
-        toggleButton = findViewById(R.id.toggle_sr_button);
+        /*toggleButton = findViewById(R.id.toggle_sr_button);
         toggleButton.setOnClickListener(v -> imageView.toggleSrDrawal());
 
         shareButton = findViewById(R.id.share_image_button);
@@ -120,19 +118,7 @@ public abstract class PreprocessAndEnhanceActivity extends AppCompatActivity {
                             }
                         }).show();
             }
-        });
-
-        FloatingActionButton fab = findViewById(R.id.fab);
-        fab.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                try {
-                    toggleFabs();
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
-                }
-            }
-        });
+        });*/
 
         Intent intent = getIntent();
         // fill image URIs
@@ -145,22 +131,13 @@ public abstract class PreprocessAndEnhanceActivity extends AppCompatActivity {
         // Set content of Zoomable image view
         refreshImage();
 
-        try {
-            toggleFabs();
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        }
+        placeProcessingButtons();
     }
 
     abstract protected void setupAsyncTask();
 
     protected void processImages( ArrayList<UserSelectedBitmapInfo> bmInfos ) {
-        try {
-            notProcessedYet = false;
-            toggleFabs();
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        }
+        settingsMenu.findItem(R.id.rotate).setEnabled(false);
         setupAsyncTask();
         dialog.show();
         imageProcessingTask.execute(bmInfos);
@@ -263,38 +240,28 @@ public abstract class PreprocessAndEnhanceActivity extends AppCompatActivity {
         }
     }
 
-    protected void toggleFabs() throws InterruptedException {
-        int offsetFromBottom = 105;
-        if( isFABOpen ) {
+    protected void placeProcessingButtons(){
+        DisplayMetrics displayMetrics = new DisplayMetrics();
+        getWindowManager().getDefaultDisplay().getMetrics(displayMetrics);
+        int width = displayMetrics.widthPixels;
+
+        int offsetFromBottom = -130;
+        int offsetFromRight = -width+480;
+
+        if( this instanceof SingleImageEnhanceActivity ){ // Indicator of such a nice design that we have
             processButton.setVisibility(View.VISIBLE);
-            processAllButton.setVisibility(View.VISIBLE);
-            toggleButton.setVisibility(View.VISIBLE);
-            saveButton.setVisibility(View.VISIBLE);
-            shareButton.setVisibility(View.VISIBLE);
-            if( notProcessedYet ) rotateButton.setVisibility(View.VISIBLE);
+            processAllButton.setVisibility(View.INVISIBLE);
 
             processButton.animate().translationY(-getResources().getDimension(R.dimen.padding)-offsetFromBottom);
-            processAllButton.animate().translationY(-getResources().getDimension(R.dimen.padding)*2-offsetFromBottom);
-            toggleButton.animate().translationY(-getResources().getDimension(R.dimen.padding)*3-offsetFromBottom);
-            saveButton.animate().translationY(-getResources().getDimension(R.dimen.padding)*4-offsetFromBottom);
-            shareButton.animate().translationY(-getResources().getDimension(R.dimen.padding)*5-offsetFromBottom);
-            rotateButton.animate().translationY(-getResources().getDimension(R.dimen.padding)*6-offsetFromBottom);
-        } else {
-            processButton.animate().translationY(-offsetFromBottom);
-            processAllButton.animate().translationY(-offsetFromBottom);
-            saveButton.animate().translationY(-offsetFromBottom);
-            shareButton.animate().translationY(-offsetFromBottom);
-            toggleButton.animate().translationY(-offsetFromBottom);
-            rotateButton.animate().translationY(-offsetFromBottom);
-
-            processButton.setVisibility(View.INVISIBLE);
-            processAllButton.setVisibility(View.INVISIBLE);
-            toggleButton.setVisibility(View.INVISIBLE);
-            saveButton.setVisibility(View.INVISIBLE);
-            shareButton.setVisibility(View.INVISIBLE);
-            rotateButton.setVisibility(View.INVISIBLE);
         }
-        isFABOpen = !isFABOpen;
+        else{
+            processButton.setVisibility(View.VISIBLE);
+            processAllButton.setVisibility(View.VISIBLE);
+
+            processButton.animate().translationY(-getResources().getDimension(R.dimen.padding)-offsetFromBottom);
+            processAllButton.animate().translationY(-getResources().getDimension(R.dimen.padding)-offsetFromBottom);
+            processAllButton.animate().translationX( offsetFromRight );
+        }
     }
 
     @SuppressLint("RestrictedApi")
@@ -302,6 +269,7 @@ public abstract class PreprocessAndEnhanceActivity extends AppCompatActivity {
     public boolean onCreateOptionsMenu(Menu menu) {
         MenuInflater inflater = getMenuInflater();
         inflater.inflate(R.menu.menu, menu);
+        settingsMenu = menu;
         if(menu instanceof MenuBuilder){
             MenuBuilder m = (MenuBuilder) menu;
             m.setOptionalIconsVisible(true);
@@ -320,12 +288,6 @@ public abstract class PreprocessAndEnhanceActivity extends AppCompatActivity {
         }
         if (item.getItemId() == R.id.rotate){
             imageView.rotate();
-        }
-        if (item.getItemId() == R.id.process){
-            processImage();
-        }
-        if (item.getItemId() == R.id.processall){
-            processAllImages();
         }
         if (item.getItemId() == R.id.toggle){
             imageView.toggleSrDrawal();
