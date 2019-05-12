@@ -5,7 +5,9 @@ import android.os.Bundle;
 import com.senior_project.group_1.mobilesr.BuildConfig;
 import com.senior_project.group_1.mobilesr.configurations.SRModelConfiguration;
 import com.senior_project.group_1.mobilesr.configurations.SRModelConfigurationManager;
+import com.senior_project.group_1.mobilesr.img_processing.ImageProcessingDialog;
 import com.senior_project.group_1.mobilesr.img_processing.LocalImageProcessingTask;
+import com.senior_project.group_1.mobilesr.img_processing.RemoteImageProcessingTask;
 import com.senior_project.group_1.mobilesr.img_processing.UserSelectedBitmapInfo;
 import com.senior_project.group_1.mobilesr.img_processing.BitmapHelpers;
 
@@ -19,6 +21,13 @@ public class MultipleImageEnhanceActivity extends PreprocessAndEnhanceActivity {
 
         // disable process
         processButton.setEnabled(false);
+        SRModelConfiguration modelConfiguration = SRModelConfigurationManager.getCurrentConfiguration();
+        imageProcessingTask = new LocalImageProcessingTask(this, dialog, modelConfiguration);
+    }
+
+    @Override
+    protected void setupAsyncTask() {
+        dialog = new ImageProcessingDialog(this);
         SRModelConfiguration modelConfiguration = SRModelConfigurationManager.getCurrentConfiguration();
         imageProcessingTask = new LocalImageProcessingTask(this, dialog, modelConfiguration);
     }

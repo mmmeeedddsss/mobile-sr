@@ -150,8 +150,9 @@ public abstract class PreprocessAndEnhanceActivity extends AppCompatActivity {
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
-        dialog = new ImageProcessingDialog(this);
     }
+
+    abstract protected void setupAsyncTask();
 
     protected void processImages( ArrayList<UserSelectedBitmapInfo> bmInfos ) {
         try {
@@ -160,6 +161,7 @@ public abstract class PreprocessAndEnhanceActivity extends AppCompatActivity {
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
+        setupAsyncTask();
         dialog.show();
         imageProcessingTask.execute(bmInfos);
     }
@@ -219,10 +221,8 @@ public abstract class PreprocessAndEnhanceActivity extends AppCompatActivity {
 
     // call after cancellation/end
     protected void cleanUpTask() {
-        imageProcessingTask = null;
         try {
             dialog.dismiss();
-            dialog = null;
         } catch (Exception ex)
         {
             Log.i("PreprocessAndEnhanceAct.cleanup_task", ex.getMessage());

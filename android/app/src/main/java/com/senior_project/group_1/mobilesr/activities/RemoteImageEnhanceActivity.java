@@ -7,6 +7,7 @@ import com.senior_project.group_1.mobilesr.configurations.SRModelConfiguration;
 import com.senior_project.group_1.mobilesr.configurations.SRModelConfigurationManager;
 import com.senior_project.group_1.mobilesr.img_processing.BitmapHelpers;
 import com.senior_project.group_1.mobilesr.img_processing.ImageProcessingDialog;
+import com.senior_project.group_1.mobilesr.img_processing.LocalImageProcessingTask;
 import com.senior_project.group_1.mobilesr.img_processing.RemoteImageProcessingTask;
 import com.senior_project.group_1.mobilesr.img_processing.UserSelectedBitmapInfo;
 import java.util.ArrayList;
@@ -24,6 +25,13 @@ public class RemoteImageEnhanceActivity extends PreprocessAndEnhanceActivity {
             processAllImages();
             rotateButton.setEnabled(false);
         });
+    }
+
+    @Override
+    protected void setupAsyncTask() {
+        dialog = new ImageProcessingDialog(this);
+        SRModelConfiguration modelConfiguration = SRModelConfigurationManager.getCurrentConfiguration();
+        imageProcessingTask = new RemoteImageProcessingTask(this, dialog, modelConfiguration);
     }
 
     @Override
