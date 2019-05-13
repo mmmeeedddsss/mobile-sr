@@ -78,12 +78,14 @@ public abstract class PreprocessAndEnhanceActivity extends AppCompatActivity {
         imageView.setSwipeListener(new ZoomableImageView.SwipeEventListener() {
             @Override
             public void swipeLeft() {
-              nextImage();
+                nextImage();
+                updateTitle();
             }
 
             @Override
             public void swipeRight() {
-              prevImage();
+                prevImage();
+                updateTitle();
             }
         });
 
@@ -132,6 +134,8 @@ public abstract class PreprocessAndEnhanceActivity extends AppCompatActivity {
         refreshImage();
 
         placeProcessingButtons();
+
+        updateTitle();
     }
 
     abstract protected void setupAsyncTask();
@@ -293,6 +297,14 @@ public abstract class PreprocessAndEnhanceActivity extends AppCompatActivity {
             imageView.toggleSrDrawal();
         }
         return super.onOptionsItemSelected(item);
+    }
+
+    private void updateTitle()
+    {
+        if( numImages > 1 )
+            setTitle(String.format("MobileSR (%d/%d)", imgIndex+1, numImages));
+        else
+            setTitle("MobileSR");
     }
 }
 

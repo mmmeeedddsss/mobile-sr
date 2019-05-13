@@ -42,11 +42,11 @@ public class ProcessedBitmapViewInfo {
 
     public void overrideOn(Canvas canvas, PointF offset)
     {
-        Rect saving_dest_rect = new Rect(
-                (int)offset.x - processedBitmap.getWidth()/2,
-                (int)offset.y - processedBitmap.getHeight()/2,
-                (int)offset.x + processedBitmap.getWidth()/2,
-                (int)offset.y + processedBitmap.getHeight()/2
+        RectF saving_dest_rect = new RectF(
+                offset.x - ((float)processedBitmap.getWidth())/2,
+                offset.y - ((float)processedBitmap.getHeight())/2,
+                offset.x + ((float)processedBitmap.getWidth())/2,
+                offset.y + ((float)processedBitmap.getHeight())/2
                 );
         canvas.drawBitmap(processedBitmap, BitmapHelpers.getBitmapRect(processedBitmap), saving_dest_rect, null);
         canvas.drawRect(saving_dest_rect, paint);

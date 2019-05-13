@@ -304,8 +304,11 @@ public class ZoomableImageView extends AppCompatImageView {
 
     public PointF getDestCoordinatesOfPixelwrpCenter(PointF pixel, Rect src_rect, Rect dest_rect){
         PointF coords = new PointF();
-        coords.x = ( pixel.x - ( src_rect.right/2 + src_rect.left/2  ) )/BitmapHelpers.getWidth(src_rect)*BitmapHelpers.getWidth(dest_rect);
-        coords.y = ( pixel.y - ( src_rect.bottom/2 + src_rect.top/2 ) )/BitmapHelpers.getHeight(src_rect)*BitmapHelpers.getHeight(dest_rect);
+        coords.x = ( pixel.x - ( ((float)src_rect.right + (float)src_rect.left)/2  ) )/BitmapHelpers.getWidth(src_rect)*BitmapHelpers.getWidth(dest_rect);
+        coords.y = ( pixel.y - ( ((float)src_rect.bottom + (float)src_rect.top)/2 ) )/BitmapHelpers.getHeight(src_rect)*BitmapHelpers.getHeight(dest_rect);
+        Log.i("ZoomableImageView - getDestCoordinatesOfPixelwrpCenter" , String.format("Found cx %f, cy %f", coords.x, coords.y ));
+        Log.i("ZoomableImageView - getDestCoordinatesOfPixelwrpCenter" , String.format("Src %d %d", BitmapHelpers.getWidth(src_rect), BitmapHelpers.getHeight(src_rect) ));
+        Log.i("ZoomableImageView - getDestCoordinatesOfPixelwrpCenter" , String.format("Src %d %d", BitmapHelpers.getWidth(dest_rect), BitmapHelpers.getHeight(dest_rect) ));
         return coords;
     }
 
@@ -318,10 +321,10 @@ public class ZoomableImageView extends AppCompatImageView {
     }
 
     private Rect generateSourceRectangle(int src_width, int src_height){
-        Rect src_rect = new Rect((int)(center_of_zoom_x-bm.getWidth()/zoom_factor/2),
-                (int)(center_of_zoom_y-bm.getHeight()/zoom_factor/2),
-                (int)(center_of_zoom_x+bm.getWidth()/zoom_factor/2),
-                (int)(center_of_zoom_y+bm.getHeight()/zoom_factor/2));
+        Rect src_rect = new Rect((int)((int)center_of_zoom_x-bm.getWidth()/zoom_factor/2),
+                (int)((int)center_of_zoom_y-bm.getHeight()/zoom_factor/2),
+                (int)((int)center_of_zoom_x+bm.getWidth()/zoom_factor/2),
+                (int)((int)center_of_zoom_y+bm.getHeight()/zoom_factor/2));
         return fit_in_original_bm( src_rect );
     }
 
