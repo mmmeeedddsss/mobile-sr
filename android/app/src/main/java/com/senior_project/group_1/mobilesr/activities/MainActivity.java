@@ -87,17 +87,17 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
-       // Settings button activitys
-        settingsImageView2 = (ImageView) findViewById(R.id.ic_settings2);
+        // Settings2 button activitys
+        //settingsImageView2 = (ImageView) findViewById(R.id.ic_settings2);
 
-        // Settings button clicks
-        settingsImageView2.setOnClickListener(new View.OnClickListener() {
+        // Settings2 button clicks
+        /*settingsImageView2.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 Intent settingsIntent = new Intent(MainActivity.this, SettingsActivity2.class);
                 startActivity(settingsIntent);
             }
-        });
+        });*/
 
         // Tutorial button activity
         tutorialImageView = (ImageView) findViewById(R.id.ic_tutorial);
