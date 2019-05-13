@@ -306,9 +306,6 @@ public class ZoomableImageView extends AppCompatImageView {
         PointF coords = new PointF();
         coords.x = ( pixel.x - ( ((float)src_rect.right + (float)src_rect.left)/2  ) )/BitmapHelpers.getWidth(src_rect)*BitmapHelpers.getWidth(dest_rect);
         coords.y = ( pixel.y - ( ((float)src_rect.bottom + (float)src_rect.top)/2 ) )/BitmapHelpers.getHeight(src_rect)*BitmapHelpers.getHeight(dest_rect);
-        Log.i("ZoomableImageView - getDestCoordinatesOfPixelwrpCenter" , String.format("Found cx %f, cy %f", coords.x, coords.y ));
-        Log.i("ZoomableImageView - getDestCoordinatesOfPixelwrpCenter" , String.format("Src %d %d", BitmapHelpers.getWidth(src_rect), BitmapHelpers.getHeight(src_rect) ));
-        Log.i("ZoomableImageView - getDestCoordinatesOfPixelwrpCenter" , String.format("Src %d %d", BitmapHelpers.getWidth(dest_rect), BitmapHelpers.getHeight(dest_rect) ));
         return coords;
     }
 

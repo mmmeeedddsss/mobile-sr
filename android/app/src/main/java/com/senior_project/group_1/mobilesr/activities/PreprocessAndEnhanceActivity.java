@@ -19,6 +19,7 @@ import android.view.MenuItem;
 import android.view.View;
 
 import com.senior_project.group_1.mobilesr.BuildConfig;
+import com.senior_project.group_1.mobilesr.img_processing.GallerySavingUtil;
 import com.senior_project.group_1.mobilesr.img_processing.ImageProcessingTask;
 import com.senior_project.group_1.mobilesr.img_processing.UserSelectedBitmapInfo;
 import com.senior_project.group_1.mobilesr.img_processing.ImageProcessingDialog;
@@ -27,6 +28,7 @@ import com.senior_project.group_1.mobilesr.img_processing.BitmapHelpers;
 import com.senior_project.group_1.mobilesr.views.ZoomableImageView;
 import ru.dimorinny.floatingtextbutton.FloatingTextButton;
 
+import java.io.File;
 import java.util.ArrayList;
 
 /* I changed PreprocessAndEnhanceActivity into an abstract base class since we want
@@ -284,7 +286,38 @@ public abstract class PreprocessAndEnhanceActivity extends AppCompatActivity {
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         if (item.getItemId() == R.id.save) {
-            BitmapHelpers.saveImageExternal(imageView.getFullBitmap(), getApplicationContext());
+            CharSequence cs[] = {"Override", "Save as new", "Save only processed parts"};
+            new AlertDialog.Builder(PreprocessAndEnhanceActivity.this)
+                    .setTitle("Select Saving Preferance")
+                    .setItems( cs, (dialog, which) -> {
+                        if (which == 0){
+                            BitmapHelpers.saveImageInternal(imageView.getFullBitmap(),
+                                    bitmapInfos.get(imgIndex).getNonProcessedUri(), getApplicationContext());
+                        }
+                        else if (which == 1){
+                            //BitmapHelpers.saveImageExternal(imageView.getFullBitmap(), getApplicationContext());
+                            String url = GallerySavingUtil.insertImage(getContentResolver(),
+                                    imageView.getFullBitmap(), "MobileSR", "MobileSR");
+                            Intent mediaScanIntent = new Intent(Intent.ACTION_MEDIA_SCANNER_SCAN_FILE);
+                            File f = new File(url);
+                            Uri contentUri = Uri.fromFile(f);
+                            mediaScanIntent.setData(contentUri);
+                            this.sendBroadcast(mediaScanIntent);
+                        }
+                        else if (which == 2){
+                            ArrayList<Bitmap> processedBitmaps = imageView.getProcessedBitmaps();
+                            for ( Bitmap bm : processedBitmaps ) {
+                                //BitmapHelpers.saveImageExternal(bm, getApplicationContext());
+                                String url = GallerySavingUtil.insertImage(getContentResolver(),
+                                        bm, "MobileSR", "MobileSR");
+                                Intent mediaScanIntent = new Intent(Intent.ACTION_MEDIA_SCANNER_SCAN_FILE);
+                                File f = new File(url);
+                                Uri contentUri = Uri.fromFile(f);
+                                mediaScanIntent.setData(contentUri);
+                                this.sendBroadcast(mediaScanIntent);
+                            }
+                        }
+                    }).show();
         }
         if (item.getItemId() == R.id.share) {
             Uri savedImageUri = BitmapHelpers.saveImageExternal(imageView.getFullBitmap(), getApplicationContext());
