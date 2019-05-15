@@ -1,6 +1,17 @@
 package com.senior_project.group_1.mobilesr.configurations;
 
+import android.content.SharedPreferences;
+import android.preference.PreferenceManager;
+
+import java.util.HashMap;
+import java.util.Map;
+
 public final class ApplicationConstants {
+    // TODO: use build related variable instead of application constant?
+    // to be useed for debugging. If set, persistent things like model configurations
+    // and preferences are deleted when starting the app.
+    public static final boolean RESET_PERSISTENT = false;
+
     public static final int IMAGE_OVERLAP_X = 16; // %10 of width & height might be ideal
     public static final int IMAGE_OVERLAP_Y = 16;
 
@@ -21,4 +32,7 @@ public final class ApplicationConstants {
 
     // Threshold distance for swipe event for x-axis
     public static final float SWIPE_CONSTANT = 90.0f;
+
+    // The default model to be selected when first opening the app
+    public static final String DEFAULT_MODEL = "SRCNN_NR_256";
 }

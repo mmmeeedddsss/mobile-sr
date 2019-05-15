@@ -1,10 +1,13 @@
 package com.senior_project.group_1.mobilesr.activities;
 
+import android.content.SharedPreferences;
 import android.os.Bundle;
+import android.preference.PreferenceManager;
 import android.support.v7.app.AppCompatActivity;
 
 import android.text.Editable;
 import android.text.TextWatcher;
+import android.util.Log;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.EditText;
@@ -13,11 +16,12 @@ import android.widget.Spinner;
 import android.widget.ArrayAdapter;
 
 import com.senior_project.group_1.mobilesr.R;
+import com.senior_project.group_1.mobilesr.configurations.ApplicationConstants;
 import com.senior_project.group_1.mobilesr.configurations.SRModelConfiguration;
 import com.senior_project.group_1.mobilesr.configurations.SRModelConfigurationManager;
 
-
 public class SettingsActivity extends AppCompatActivity {
+
     @Override
     public void onCreate(Bundle savedInstance) {
         super.onCreate(savedInstance);
@@ -35,8 +39,7 @@ public class SettingsActivity extends AppCompatActivity {
         spinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
             public void onItemSelected(AdapterView<?> parentView, View selectedItemView, int position, long id) {
-                SRModelConfigurationManager.getConfiguration(conf_list[position]);
-                fill_table();
+                setModel(conf_list[position]);
             }
 
             @Override
@@ -44,6 +47,7 @@ public class SettingsActivity extends AppCompatActivity {
             }
 
         });
+
         // nnapi
         spinner = (Spinner) findViewById(R.id.nnapi_spin);
         adapter = new ArrayAdapter<String>(this, android.R.layout.simple_spinner_dropdown_item, nnapi_str);
@@ -112,6 +116,15 @@ public class SettingsActivity extends AppCompatActivity {
             }
         });
 
+        // set the default/stored model value on the spinner
+        spinner = findViewById(R.id.modelNameSpinner);
+        String model = PreferenceManager.getDefaultSharedPreferences(this).getString("model", ApplicationConstants.DEFAULT_MODEL);
+        for(int i = 0; i < conf_list.length; i++) {
+            if (model.equals(conf_list[i])) {
+                spinner.setSelection(i);
+                break;
+            }
+        }
     }
 
     private void fill_table()
@@ -143,5 +156,12 @@ public class SettingsActivity extends AppCompatActivity {
         num_par_bat.setSelection(((ArrayAdapter)(num_par_bat.getAdapter())).getPosition(Integer.toString(num_bat)));
         ip.setText( mconf.getIPAddress() );
         port.setText( mconf.getPort() == 0 ?"": ""+mconf.getPort());
+    }
+
+    private void setModel(String model) {
+        // NOTE: this getConfig also sets the current config huh? Weird!
+        SRModelConfigurationManager.getConfiguration(model);
+        fill_table();
+        PreferenceManager.getDefaultSharedPreferences(this).edit().putString("model", model).apply();
     }
 }

@@ -6,9 +6,11 @@ import android.app.NotificationManager;
 import android.content.ClipData;
 import android.content.ClipDescription;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Environment;
+import android.preference.PreferenceManager;
 import android.provider.MediaStore;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.FileProvider;
@@ -49,6 +51,10 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
+        // remove preferences if we the app is reset
+        if(ApplicationConstants.RESET_PERSISTENT) // TODO: switch to something build related?
+            PreferenceManager.getDefaultSharedPreferences(this).edit().clear().commit();
 
         // create the notification channel for the application
         createNotificationChannel();
@@ -115,8 +121,10 @@ public class MainActivity extends AppCompatActivity {
         try { // Load configuration xml
             File root = android.os.Environment.getExternalStorageDirectory();
             File file = new File(root.getAbsolutePath(), "sr_model_configurations.xml");
-            if( file.exists() )
-                file.delete(); // TODO remove on production
+            // Fun fact: Mert, what the hell bro? It took me a while to find this and thus understand
+            // why the model settings were not persisting...
+            if( ApplicationConstants.RESET_PERSISTENT && file.exists() )
+                file.delete();
             if (!file.exists())
             {
                 InputStream inConfig = getAssets().open(ApplicationConstants.CONFIGURATION_FILE_NAME);
@@ -141,6 +149,14 @@ public class MainActivity extends AppCompatActivity {
         ActivityCompat.requestPermissions(this,
                 new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE},
                 ApplicationConstants.EXTERNAL_WRITE_PERMISSION_ID);
+
+        // now, if this is the first launch of the application, start the tutorial
+        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(this);
+        if(prefs.getBoolean("first_launch", true)) {
+            prefs.edit().putBoolean("first_launch", false).apply();
+            Intent tutorialIntent = new Intent(MainActivity.this, TutorialActivity.class);
+            startActivity(tutorialIntent);
+        }
     }
 
     public void pickImageFromGallery() {
