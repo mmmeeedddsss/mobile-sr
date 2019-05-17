@@ -46,7 +46,8 @@ public class SettingsActivity3Fragment extends PreferenceFragmentCompat {
         loadCurrentModelPreferences();
 
         modelNameList.setOnPreferenceChangeListener((preference, value) -> {
-            SRModelConfigurationManager.switchConfiguration((String) value);
+            String model = (String) value;
+            SRModelConfigurationManager.switchConfiguration(model);
             loadCurrentModelPreferences();
             return true;
         });
@@ -62,6 +63,8 @@ public class SettingsActivity3Fragment extends PreferenceFragmentCompat {
         // ideally be powers of two anyway
         parallelBatchList.setOnPreferenceChangeListener((preference, value) -> {
             SRModelConfigurationManager.setBatch(Integer.parseInt((String) value));
+            String formatted = String.format(getString(R.string.summary_format_parallel_batch_number), value);
+            parallelBatchList.setSummary(formatted);
             return true;
         });
     }
@@ -99,8 +102,12 @@ public class SettingsActivity3Fragment extends PreferenceFragmentCompat {
         SRModelConfiguration conf = SRModelConfigurationManager.getCurrentConfiguration();
         checkAndFixCurrentBatchNumber();
         String batchNum = Integer.toString(conf.getNumParallelBatch());
+        String formatted = String.format(getString(R.string.summary_format_model_name), conf.getModelName());
+        modelNameList.setSummary(formatted);
         nnapiSwitch.setChecked(conf.getNNAPISetting());
         nnapiSwitch.setEnabled(conf.supportsNNAPI());
         parallelBatchList.setValue(batchNum);
+        formatted = String.format(getString(R.string.summary_format_parallel_batch_number), batchNum);
+        parallelBatchList.setSummary(formatted);
     }
 }
