@@ -1,14 +1,21 @@
 package com.senior_project.group_1.mobilesr.configurations;
 
+import android.renderscript.RSInvalidStateException;
+
 import java.util.Locale;
 
 public class SRModelConfiguration{
+
+    // Edit by Deniz: I added an 'NNAPI_SUPPORTED' entry, because it might not always be
+    // depending on the model, which was my original intent. In that case, we should not
+    // be able to enable the GPU.
 
     private String MODEL_NAME;
     private String MODEL_PATH;
     private String INPUT_TENSOR_NAME;
     private boolean MODEL_RESCALES;
     private boolean NNAPI_SETTING;
+    private boolean NNAPI_SUPPORTED;
     private int RESCALING_FACTOR;
     private int INPUT_IMAGE_WIDTH;
     private int INPUT_IMAGE_HEIGHT;
@@ -47,6 +54,15 @@ public class SRModelConfiguration{
         return getInputImageHeight()*getRescalingFactor();
     }
 
+    public boolean supportsNNAPI() {
+        return NNAPI_SUPPORTED;
+    }
+
+    public void setNNAPISupported(boolean NNAPISupported) {
+        this.NNAPI_SUPPORTED = NNAPISupported;
+        this.NNAPI_SETTING = true;
+    }
+
     public void setModelName(String MODEL_NAME) {
         this.MODEL_NAME = MODEL_NAME;
     }
@@ -68,6 +84,8 @@ public class SRModelConfiguration{
     }
 
     public void setNNAPISetting(boolean NNAPISetting) {
+        if(!NNAPI_SUPPORTED && NNAPISetting)
+            throw new IllegalStateException("Cannot set NNAPI setting on a model that does not support NNAPI.");
         this.NNAPI_SETTING = NNAPISetting;
     }
 

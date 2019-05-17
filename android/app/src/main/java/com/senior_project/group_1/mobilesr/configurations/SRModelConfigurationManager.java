@@ -76,6 +76,9 @@ public class SRModelConfigurationManager {
                     case "model_rescales":
                         newConfiguration.setModelRescales( Boolean.parseBoolean(parser.nextText()) );
                         break;
+                    case "supports_nnapi":
+                        newConfiguration.setNNAPISupported( Boolean.parseBoolean(parser.nextText() ));
+                        break;
                     case "use_nnapi":
                         newConfiguration.setNNAPISetting( Boolean.parseBoolean(parser.nextText()) );
                         break;

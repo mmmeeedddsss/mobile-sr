@@ -32,6 +32,12 @@ public class SettingsActivity3Fragment extends PreferenceFragmentCompat {
         nnapiSwitch = (SwitchPreference) prefManager.findPreference("use_nnapi_switch");
         parallelBatchList = (ListPreference) prefManager.findPreference("parallel_batch_number");
 
+        // first of all, the hard-coded model list in the XML is super lame! We need to get
+        // it from the model configuration file instead.
+        String[] fullModelList = SRModelConfigurationManager.getConfigurationMapKeys();
+        modelNameList.setEntries(fullModelList);
+        modelNameList.setEntryValues(fullModelList);
+
         initBatchValues(); // possible batch values to ensure configurations
 
         // before setting listeners, load the previously stored config
@@ -46,7 +52,7 @@ public class SettingsActivity3Fragment extends PreferenceFragmentCompat {
         });
 
         nnapiSwitch.setOnPreferenceChangeListener((preference, value) -> {
-            // the value returned is a Boolean in this case, no issues here
+            // the value gotten is a Boolean in this case, no issues here
             SRModelConfigurationManager.setNNAPI((Boolean) value);
             return true;
         });
@@ -94,6 +100,7 @@ public class SettingsActivity3Fragment extends PreferenceFragmentCompat {
         checkAndFixCurrentBatchNumber();
         String batchNum = Integer.toString(conf.getNumParallelBatch());
         nnapiSwitch.setChecked(conf.getNNAPISetting());
+        nnapiSwitch.setEnabled(conf.supportsNNAPI());
         parallelBatchList.setValue(batchNum);
     }
 }
