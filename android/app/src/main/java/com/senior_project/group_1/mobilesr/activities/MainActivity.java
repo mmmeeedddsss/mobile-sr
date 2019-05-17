@@ -87,7 +87,7 @@ public class MainActivity extends AppCompatActivity {
         settingsImageView.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Intent settingsIntent = new Intent(MainActivity.this, SettingsActivity.class);
+                Intent settingsIntent = new Intent(MainActivity.this, SettingsActivity3.class);
                 startActivity(settingsIntent);
             }
         });
