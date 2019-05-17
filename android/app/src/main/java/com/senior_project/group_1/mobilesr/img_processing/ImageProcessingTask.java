@@ -7,6 +7,7 @@ import android.support.v4.app.NotificationCompat;
 import android.support.v4.app.NotificationManagerCompat;
 import android.util.Log;
 import android.widget.Toast;
+
 import com.senior_project.group_1.mobilesr.R;
 import com.senior_project.group_1.mobilesr.activities.PreprocessAndEnhanceActivity;
 import com.senior_project.group_1.mobilesr.configurations.ApplicationConstants;

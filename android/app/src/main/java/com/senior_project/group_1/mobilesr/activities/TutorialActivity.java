@@ -1,15 +1,11 @@
 package com.senior_project.group_1.mobilesr.activities;
 
-import android.content.SharedPreferences;
 import android.os.Bundle;
-import android.preference.PreferenceManager;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.View;
-import android.app.Activity;
 import android.widget.Button;
 import android.widget.ImageView;
-
 
 import com.senior_project.group_1.mobilesr.R;
 import com.senior_project.group_1.mobilesr.views.DoubleClickListener;

@@ -1,7 +1,5 @@
 package com.senior_project.group_1.mobilesr.img_processing;
 
-import java.util.ArrayList;
-
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.view.View;
@@ -9,6 +7,8 @@ import android.view.ViewGroup;
 import android.widget.BaseAdapter;
 import android.widget.GridView;
 import android.widget.ImageView;
+
+import java.util.ArrayList;
 
 //The adapter class associated with the DivideImageActivity class
 //The reason : to adapt the bitmaps to a grid view to see that bitmap conversion accomplished

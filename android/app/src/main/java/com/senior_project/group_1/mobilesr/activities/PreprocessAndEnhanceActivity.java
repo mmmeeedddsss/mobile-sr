@@ -2,12 +2,10 @@ package com.senior_project.group_1.mobilesr.activities;
 
 import android.annotation.SuppressLint;
 import android.content.ClipData;
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.net.Uri;
 import android.os.Bundle;
-import android.support.design.widget.FloatingActionButton;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.view.menu.MenuBuilder;
@@ -19,17 +17,18 @@ import android.view.MenuItem;
 import android.view.View;
 
 import com.senior_project.group_1.mobilesr.BuildConfig;
-import com.senior_project.group_1.mobilesr.img_processing.GallerySavingUtil;
-import com.senior_project.group_1.mobilesr.img_processing.ImageProcessingTask;
-import com.senior_project.group_1.mobilesr.img_processing.UserSelectedBitmapInfo;
-import com.senior_project.group_1.mobilesr.img_processing.ImageProcessingDialog;
 import com.senior_project.group_1.mobilesr.R;
 import com.senior_project.group_1.mobilesr.img_processing.BitmapHelpers;
+import com.senior_project.group_1.mobilesr.img_processing.GallerySavingUtil;
+import com.senior_project.group_1.mobilesr.img_processing.ImageProcessingDialog;
+import com.senior_project.group_1.mobilesr.img_processing.ImageProcessingTask;
+import com.senior_project.group_1.mobilesr.img_processing.UserSelectedBitmapInfo;
 import com.senior_project.group_1.mobilesr.views.ZoomableImageView;
-import ru.dimorinny.floatingtextbutton.FloatingTextButton;
 
 import java.io.File;
 import java.util.ArrayList;
+
+import ru.dimorinny.floatingtextbutton.FloatingTextButton;
 
 /* I changed PreprocessAndEnhanceActivity into an abstract base class since we want
  * different actions for the single image/multi image case. This class implements all

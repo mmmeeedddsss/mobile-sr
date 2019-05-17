@@ -3,7 +3,6 @@ package com.senior_project.group_1.mobilesr.img_processing;
 import android.app.Activity;
 import android.graphics.Bitmap;
 import android.graphics.Color;
-import android.graphics.ColorSpace;
 import android.util.Log;
 
 import com.senior_project.group_1.mobilesr.configurations.SRModelConfiguration;

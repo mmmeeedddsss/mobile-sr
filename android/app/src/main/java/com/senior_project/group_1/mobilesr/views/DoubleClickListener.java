@@ -1,6 +1,5 @@
 package com.senior_project.group_1.mobilesr.views;
 
-import android.view.View.OnClickListener;
 import android.view.View;
 
 public abstract class DoubleClickListener implements android.widget.Button.OnClickListener {

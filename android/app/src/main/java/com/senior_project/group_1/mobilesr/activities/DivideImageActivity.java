@@ -1,12 +1,9 @@
 package com.senior_project.group_1.mobilesr.activities;
 
 import android.app.Activity;
-import android.content.Intent;
 import android.graphics.Bitmap;
 import android.os.Bundle;
-import android.view.View;
 import android.widget.Button;
-import android.widget.GridView;
 
 public class DivideImageActivity extends Activity {
     private Button mergeButton;

@@ -9,6 +9,7 @@ import com.senior_project.group_1.mobilesr.img_processing.BitmapHelpers;
 import com.senior_project.group_1.mobilesr.img_processing.ImageProcessingDialog;
 import com.senior_project.group_1.mobilesr.img_processing.RemoteImageProcessingTask;
 import com.senior_project.group_1.mobilesr.img_processing.UserSelectedBitmapInfo;
+
 import java.util.ArrayList;
 
 public class RemoteImageEnhanceActivity extends PreprocessAndEnhanceActivity {

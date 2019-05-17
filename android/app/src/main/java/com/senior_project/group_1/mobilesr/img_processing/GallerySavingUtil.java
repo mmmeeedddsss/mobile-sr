@@ -1,19 +1,17 @@
 package com.senior_project.group_1.mobilesr.img_processing;
 
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.IOException;
-import java.io.OutputStream;
-
 import android.content.ContentResolver;
 import android.content.ContentUris;
 import android.content.ContentValues;
-import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.Matrix;
 import android.net.Uri;
 import android.provider.MediaStore;
 import android.provider.MediaStore.Images;
+
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.io.OutputStream;
 
 /**
  * @author samuelkirton

@@ -1,11 +1,5 @@
 package com.senior_project.group_1.mobilesr.configurations;
 
-import android.content.SharedPreferences;
-import android.preference.PreferenceManager;
-
-import java.util.HashMap;
-import java.util.Map;
-
 public final class ApplicationConstants {
     // TODO: use build related variable instead of application constant?
     // to be useed for debugging. If set, persistent things like model configurations

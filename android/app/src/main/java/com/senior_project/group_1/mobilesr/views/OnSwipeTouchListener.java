@@ -1,6 +1,5 @@
 package com.senior_project.group_1.mobilesr.views;
 
-import android.view.View.OnTouchListener;
 import android.content.Context;
 import android.view.GestureDetector;
 import android.view.GestureDetector.SimpleOnGestureListener;

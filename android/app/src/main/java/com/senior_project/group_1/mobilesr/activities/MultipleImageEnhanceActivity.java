@@ -2,14 +2,12 @@ package com.senior_project.group_1.mobilesr.activities;
 
 import android.os.Bundle;
 
-import com.senior_project.group_1.mobilesr.BuildConfig;
 import com.senior_project.group_1.mobilesr.configurations.SRModelConfiguration;
 import com.senior_project.group_1.mobilesr.configurations.SRModelConfigurationManager;
+import com.senior_project.group_1.mobilesr.img_processing.BitmapHelpers;
 import com.senior_project.group_1.mobilesr.img_processing.ImageProcessingDialog;
 import com.senior_project.group_1.mobilesr.img_processing.LocalImageProcessingTask;
-import com.senior_project.group_1.mobilesr.img_processing.RemoteImageProcessingTask;
 import com.senior_project.group_1.mobilesr.img_processing.UserSelectedBitmapInfo;
-import com.senior_project.group_1.mobilesr.img_processing.BitmapHelpers;
 
 import java.util.ArrayList;
 
