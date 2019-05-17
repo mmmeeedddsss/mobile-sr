@@ -126,6 +126,16 @@ public class SRModelConfigurationManager {
         return currentConfiguration;
     }
 
+    public static void setNNAPI(Boolean use) {
+        currentConfiguration.setNNAPISetting(use);
+        editXmlFile("use_nnapi", use.toString());
+    }
+
+    public static void setBatch(Integer batch) {
+        currentConfiguration.setNumParallelBatch(batch);
+        editXmlFile("num_parallel_batch", batch.toString());
+    }
+
     public static void setConfiguration(String type, String value) {
         switch (type) {
             case "nnapi":
