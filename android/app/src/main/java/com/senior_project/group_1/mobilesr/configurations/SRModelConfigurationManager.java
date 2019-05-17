@@ -117,7 +117,7 @@ public class SRModelConfigurationManager {
 
     }
 
-    public static SRModelConfiguration getConfiguration( String key ){
+    public static SRModelConfiguration switchConfiguration(String key){
         currentConfiguration = configurationMap.get(key);
         return currentConfiguration;
     }

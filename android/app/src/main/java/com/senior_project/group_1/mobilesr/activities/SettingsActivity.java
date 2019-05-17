@@ -157,7 +157,7 @@ public class SettingsActivity extends AppCompatActivity {
 
     private void setModel(String model) {
         // NOTE: this getConfig also sets the current config huh? Weird!
-        SRModelConfigurationManager.getConfiguration(model);
+        SRModelConfigurationManager.switchConfiguration(model);
         fill_table();
         PreferenceManager.getDefaultSharedPreferences(this).edit().putString("model", model).apply();
     }
