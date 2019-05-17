@@ -34,8 +34,14 @@ public class SettingsActivity3Fragment extends PreferenceFragmentCompat {
 
         initBatchValues(); // possible batch values to ensure configurations
 
+        // before setting listeners, load the previously stored config
+        CharSequence storedModel = modelNameList.getValue();
+        SRModelConfigurationManager.switchConfiguration(storedModel.toString());
+        loadCurrentModelPreferences();
+
         modelNameList.setOnPreferenceChangeListener((preference, value) -> {
-            loadModelPreferences((String) value);
+            SRModelConfigurationManager.switchConfiguration((String) value);
+            loadCurrentModelPreferences();
             return true;
         });
 
@@ -55,20 +61,23 @@ public class SettingsActivity3Fragment extends PreferenceFragmentCompat {
     }
 
     // a wrapper to ensure config values are near a power of two provided in the selections
-    private int fixBatchNumber(int number) {
+    // if it is not, the config value is replaced with the closest option
+    private void checkAndFixCurrentBatchNumber() {
+        SRModelConfiguration conf = SRModelConfigurationManager.getCurrentConfiguration();
+        int number = conf.getNumParallelBatch();
         int index = Arrays.binarySearch(possibleBatchNumbers, number);
-        if(index >= 0)
-            return number;
-        // decide on the closest
-        int insertionPoint = -index - 1;
-        int ldiff = Integer.MAX_VALUE, rdiff = Integer.MAX_VALUE;
-        if(insertionPoint > 0)
-            ldiff = Math.abs(number - possibleBatchNumbers[insertionPoint - 1]);
-        if(insertionPoint < possibleBatchNumbers.length)
-            rdiff = Math.abs(number - possibleBatchNumbers[insertionPoint]);
-        int closest = ldiff < rdiff ? possibleBatchNumbers[insertionPoint - 1] : possibleBatchNumbers[insertionPoint];
-        Log.w("Preferences", String.format("Batch number %d read from config is not a proper batch value. Replaced with closest value %d.", number, closest));
-        return closest;
+        if(index < 0) {
+            // decide on the closest
+            int insertionPoint = -index - 1;
+            int ldiff = Integer.MAX_VALUE, rdiff = Integer.MAX_VALUE;
+            if (insertionPoint > 0)
+                ldiff = Math.abs(number - possibleBatchNumbers[insertionPoint - 1]);
+            if (insertionPoint < possibleBatchNumbers.length)
+                rdiff = Math.abs(number - possibleBatchNumbers[insertionPoint]);
+            int closest = ldiff < rdiff ? possibleBatchNumbers[insertionPoint - 1] : possibleBatchNumbers[insertionPoint];
+            SRModelConfigurationManager.setBatch(closest);
+            Log.w("Preferences", String.format("Batch number %d read from config is not a proper batch value. Replaced with closest value %d.", number, closest));
+        }
     }
 
     private void initBatchValues() {
@@ -78,13 +87,12 @@ public class SettingsActivity3Fragment extends PreferenceFragmentCompat {
             possibleBatchNumbers[i] = Integer.parseUnsignedInt(stringVals[i].toString());
     }
 
-    private void loadModelPreferences(String modelName) {
-        // Since the preferences depend on the model, the existing
-        // values should be set when the model is changed
-        SRModelConfiguration conf = SRModelConfigurationManager.switchConfiguration(modelName);
-        Log.i("REF", "" + conf.getNNAPISetting());
-        Log.i("REF", "" + conf.getNumParallelBatch());
-        String batchNum = Integer.toString(fixBatchNumber(conf.getNumParallelBatch()));
+    // Since the preferences depend on the model, the existing
+    // values should be set when the model is changed
+    private void loadCurrentModelPreferences() {
+        SRModelConfiguration conf = SRModelConfigurationManager.getCurrentConfiguration();
+        checkAndFixCurrentBatchNumber();
+        String batchNum = Integer.toString(conf.getNumParallelBatch());
         nnapiSwitch.setChecked(conf.getNNAPISetting());
         parallelBatchList.setValue(batchNum);
     }
