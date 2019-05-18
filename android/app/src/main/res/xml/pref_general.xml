@@ -9,23 +9,56 @@
         android:positiveButtonText="@null"
         android:title="@string/title_model_name" />
 
-    <SwitchPreference
-        android:defaultValue="true"
-        android:key="use_nnapi_switch"
-        android:summary="@string/pref_description_use_nnapi"
-        android:title="@string/title_use_nnapi"/>
 
-    <!-- NOTE: EditTextPreference accepts EditText attributes. -->
-    <!-- NOTE: EditTextPreference's summary should be set to its value by the activity code. -->
+    <PreferenceCategory
+        android:title="Model Settings">
 
-    <ListPreference
-        android:defaultValue="@string/pref_default_parallel_batch_number"
-        android:entries="@array/batch_size_values"
-        android:entryValues="@array/batch_size_values"
-        android:key="parallel_batch_number"
-        android:negativeButtonText="@null"
-        android:positiveButtonText="@null"
-        android:title="@string/title_parallel_batch_number" />
+        <SwitchPreference
+            android:defaultValue="true"
+            android:key="use_nnapi_switch"
+            android:summary="@string/pref_description_use_nnapi"
+            android:title="@string/title_use_nnapi"/>
+
+        <!-- NOTE: EditTextPreference accepts EditText attributes. -->
+        <!-- NOTE: EditTextPreference's summary should be set to its value by the activity code. -->
+
+        <ListPreference
+            android:defaultValue="@string/pref_default_parallel_batch_number"
+            android:entries="@array/batch_size_values"
+            android:entryValues="@array/batch_size_values"
+            android:key="parallel_batch_number"
+            android:negativeButtonText="@null"
+            android:positiveButtonText="@null"
+            android:title="@string/title_parallel_batch_number" />
+
+    </PreferenceCategory>
+
+    <PreferenceCategory
+        android:title="Model Information">
+
+        <Preference
+            android:key="rescaling_factor"
+            android:title="@string/title_rescaling_factor">
+        </Preference>
+
+        <Preference
+            android:key="model_rescales"
+            android:title="@string/title_model_rescales">
+        </Preference>
+
+        <Preference
+            android:key="input_height"
+            android:title="@string/title_input_height">
+        </Preference>
+
+        <Preference
+            android:key="input_width"
+            android:title="@string/title_input_width">
+        </Preference>
+
+
+    </PreferenceCategory>
+
 
     <!-- NOTE: Hide buttons to simplify the UI. Users can touch outside the dialog to
          dismiss it. -->

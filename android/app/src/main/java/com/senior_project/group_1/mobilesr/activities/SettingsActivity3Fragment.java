@@ -2,7 +2,9 @@ package com.senior_project.group_1.mobilesr.activities;
 
 import android.os.Bundle;
 import android.support.v14.preference.SwitchPreference;
+import android.support.v7.preference.EditTextPreference;
 import android.support.v7.preference.ListPreference;
+import android.support.v7.preference.Preference;
 import android.support.v7.preference.PreferenceFragmentCompat;
 import android.support.v7.preference.PreferenceManager;
 import android.util.Log;
@@ -22,6 +24,11 @@ public class SettingsActivity3Fragment extends PreferenceFragmentCompat {
     SwitchPreference nnapiSwitch;
     ListPreference parallelBatchList;
 
+    Preference rescalingFactorText;
+    Preference modelRescalesText;
+    Preference inputHeightText;
+    Preference inputWidthText;
+
     int[] possibleBatchNumbers;
 
     @Override
@@ -31,12 +38,17 @@ public class SettingsActivity3Fragment extends PreferenceFragmentCompat {
         modelNameList = (ListPreference) prefManager.findPreference("model_name_list");
         nnapiSwitch = (SwitchPreference) prefManager.findPreference("use_nnapi_switch");
         parallelBatchList = (ListPreference) prefManager.findPreference("parallel_batch_number");
+        rescalingFactorText = prefManager.findPreference("rescaling_factor");
+        modelRescalesText = prefManager.findPreference("model_rescales");
+        inputHeightText = prefManager.findPreference("input_height");
+        inputWidthText = prefManager.findPreference("input_width");
 
         // first of all, the hard-coded model list in the XML is super lame! We need to get
         // it from the model configuration file instead.
         String[] fullModelList = SRModelConfigurationManager.getConfigurationMapKeys();
         modelNameList.setEntries(fullModelList);
         modelNameList.setEntryValues(fullModelList);
+
 
         initBatchValues(); // possible batch values to ensure configurations
 
@@ -109,5 +121,9 @@ public class SettingsActivity3Fragment extends PreferenceFragmentCompat {
         parallelBatchList.setValue(batchNum);
         formatted = String.format(getString(R.string.summary_format_parallel_batch_number), batchNum);
         parallelBatchList.setSummary(formatted);
+        rescalingFactorText.setSummary(Integer.toString(conf.getRescalingFactor()));
+        modelRescalesText.setSummary(conf.getModelRescales() ? "No" : "Yes");
+        inputHeightText.setSummary(Integer.toString(conf.getInputImageHeight()));
+        inputWidthText.setSummary(Integer.toString(conf.getInputImageWidth()));
     }
 }
