@@ -1,9 +1,6 @@
 <PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
 
     <ListPreference
-        android:defaultValue="@string/pref_default_model_name"
-        android:entries="@array/model_name_list_titles"
-        android:entryValues="@array/model_name_list_values"
         android:key="model_name_list"
         android:negativeButtonText="@null"
         android:positiveButtonText="@null"

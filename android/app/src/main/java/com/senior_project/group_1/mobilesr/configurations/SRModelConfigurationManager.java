@@ -129,14 +129,14 @@ public class SRModelConfigurationManager {
         return currentConfiguration;
     }
 
-    public static void setNNAPI(Boolean use) {
+    public static void setNNAPI(boolean use) {
         currentConfiguration.setNNAPISetting(use);
-        editXmlFile("use_nnapi", use.toString());
+        editXmlFile("use_nnapi", Boolean.toString(use));
     }
 
-    public static void setBatch(Integer batch) {
+    public static void setBatch(int batch) {
         currentConfiguration.setNumParallelBatch(batch);
-        editXmlFile("num_parallel_batch", batch.toString());
+        editXmlFile("num_parallel_batch", Integer.toString(batch));
     }
 
     public static void setConfiguration(String type, String value) {

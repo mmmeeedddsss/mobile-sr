@@ -54,7 +54,10 @@ public class SettingsActivity3Fragment extends PreferenceFragmentCompat {
 
         // before setting listeners, load the previously stored config
         CharSequence storedModel = modelNameList.getValue();
-        SRModelConfigurationManager.switchConfiguration(storedModel.toString());
+        if(storedModel != null)
+            SRModelConfigurationManager.switchConfiguration(storedModel.toString());
+        else
+            modelNameList.setValue(SRModelConfigurationManager.getCurrentConfiguration().getModelName());
         loadCurrentModelPreferences();
 
         modelNameList.setOnPreferenceChangeListener((preference, value) -> {
@@ -89,7 +92,7 @@ public class SettingsActivity3Fragment extends PreferenceFragmentCompat {
         int index = Arrays.binarySearch(possibleBatchNumbers, number);
         if(index < 0) {
             // decide on the closest
-            int insertionPoint = -index - 1;
+            int insertionPoint = -index - 1; // see the java docs for Arrays.binarysearch
             int ldiff = Integer.MAX_VALUE, rdiff = Integer.MAX_VALUE;
             if (insertionPoint > 0)
                 ldiff = Math.abs(number - possibleBatchNumbers[insertionPoint - 1]);

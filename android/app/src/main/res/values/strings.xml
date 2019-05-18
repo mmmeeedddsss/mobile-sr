@@ -12,7 +12,7 @@
     <string name="pref_header_general">General</string>
 
     <string name="title_use_nnapi">Use GPU</string>
-    <string name="pref_description_use_nnapi">Selects whether superresolution is executed on your phones GPU or CPU</string>
+    <string name="pref_description_use_nnapi">Selects whether superresolution is executed on your phone\'s GPU or CPU</string>
 
     <!--
     <string name="title_model_rescales">Model Rescales</string>
@@ -34,22 +34,6 @@
     <string name="pref_default_port">5054</string>
     -->
 
-    <string name="title_model_name">Model</string>
-    <string name="pref_default_model_name">SRCNN_NR_256</string>
-    <string-array name="model_name_list_titles">
-        <item>SRCNN_NR_256</item>
-        <item>SRCNN_NR_128</item>
-        <item>SRCNN_NR_64</item>
-        <item>SRCNN_REMOTE</item>
-        <item>PERC_NR_128</item>
-    </string-array>
-    <string-array name="model_name_list_values">
-        <item>SRCNN_NR_256</item>
-        <item>SRCNN_NR_128</item>
-        <item>SRCNN_NR_64</item>
-        <item>SRCNN_REMOTE</item>
-        <item>PERC_NR_128</item>
-    </string-array>
     <string-array name="batch_size_values">
         <item>1</item>
         <item>2</item>
@@ -62,6 +46,7 @@
         <item>256</item>
     </string-array>
 
+    <string name="title_model_name">Model</string>
     <string name="summary_format_model_name">Currently selected model: %s</string>
     <string name="summary_format_parallel_batch_number">The number of mini-patches to be processed in parallel by the model\nCurrently set to: %s</string>
 
