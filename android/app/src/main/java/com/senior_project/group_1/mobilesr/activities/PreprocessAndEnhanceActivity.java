@@ -63,10 +63,6 @@ public abstract class PreprocessAndEnhanceActivity extends AppCompatActivity {
 
         imageView = findViewById(R.id.pick_photo_image_view);
 
-        /*rotateButton = findViewById(R.id.rotate_image_button);
-        rotateButton.setEnabled(true);
-        rotateButton.setOnClickListener(v -> imageView.rotate());*/
-
         processButton = findViewById(R.id.process_image_button);
         processButton.setOnClickListener(v -> {
             processImage();
@@ -89,39 +85,6 @@ public abstract class PreprocessAndEnhanceActivity extends AppCompatActivity {
                 updateTitle();
             }
         });
-
-        /*toggleButton = findViewById(R.id.toggle_sr_button);
-        toggleButton.setOnClickListener(v -> imageView.toggleSrDrawal());
-
-        shareButton = findViewById(R.id.share_image_button);
-        shareButton.setOnClickListener(v -> {
-            Uri savedImageUri = BitmapHelpers.saveImageExternal(imageView.getFullBitmap(), getApplicationContext());
-            startActivity(Intent.createChooser(BitmapHelpers.createShareIntentByUri(savedImageUri),"Share Image"));
-        });
-
-        saveButton = findViewById(R.id.save_image_button);
-        saveButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                CharSequence cs[] = {"Override", "Save as new", "Save only processed parts"};
-                new AlertDialog.Builder(PreprocessAndEnhanceActivity.this)
-                        .setTitle("Select Saving Preferance")
-                        .setItems( cs, (dialog, which) -> {
-                            if (which == 0){
-                                BitmapHelpers.saveImageInternal(imageView.getFullBitmap(),
-                                        bitmapInfos.get(imgIndex).getNonProcessedUri(), getApplicationContext());
-                            }
-                            else if (which == 1){
-                                BitmapHelpers.saveImageExternal(imageView.getFullBitmap(), getApplicationContext());
-                            }
-                            else if (which == 2){
-                                ArrayList<Bitmap> processedBitmaps = imageView.getProcessedBitmaps();
-                                for ( Bitmap bm : processedBitmaps )
-                                    BitmapHelpers.saveImageExternal(bm, getApplicationContext());
-                            }
-                        }).show();
-            }
-        });*/
 
         Intent intent = getIntent();
         // fill image URIs
@@ -214,7 +177,7 @@ public abstract class PreprocessAndEnhanceActivity extends AppCompatActivity {
     protected void refreshImage() {
         Bitmap bitmap = bitmapInfos.get(imgIndex).getBitmap();
         if(bitmap != null)
-            imageView.setImageBitmap(bitmap);
+            imageView.setImageBitmap(bitmap, bitmapInfos.get(imgIndex).getNonProcessedBmSize());
     }
 
     @Override

@@ -2,11 +2,13 @@ package com.senior_project.group_1.mobilesr.img_processing;
 
 import android.content.ContentResolver;
 import android.graphics.Bitmap;
+import android.graphics.Rect;
 import android.net.Uri;
 
 public class UserSelectedBitmapInfo {
     private Uri nonProcessedUri, processedUri;
     private Bitmap bitmap;
+    private Rect nonProcessedBmSize;
     private Integer previewIndex;
 
     private boolean processed;
@@ -14,6 +16,7 @@ public class UserSelectedBitmapInfo {
     public UserSelectedBitmapInfo(Uri nonProcessedUri, Integer previewIndex, ContentResolver cr) {
         this.nonProcessedUri = nonProcessedUri;
         this.bitmap = BitmapHelpers.loadBitmapFromURI(nonProcessedUri, cr);
+        this.nonProcessedBmSize = BitmapHelpers.getBitmapRect(this.bitmap);
         this.previewIndex = previewIndex;
         this.processedUri = null;
     }
@@ -57,5 +60,9 @@ public class UserSelectedBitmapInfo {
 
     public void setProcessed(boolean processed) {
         this.processed = processed;
+    }
+
+    public Rect getNonProcessedBmSize() {
+        return nonProcessedBmSize;
     }
 }

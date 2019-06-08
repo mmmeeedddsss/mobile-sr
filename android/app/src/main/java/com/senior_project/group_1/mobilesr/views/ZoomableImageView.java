@@ -76,6 +76,31 @@ public class ZoomableImageView extends AppCompatImageView {
         processedBitmaps = new ArrayList<>();
     }
 
+    public void setImageBitmap(Bitmap bm, Rect originalImageSize) {
+        if( bm.getWidth() > originalImageSize.width() ) { // Means that image is at least started processing
+            Bitmap croppedBitmap = null;
+            if( bm.getWidth() - originalImageSize.width()*2 >= 0 ) // Means that processing is done
+            {
+                int paddingX = (bm.getWidth() - originalImageSize.width() * 2) / 2;
+                int paddingY = (bm.getHeight() - originalImageSize.height() * 2) / 2;
+                 croppedBitmap = Bitmap.createBitmap(bm, paddingX, paddingY,
+                        originalImageSize.width() * 2,
+                        originalImageSize.height() * 2);
+                setImageBitmap(croppedBitmap);
+            } else {
+                int paddingX = (bm.getWidth() - originalImageSize.width()) / 2;
+                int paddingY = (bm.getHeight() - originalImageSize.height()) / 2;
+                croppedBitmap = Bitmap.createBitmap(bm, paddingX, paddingY,
+                        originalImageSize.width(),
+                        originalImageSize.height());
+                setImageBitmap(croppedBitmap);
+            }
+            croppedBitmap.recycle();
+        } else {
+            setImageBitmap(bm);
+        }
+    }
+
     // Overrided to get the original bitmap
     @Override
     public void setImageBitmap(Bitmap bm) {

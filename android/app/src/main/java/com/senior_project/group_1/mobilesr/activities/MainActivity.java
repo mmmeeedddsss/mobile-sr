@@ -149,13 +149,14 @@ public class MainActivity extends AppCompatActivity {
                 new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE},
                 ApplicationConstants.EXTERNAL_WRITE_PERMISSION_ID);
 
+        /* TODO Disabling since broken for no reason ?
         // now, if this is the first launch of the application, start the tutorial
         SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(this);
         if(prefs.getBoolean("first_launch", true)) {
             prefs.edit().putBoolean("first_launch", false).apply();
             Intent tutorialIntent = new Intent(MainActivity.this, TutorialActivity.class);
             startActivity(tutorialIntent);
-        }
+        }*/
     }
 
     public void pickImageFromGallery() {
