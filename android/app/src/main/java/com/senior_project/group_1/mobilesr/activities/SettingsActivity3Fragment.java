@@ -20,6 +20,8 @@ public class SettingsActivity3Fragment extends PreferenceFragmentCompat {
     // Nice! No need to get and edit the preferences, this guy does those automatically,
     // the results are persistent by default, as far as I understand.
 
+    SwitchPreference drawBox;
+
     ListPreference modelNameList;
     SwitchPreference nnapiSwitch;
     ListPreference parallelBatchList;
@@ -35,6 +37,7 @@ public class SettingsActivity3Fragment extends PreferenceFragmentCompat {
     public void onCreatePreferences(Bundle savedInstanceState, String rootKey) {
         setPreferencesFromResource(R.xml.pref_general, rootKey);
         PreferenceManager prefManager = getPreferenceManager();
+        drawBox = (SwitchPreference) prefManager.findPreference("draw_superresolution_border");
         modelNameList = (ListPreference) prefManager.findPreference("model_name_list");
         nnapiSwitch = (SwitchPreference) prefManager.findPreference("use_nnapi_switch");
         parallelBatchList = (ListPreference) prefManager.findPreference("parallel_batch_number");
@@ -59,6 +62,8 @@ public class SettingsActivity3Fragment extends PreferenceFragmentCompat {
         else
             modelNameList.setValue(SRModelConfigurationManager.getCurrentConfiguration().getModelName());
         loadCurrentModelPreferences();
+
+        // no need to set a listener for drawbox, we do not need to do anything
 
         modelNameList.setOnPreferenceChangeListener((preference, value) -> {
             String model = (String) value;

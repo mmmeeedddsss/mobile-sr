@@ -8,6 +8,17 @@
 
 
     <PreferenceCategory
+        android:title="General Settings">
+
+        <SwitchPreference
+            android:defaultValue="true"
+            android:key="draw_superresolution_border"
+            android:summary="Select whether superresolved parts are shown in a red box"
+            android:title="Draw Borders"/>
+
+    </PreferenceCategory>
+
+    <PreferenceCategory
         android:title="Model Settings">
 
         <SwitchPreference
