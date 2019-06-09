@@ -4,9 +4,8 @@ import tensorflow as tf
 import os
 
 # Disable deprecation warnings
-tf.logging.set_verbosity(tf.logging.FATAL)
-os.environ['TF_CPP_MIN_LOG_LEVEL'] = '2'
-
+# tf.logging.set_verbosity(tf.logging.FATAL)
+# os.environ['TF_CPP_MIN_LOG_LEVEL'] = '2'
 
 # loads model with given path
 def load_model(sess, model_path):
@@ -24,15 +23,15 @@ def load_model(sess, model_path):
 # and data normalization
 def bgr2rgbnb(img):
     rgb = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
-    rgbnorm = rgb.astype('float32') * (1.0 / 255.0) - 0.5
+    rgbnorm = rgb.astype('float32') / 127.5 - 1.0
     batched = np.expand_dims(rgbnorm, axis=0)
     return batched
 
 # convert between color spaces
 # and data normalization
 def rgbnb2bgr(img):
-    rgbnorm = np.squeeze(img)
-    rgb = ((rgbnorm + 0.5) * 255).astype('uint8')
+    rgbnorm = np.clip(np.squeeze(img), -1.0, 1.0)
+    rgb = ((rgbnorm + 1.0) * 127.5).astype('uint8')
     bgr = cv2.cvtColor(rgb, cv2.COLOR_RGB2BGR)
     return bgr
 
@@ -64,10 +63,9 @@ def apply_sr(lr_data, model_dir):
 
 # Given low-res image Mat object and model path
 # returns high-res image Mat object
-def apply_sr_img(lr_img, model_dir):
-    with tf.Session() as sess:
-        input_sym, output_sym = load_model(sess, model_dir)
-        lr_norm = bgr2rgbnb(lr_img)
-        hr_norm = sess.run(output_sym, feed_dict={input_sym: lr_norm})
-        hr_img = rgbnb2bgr(hr_norm)
-        return hr_img
+def apply_sr_img(lr_img, model_vars):
+    sess, input_sym, output_sym = model_vars
+    lr_norm = bgr2rgbnb(lr_img)
+    hr_norm = sess.run(output_sym, feed_dict={input_sym: lr_norm})
+    hr_img = rgbnb2bgr(hr_norm)
+    return hr_img

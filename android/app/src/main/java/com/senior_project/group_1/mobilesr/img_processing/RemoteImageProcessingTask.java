@@ -35,8 +35,10 @@ public class RemoteImageProcessingTask extends ImageProcessingTask {
             Log.i("RemoteImageProcessingTask.doInBackground",
                     String.format("Sending request to  -  %s:%d", ip, port));
 
-            ClientSocketBinary conn = new ClientSocketBinary(InetAddress.getByName(ip), port);
             for (int imgIndex = 0, len = bitmapInfos.size(); imgIndex < len; imgIndex++) {
+
+                // server.py is pretty basic, so recreate a socket each time!
+                ClientSocketBinary conn = new ClientSocketBinary(InetAddress.getByName(ip), port);
 
                 if (bitmapInfos.get(imgIndex).isProcessed()) // cached case
                     continue;
@@ -53,8 +55,11 @@ public class RemoteImageProcessingTask extends ImageProcessingTask {
 
                     bitmapInfos.get(imgIndex).setBitmap( conn.getBitmap() );
                 }
+
+                publishProgress(100 * (imgIndex + 1));
+
+                conn.endConnection();
             }
-            conn.endConnection();
         }
         catch ( Exception ex )
         {

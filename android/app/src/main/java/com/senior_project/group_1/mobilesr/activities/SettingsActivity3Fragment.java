@@ -126,9 +126,14 @@ public class SettingsActivity3Fragment extends PreferenceFragmentCompat {
         modelNameList.setSummary(formatted);
         nnapiSwitch.setChecked(conf.getNNAPISetting());
         nnapiSwitch.setEnabled(conf.supportsNNAPI());
-        parallelBatchList.setValue(batchNum);
-        formatted = String.format(getString(R.string.summary_format_parallel_batch_number), batchNum);
-        parallelBatchList.setSummary(formatted);
+        if(conf.isRemote()) {
+            parallelBatchList.setEnabled(false);
+        } else {
+            parallelBatchList.setValue(batchNum);
+            formatted = String.format(getString(R.string.summary_format_parallel_batch_number), batchNum);
+            parallelBatchList.setSummary(formatted);
+            parallelBatchList.setEnabled(true);
+        }
         rescalingFactorText.setSummary(Integer.toString(conf.getRescalingFactor()));
         modelRescalesText.setSummary(conf.getModelRescales() ? "No" : "Yes");
         inputHeightText.setSummary(Integer.toString(conf.getInputImageHeight()));

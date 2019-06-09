@@ -7,6 +7,8 @@ import sys
 import threading
 from argparse import ArgumentParser
 
+import tensorflow as tf
+
 import sr
 
 # default values
@@ -111,10 +113,14 @@ if __name__ == '__main__':
 
   print('Listening on: ' + str(addr))
 
-  while True:
-    clientSock, clientAddr = sock.accept()
-    req_handler_t = threading.Thread(target=handle_request, args=(clientSock, model_path))
-    req_handler_t.start()
+  with tf.Session() as sess:
+      input_sym, output_sym = sr.load_model(sess, model_path)
+      model = (sess, input_sym, output_sym)
+      while True:
+        clientSock, clientAddr = sock.accept()
+        print('Connection accepted.')
+        req_handler_t = threading.Thread(target=handle_request, args=(clientSock, model))
+        req_handler_t.start()
 
   print('Closing connection...')
   clientSock.close()
