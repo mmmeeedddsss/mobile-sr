@@ -17,8 +17,8 @@ public class RemoteImageEnhanceActivity extends PreprocessAndEnhanceActivity {
     @Override
     public void onCreate(Bundle savedInstance) {
         super.onCreate(savedInstance);
-        SRModelConfiguration modelConfiguration = SRModelConfigurationManager.getCurrentConfiguration();
-        imageProcessingTask = new RemoteImageProcessingTask(this, dialog, modelConfiguration);
+        // SRModelConfiguration modelConfiguration = SRModelConfigurationManager.getCurrentConfiguration();
+        // imageProcessingTask = new RemoteImageProcessingTask(this, dialog, modelConfiguration);
         /*processButton.setOnClickListener(v -> { // TODO REMOVING THOSE LINES, I COULDNT REMEMBER WHY DID I ADD THOSE
             processAllImages();
         });*/
@@ -44,14 +44,5 @@ public class RemoteImageEnhanceActivity extends PreprocessAndEnhanceActivity {
         refreshImage();
         // clean up
         cleanUpTask();
-    }
-
-    @Override
-    protected void processImages( ArrayList<UserSelectedBitmapInfo> bmInfos ) {
-        dialog = new ImageProcessingDialog(this);
-        dialog.show();
-
-        imageProcessingTask.execute(bmInfos);
-        Log.i("RemoteImageEnhanceActivity", "Called processImage of Remote Processing Activity");
     }
 }

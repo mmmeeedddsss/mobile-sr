@@ -5,6 +5,7 @@ import android.util.Log;
 
 import com.senior_project.group_1.mobilesr.BuildConfig;
 import com.senior_project.group_1.mobilesr.activities.PreprocessAndEnhanceActivity;
+import com.senior_project.group_1.mobilesr.configurations.ApplicationConstants;
 import com.senior_project.group_1.mobilesr.configurations.SRModelConfiguration;
 import com.senior_project.group_1.mobilesr.configurations.SRModelConfigurationManager;
 import com.senior_project.group_1.mobilesr.networking.ClientSocketBinary;
@@ -29,8 +30,8 @@ public class RemoteImageProcessingTask extends ImageProcessingTask {
 
         try {
 
-            String ip = SRModelConfigurationManager.getCurrentConfiguration().getIPAddress();
-            int port = SRModelConfigurationManager.getCurrentConfiguration().getPort();
+            String ip = ApplicationConstants.SERVER_IP;
+            int port = ApplicationConstants.SERVER_PORT;
             Log.i("RemoteImageProcessingTask.doInBackground",
                     String.format("Sending request to  -  %s:%d", ip, port));
 

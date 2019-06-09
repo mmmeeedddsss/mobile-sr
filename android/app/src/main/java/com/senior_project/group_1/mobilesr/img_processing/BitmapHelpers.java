@@ -272,7 +272,8 @@ public class BitmapHelpers {
             file.createNewFile();
 
             FileOutputStream stream = new FileOutputStream(file);
-            bm.compress(Bitmap.CompressFormat.PNG, 99, stream);
+            Bitmap bm2 = bm.copy(Bitmap.Config.ARGB_4444, false);
+            bm2.compress(Bitmap.CompressFormat.PNG, 99, stream);
             stream.close();
             Log.i("BitmapHelpers","Auth : "+context.getApplicationContext().getPackageName());
             uri = GenericFileProvider.getUriForFile(context, context.getApplicationContext().getPackageName() + "", file);

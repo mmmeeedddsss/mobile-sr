@@ -4,7 +4,7 @@ public final class ApplicationConstants {
     // TODO: use build related variable instead of application constant?
     // to be useed for debugging. If set, persistent things like model configurations
     // and preferences are deleted when starting the app.
-    public static final boolean RESET_PERSISTENT = true;
+    public static final boolean RESET_PERSISTENT = false;
 
     public static final int IMAGE_OVERLAP_X = 16; // %10 of width & height might be ideal
     public static final int IMAGE_OVERLAP_Y = 16;
@@ -29,4 +29,8 @@ public final class ApplicationConstants {
 
     // The default model to be selected when first opening the app
     public static final String DEFAULT_MODEL = "SRCNN_NR_256";
+
+    // hardcoded server paremeters
+    public static final String SERVER_IP = "10.0.2.2"; // change this IP
+    public static final int SERVER_PORT = 61275;
 }

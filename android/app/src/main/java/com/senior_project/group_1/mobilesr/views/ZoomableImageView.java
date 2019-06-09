@@ -97,7 +97,9 @@ public class ZoomableImageView extends AppCompatImageView {
                         originalImageSize.height());
                 setImageBitmap(croppedBitmap);
             }
-            croppedBitmap.recycle();
+            // TODO: this thing causes errors when retrieving this bitmap
+            // maybe we should recycle the original bitmap and not the cropped one?
+            // croppedBitmap.recycle();
         } else {
             setImageBitmap(bm);
         }
