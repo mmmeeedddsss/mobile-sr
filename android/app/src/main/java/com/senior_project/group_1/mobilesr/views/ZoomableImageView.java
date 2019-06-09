@@ -14,6 +14,7 @@ import android.util.Log;
 import android.view.MotionEvent;
 
 import com.senior_project.group_1.mobilesr.configurations.ApplicationConstants;
+import com.senior_project.group_1.mobilesr.configurations.SRModelConfigurationManager;
 import com.senior_project.group_1.mobilesr.img_processing.BitmapHelpers;
 
 import java.util.ArrayList;
@@ -78,14 +79,15 @@ public class ZoomableImageView extends AppCompatImageView {
 
     public void setImageBitmap(Bitmap bm, Rect originalImageSize) {
         if( bm.getWidth() > originalImageSize.width() ) { // Means that image is at least started processing
+            int rescalingFactor = SRModelConfigurationManager.getCurrentConfiguration().getRescalingFactor();
             Bitmap croppedBitmap = null;
-            if( bm.getWidth() - originalImageSize.width()*2 >= 0 ) // Means that processing is done
+            if( bm.getWidth() - originalImageSize.width()*rescalingFactor >= 0 ) // Means that processing is done
             {
-                int paddingX = (bm.getWidth() - originalImageSize.width() * 2) / 2;
-                int paddingY = (bm.getHeight() - originalImageSize.height() * 2) / 2;
+                int paddingX = (bm.getWidth() - originalImageSize.width() * rescalingFactor) / 2;
+                int paddingY = (bm.getHeight() - originalImageSize.height() * rescalingFactor) / 2;
                  croppedBitmap = Bitmap.createBitmap(bm, paddingX, paddingY,
-                        originalImageSize.width() * 2,
-                        originalImageSize.height() * 2);
+                        originalImageSize.width() * rescalingFactor,
+                        originalImageSize.height() * rescalingFactor);
                 setImageBitmap(croppedBitmap);
             } else {
                 int paddingX = (bm.getWidth() - originalImageSize.width()) / 2;
@@ -128,13 +130,14 @@ public class ZoomableImageView extends AppCompatImageView {
         Call this one with the resultant processed image
      */
     public void attachProcessedBitmap(Bitmap processedBitmap){
-        int addedPaddingX = processedBitmap.getWidth()/2 - BitmapHelpers.getWidth(src_rect);
-        int addedPaddingY = processedBitmap.getHeight()/2 - BitmapHelpers.getHeight(src_rect);
+        int rescalingFactor = SRModelConfigurationManager.getCurrentConfiguration().getRescalingFactor();
+        int addedPaddingX = (processedBitmap.getWidth() - BitmapHelpers.getWidth(src_rect)*rescalingFactor)/2;
+        int addedPaddingY = (processedBitmap.getHeight() - BitmapHelpers.getHeight(src_rect)*rescalingFactor)/2;
         Log.i("ZoomableImageView", String.format("Received a bitmap with sizes are w:%d h:%d ", processedBitmap.getWidth(), processedBitmap.getHeight()));
         ProcessedBitmapViewInfo bmInfo = new ProcessedBitmapViewInfo(
-                Bitmap.createBitmap(processedBitmap, addedPaddingX, addedPaddingY,BitmapHelpers.getWidth(src_rect)*2, BitmapHelpers.getHeight(src_rect)*2),
+                Bitmap.createBitmap(processedBitmap, addedPaddingX, addedPaddingY,BitmapHelpers.getWidth(src_rect)*rescalingFactor, BitmapHelpers.getHeight(src_rect)*rescalingFactor),
                 new PointF(src_rect.centerX(), src_rect.centerY()),
-                zoom_factor, dest_rect);
+                zoom_factor, dest_rect, rescalingFactor);
         processedBitmaps.add( bmInfo );
         invalidate();
         // TODO delete processedBitmap?

@@ -12,26 +12,30 @@ import com.senior_project.group_1.mobilesr.img_processing.BitmapHelpers;
 
 public class ProcessedBitmapViewInfo {
     Bitmap processedBitmap; // processed picture bitmap
-    RectF dest_rect;
+    private RectF dest_rect;
     final Rect creation_dest_rect;
     Rect src_rect;
     double creationZoomFactor;
     Paint paint;
+    int rescalingFactor;
 
     final PointF creationMiddlePoint;
 
-    public ProcessedBitmapViewInfo(Bitmap processedBitmap, PointF offset, double creationZoomFactor, Rect current_dest_rect) {
+    public ProcessedBitmapViewInfo(Bitmap processedBitmap, PointF offset, double creationZoomFactor, Rect current_dest_rect, int rescalingFactor) {
         this.processedBitmap = processedBitmap;
-        this.dest_rect = new RectF(current_dest_rect);
+        // Below, 2 is such a magic number xd
+        this.dest_rect = BitmapHelpers.scale(new RectF(current_dest_rect), 2.0/rescalingFactor, false);
         this.src_rect = BitmapHelpers.getBitmapRect(processedBitmap);
         this.creationZoomFactor = creationZoomFactor;
         paint = new Paint();
         paint.setColor(Color.rgb(255, 0, 0));
-        paint.setStrokeWidth(10);
+        paint.setStrokeWidth(5);
         paint.setStyle(Paint.Style.STROKE);
 
         this.creationMiddlePoint = new PointF(offset.x, offset.y);
         this.creation_dest_rect = new Rect(current_dest_rect);
+
+        this.rescalingFactor = rescalingFactor;
     }
 
     public void renderOn(Canvas canvas, double currentZoomFactor) {
@@ -43,10 +47,10 @@ public class ProcessedBitmapViewInfo {
     public void overrideOn(Canvas canvas, PointF offset)
     {
         RectF saving_dest_rect = new RectF(
-                offset.x - ((float)processedBitmap.getWidth())/2,
-                offset.y - ((float)processedBitmap.getHeight())/2,
-                offset.x + ((float)processedBitmap.getWidth())/2,
-                offset.y + ((float)processedBitmap.getHeight())/2
+                offset.x - ((float)processedBitmap.getWidth())/rescalingFactor,
+                offset.y - ((float)processedBitmap.getHeight())/rescalingFactor,
+                offset.x + ((float)processedBitmap.getWidth())/rescalingFactor,
+                offset.y + ((float)processedBitmap.getHeight())/rescalingFactor
                 );
         canvas.drawBitmap(processedBitmap, BitmapHelpers.getBitmapRect(processedBitmap), saving_dest_rect, null);
         canvas.drawRect(saving_dest_rect, paint);
