@@ -83,10 +83,10 @@ public abstract class ImageProcessingTask extends AsyncTask<ArrayList<UserSelect
         // set a proper title string for the dialog/notification
         // cannot 'cache' the string, since I do not want to call
         // format('superres in progress', imgsDone, numImages)
-        Log.i("ImageProcessingTask.onProgressPudate", String.format("Progress : %d", imgProgress));
-        String titleString = numImages == 0 ?
+        Log.i("ImageProcessingTask.onProgressUpdate", String.format("Progress : %d", imgProgress));
+        String titleString = numImages == 1 ?
                 "Superresolution in progress..." :
-                String.format("Superresolving image %d/%d", imgsDone + 1, numImages);
+                String.format("Superresolving image %d/%d", Math.min(imgsDone + 1, numImages), numImages);
 
         if(requestingActivity.inBackground()) {
             // activate the notification bar
