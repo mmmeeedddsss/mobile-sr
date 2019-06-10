@@ -4,7 +4,7 @@ public final class ApplicationConstants {
     // TODO: use build related variable instead of application constant?
     // to be useed for debugging. If set, persistent things like model configurations
     // and preferences are deleted when starting the app.
-    public static final boolean RESET_PERSISTENT = false;
+    public static final boolean RESET_PERSISTENT = true;
 
     public static final int IMAGE_OVERLAP_X = 16; // %10 of width & height might be ideal
     public static final int IMAGE_OVERLAP_Y = 16;
