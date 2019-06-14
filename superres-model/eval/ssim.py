@@ -1,6 +1,7 @@
 import math
 import numpy as np
 from skimage.measure import compare_ssim
+import cv2
 
 # Calculate SSIM of two images
 # @params (original_image, imitation_image)
@@ -12,6 +13,8 @@ from skimage.measure import compare_ssim
 # SSIM = -------------------------------------------------
 #        (mu_x^2 + mu_y^2 + c1)(sigma_x^2 + sigma_y^2 + c2)
 def calc_ssim_numpy(org, imit):
+  if org.shape != imit.shape:
+      org = cv2.resize(org, dsize=imit.shape[1::-1], interpolation=cv2.INTER_CUBIC)
   return compare_ssim(org, imit, full=True, multichannel=True)[0]
 
 # Calculate SSIM of two images given their file paths

@@ -1,12 +1,15 @@
 # -*- coding: utf-8 -*-
 import math
 import numpy as np
+import cv2
 
 # Calculate PSNR of two images
 # @params (original_image, imitation_image)
 # @ret float
 def calc_psnr_numpy(org, imit):
   MAXVAL = 255
+  if org.shape != imit.shape:
+      org = cv2.resize(org, dsize=imit.shape[1::-1], interpolation=cv2.INTER_CUBIC)
   err = imit - org
   sqerr = err**2
   dim = org.shape[0]*org.shape[1]*3

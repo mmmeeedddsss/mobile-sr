@@ -42,24 +42,25 @@ def normalize_path():
     path = this_file[:idx_delim+1]
   return path
 
-def cmd_for_downscale(file_path):
+def cmd_for_downscale(file_path, ratio):
+  scale = (1.0 / ratio) * 100
   new_path = file_path[:-4] + '_LR.png'
-  cmd = 'convert ' + file_path + ' -scale 50% ' + new_path
+  cmd = 'convert ' + file_path + ' -scale {}% '.format(scale) + new_path
   return cmd
 
 # create images in Low-Resolution domain, takes datasets root path as arg
 # and individual flags for separate datasets
 # creates them by 2x downscaling
-def create_low_res(path, set5_flag=True, set14_flag=True, bsd100_flag=True):
+def create_low_res(path, ratio, set5_flag=True, set14_flag=True, bsd100_flag=True):
   if set5_flag:
     for i in range(*set5_range):
-      subprocess.call(cmd_for_downscale(path+'/Set5_{}.png'.format(i)), shell=True)
+      subprocess.call(cmd_for_downscale(path+'/Set5_{}.png'.format(i), ratio), shell=True)
   if set14_flag:
     for i in range(*set14_range):
-      subprocess.call(cmd_for_downscale(path+'/Set14_{}.png'.format(i)), shell=True)
+      subprocess.call(cmd_for_downscale(path+'/Set14_{}.png'.format(i), ratio), shell=True)
   if bsd100_flag:
     for i in range(*bsd100_range):
-      subprocess.call(cmd_for_downscale(path+'/BSD100_{}.png'.format(i)), shell=True)
+      subprocess.call(cmd_for_downscale(path+'/BSD100_{}.png'.format(i), ratio), shell=True)
 
 def cmd_for_SR(file_paths):
   sr_scr_path = path + 'superresolve.py'
@@ -181,6 +182,11 @@ def parse_arguments():
     parser.add_argument(
         '-c',
         help='compare with file')
+    parser.add_argument(
+        '-f',
+        help='superresolution factor, defaults to 2',
+        type=int,
+        default=2)
     args = parser.parse_args()
     if not args.dataset_path:
         print('error: dataset path have to be specified')
@@ -258,7 +264,7 @@ if __name__ == '__main__':
   if args.e:
     extension = args.e
   if not args.no_low_res:
-    create_low_res(args.dataset_path)
+    create_low_res(args.dataset_path, args.f)
   if not args.no_sr:
     apply_SR(args.dataset_path)
   if not args.no_sr:
